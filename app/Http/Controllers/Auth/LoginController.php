@@ -7,6 +7,8 @@ use App\Providers\RouteServiceProvider;
 use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use DB;
+use Illuminate\Validation\ValidationException;
+
 
 class LoginController extends Controller
 {
@@ -43,7 +45,7 @@ class LoginController extends Controller
 
     protected function attemptLogin(Request $request)
     {
-        $username = $request->input('email');
+        $username = $request->input($this->username());
         $password = $request->input('password');
 
         // Llama a tu procedimiento almacenado para validar las credenciales
@@ -53,16 +55,31 @@ class LoginController extends Controller
             ':Param1' => $username,
             ':Param2' => $password,
         ]);
-
         //dd($result);
+
         if ($result) {
-            // Usuario válido, realiza acciones necesarias
-            return true;
+            return $this->sendLoginResponse($request);
         }
 
-        // Usuario no válido
-        return false;
+        // Usuario no válido, lanzar una excepción de validación
+        return $this->sendFailedLoginResponse($request);
     }
+
+    protected function sendLoginResponse(Request $request)
+    {
+        $request->session()->regenerate();
+
+        return redirect()->intended($this->redirectPath());
+    }
+
+    protected function sendFailedLoginResponse(Request $request)
+    {
+        throw ValidationException::withMessages([
+            $this->username() => [trans('auth.failed')],
+        ]);
+    }
+
+
 
 
 }
