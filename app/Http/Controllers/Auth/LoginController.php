@@ -8,6 +8,8 @@ use Illuminate\Foundation\Auth\AuthenticatesUsers;
 use Illuminate\Http\Request;
 use DB;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
+
 
 
 class LoginController extends Controller
@@ -32,6 +34,14 @@ class LoginController extends Controller
      */
     protected $redirectTo = RouteServiceProvider::HOME;
 
+
+    protected function redirectTo()
+    {
+        // Personaliza la redirección aquí
+        return '/home';
+    }
+
+
     /**
      * Create a new controller instance.
      *
@@ -41,6 +51,7 @@ class LoginController extends Controller
     {
         $this->middleware('guest')->except('logout');
     }
+
 
 
     protected function attemptLogin(Request $request)
@@ -57,7 +68,17 @@ class LoginController extends Controller
         ]);
         //dd($result);
 
-        if ($result) {
+        if (!empty($result)) {
+            // Construir un objeto User manualmente
+            $user = new User([
+                'idUsuario' => $result[0]->idUsuario,
+                'UsuarioNT' => $result[0]->UsuarioNT,
+                // Añadir otros campos según tus necesidades
+            ]);
+
+            // Autenticar el usuario manualmente
+            auth()->login($user);
+
             return $this->sendLoginResponse($request);
         }
 
@@ -69,11 +90,19 @@ class LoginController extends Controller
     {
         $request->session()->regenerate();
 
+        // Personaliza la creación de la sesión aquí
+        session([
+            'user_id' => auth()->user()->idUsuario,
+            'user_name' => auth()->user()->UsuarioNT,
+            // Puedes agregar otros campos según tus necesidades
+        ]);
+        dd($request->session()->all());
         return redirect()->intended($this->redirectPath());
     }
 
     protected function sendFailedLoginResponse(Request $request)
     {
+
         throw ValidationException::withMessages([
             $this->username() => [trans('auth.failed')],
         ]);
