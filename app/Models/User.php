@@ -12,6 +12,13 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+    /**
+     * The primary key associated with the table.
+     *
+     * @var string
+     */
+    protected $primaryKey = 'idUsuario';
+
     // Campos específicos de tu tabla de usuarios
     protected $fillable = [
         'idUsuario', 'Clave', 'UsuarioNT', 'EMail', 'Compras', 'Activo',

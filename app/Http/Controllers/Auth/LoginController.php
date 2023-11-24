@@ -77,8 +77,8 @@ class LoginController extends Controller
             ]);
 
             // Autenticar el usuario manualmente
-            auth()->login($user);
-
+            $request->session()->put('authenticated', time());
+            $request->session()->put('user', $user);
             return $this->sendLoginResponse($request);
         }
 
@@ -90,21 +90,21 @@ class LoginController extends Controller
     {
         $request->session()->regenerate();
 
-        // Personaliza la creación de la sesión aquí
-        session([
-            'user_id' => auth()->user()->idUsuario,
-            'user_name' => auth()->user()->UsuarioNT,
-            // Puedes agregar otros campos según tus necesidades
-        ]);
+
         dd($request->session()->all());
-        return redirect()->intended($this->redirectPath());
+        //return redirect()->intended($this->redirectPath());
+        return redirect()->intended('home');
     }
 
     protected function sendFailedLoginResponse(Request $request)
     {
 
-        throw ValidationException::withMessages([
+        /*throw ValidationException::withMessages([
             $this->username() => [trans('auth.failed')],
+        ]);*/
+        dd($request->session()->all());
+        return view('auth.login', [
+            'message' => 'Provided PIN is invalid. ',
         ]);
     }
 
