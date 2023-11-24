@@ -12,6 +12,8 @@ class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
 
+
+    protected $table = 'ADM_Usuarios';
     /**
      * The primary key associated with the table.
      *
@@ -24,13 +26,18 @@ class User extends Authenticatable
         'idUsuario', 'Clave', 'UsuarioNT', 'EMail', 'Compras', 'Activo',
     ];
 
+    public function getAuthPassword()
+    {
+        return $this->Clave;
+    }
+
     /**
      * The attributes that should be hidden for serialization.
      *
      * @var array<int, string>
      */
     protected $hidden = [
-        'password',
+        'Clave',
         'remember_token',
     ];
 

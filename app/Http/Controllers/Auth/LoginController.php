@@ -75,10 +75,9 @@ class LoginController extends Controller
                 'UsuarioNT' => $result[0]->UsuarioNT,
                 // Añadir otros campos según tus necesidades
             ]);
-
+            //dd($request->session()->all());
             // Autenticar el usuario manualmente
-            $request->session()->put('authenticated', time());
-            $request->session()->put('user', $user);
+            auth()->login($user);
             return $this->sendLoginResponse($request);
         }
 
@@ -88,13 +87,29 @@ class LoginController extends Controller
 
     protected function sendLoginResponse(Request $request)
     {
-        $request->session()->regenerate();
 
 
-        dd($request->session()->all());
-        //return redirect()->intended($this->redirectPath());
-        return redirect()->intended('home');
+        //if (auth()->check()) {
+            // El usuario está autenticado, realiza la redirección
+            $request->session()->regenerate();
+
+            // Personaliza la creación de la sesión aquí
+            session([
+                'user_id' => auth()->user()->idUsuario,
+                'user_name' => auth()->user()->UsuarioNT,
+                // Puedes agregar otros campos según tus necesidades
+            ]);
+       // dd($request->session()->all());
+            return redirect()->intended($this->redirectPath());
+        /*} else {
+            // El usuario no está autenticado, maneja este caso según sea necesario
+            // Puedes agregar un mensaje de error o realizar una redirección diferente
+            return redirect()->back()->withInput($request->only($this->username(), 'remember'))->withErrors([
+                $this->username() => trans('auth.failed'),
+            ]);
+        }*/
     }
+
 
     protected function sendFailedLoginResponse(Request $request)
     {
