@@ -18,62 +18,79 @@
 
     <!-- Styles -->
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    <link href="{{ asset('css/stile_sec.css') }}" rel="stylesheet">
     <!-- Agrega este enlace para incluir Bootstrap CSS -->
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+
+    <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/animate.css">
+    <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/menu-20191120.css">
+    <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/style-20190606.css">
 
 </head>
 <body>
     <div id="app">
-        <nav class="navbar navbar-expand-md navbar-light bg-white shadow-sm">
+        <nav id="nav-menu" class="navbar navbar-expand-md navbar-light shadow-sm z-depth-0" style="margin-bottom: 20px;">
             <div class="container">
-                <a class="navbar-brand" href="{{ url('/') }}">
-                    {{ config('app.name', 'Laravel') }}
-                </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
 
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <!-- Left Side Of Navbar -->
-                    <ul class="navbar-nav me-auto">
 
-                    </ul>
+                <div class="collapse navbar-collapse nav-wrapper" id="navbarSupportedContent">
+                    <div class="container-menu">
+                        <div id="contenido-menu">
+                            <img id="logo-sec" src="http://www.seclaplata.org.ar/assets/img/sys/logo-sec.png" alt="">
+                            <hr id="menu-linea-vertical-blanca" class="z-depth-0">
+                            <h6 id="menu-titulo-1" style="color: #fff; font-weight: 400">SINDICATO DE</h6>
+                            <h6 id="menu-titulo-2" style="color: #fff; font-weight: 400">EMPLEADOS DE COMERCIO</h6>
 
-                    <!-- Right Side Of Navbar -->
-                    <ul class="navbar-nav ms-auto">
-                        <!-- Authentication Links -->
-                        @guest
-                            @if (Route::has('login'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('login') }}">{{ __('Login') }}</a>
+                            <!-- Left Side Of Navbar -->
+                            <ul class="nav navbar-nav navbar-left">
+
+                                <li class="dropdown">
+
+
                                 </li>
-                            @endif
+                            </ul>
 
-                            @if (Route::has('register'))
-                                <li class="nav-item">
-                                    <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
-                                </li>
-                            @endif
-                        @else
-                            <li class="nav-item dropdown">
-                                <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ utf8_encode(Auth::user()->UsuarioNT) }}
-                                </a>
 
-                                <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
-                                    <a class="dropdown-item" href="{{ route('logout') }}"
-                                       onclick="event.preventDefault();
-                                                     document.getElementById('logout-form').submit();">
-                                        {{ __('Logout') }}
+                </div>
+                    </div>
+                    <div>
+                        <!-- Right Side Of Navbar -->
+                        <ul class="navbar-nav ms-auto">
+                            <!-- Authentication Links -->
+                            @guest
+                                @if (Route::has('login'))
+                                    <!-- <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('login') }}" style="color: #fff">{{ __('Login') }}</a>
+                                    </li> -->
+                                @endif
+
+                                @if (Route::has('register'))
+                                    <li class="nav-item">
+                                        <a class="nav-link" href="{{ route('register') }}">{{ __('Register') }}</a>
+                                    </li>
+                                @endif
+                            @else
+                                <li class="nav-item dropdown">
+                                    <a id="navbarDropdown" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre style="color: #fff">
+                                        {{ utf8_encode(Auth::user()->UsuarioNT) }}
                                     </a>
 
-                                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                                        @csrf
-                                    </form>
-                                </div>
-                            </li>
-                        @endguest
-                    </ul>
+                                    <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                                        <a class="dropdown-item" href="{{ route('logout') }}"
+                                           onclick="event.preventDefault();
+                                                     document.getElementById('logout-form').submit();">
+                                            {{ __('Logout') }}
+                                        </a>
+
+                                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                                            @csrf
+                                        </form>
+                                    </div>
+                                </li>
+                            @endguest
+                        </ul>
+                    </div>
                 </div>
             </div>
         </nav>
@@ -83,9 +100,51 @@
             <div class="container-fluid">
                 <div class="row">
                     <!-- Sidebar del dashboard -->
+                    <!-- Sidebar -->
                     <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
-                        <!-- ... (contenido del menú lateral) -->
+                        <div class="position-sticky">
+                            <!-- Aquí puedes agregar elementos del menú lateral -->
+                            <ul class="nav flex-column">
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/empresa') }}" style="display: flex; align-items: center;">
+                                        <img src="{{ url('images/mensaje.jpg') }}" height="49" width="37" style="margin-right: 10px;">
+                                        Información importante para los empleadores
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/formulario') }}" style="display: flex; align-items: center;">
+                                        <img src="{{ url('images/formu.jpg') }}" height="41" width="45" style="margin-right: 10px;">
+                                        Formulario de inscripción al S.E.C.
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/login') }}" style="display: flex; align-items: center;">
+                                        <img src="{{ url('images/icon_net.png') }}" height="41" width="45" style="margin-right: 10px;">
+                                        Sistema de DDJJ de empleados e impresión de boletas de pago On-Line
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/pago') }}" style="display: flex; align-items: center;">
+                                        <img src="{{ url('images/pago.jpg') }}" height="35" width="45" style="margin-right: 10px;">
+                                        Lugares de pago
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="{{ url('/calendario') }}" style="display: flex; align-items: center;">
+                                        <img src="{{ url('images/calendario.jpg') }}" height="48" width="37" style="margin-right: 10px;">
+                                        Calendario de ingreso de aportes
+                                    </a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" href="mailto:contaduria@seclaplata.org.ar" style="display: flex; align-items: center;">
+                                        <img src="{{ url('images/mail.jpg') }}" height="30" width="39" style="margin-right: 10px;">
+                                        Consultas
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
                     </nav>
+
 
                     <!-- Contenido principal del dashboard -->
                     <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">

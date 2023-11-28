@@ -1,0 +1,390 @@
+.stile {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 7px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	color: #CCCCCC;
+	text-decoration: none;
+
+}
+.fondo {
+	background-image: url(images/fondo02.gif);
+}
+.fondo01 {
+
+	background-image: url(images/fondo01.gif);
+}
+.fondo-pie02 {
+	background-image: url(images/fondo_pie_02.gif);
+}
+.fondo-pie01 {
+	background-image: url(images/fondo_pie_01.gif);
+}
+.botonera {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	color: #666666;
+	text-decoration: none;
+}
+a:hover {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #999999;
+	text-decoration: none;
+}
+.titulo {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #8D8D8D;
+	text-decoration: none;
+
+}
+.textonegro {
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	color: #666666;
+	text-decoration: none;
+}
+.titulobold {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #3399CC;
+	text-decoration: none;
+
+}
+.textomini {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	color: #666666;
+	text-decoration: none;
+	letter-spacing: -1px;
+
+}
+.tituloboldosecac {
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #0d9ca4;
+	text-decoration: none;
+}
+.destacado {
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 16px;
+	font-style: italic;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: 0D9CA4;
+	text-decoration: none;
+	letter-spacing: -1px;
+
+}
+.tituloboldorg {
+
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #0572b1;
+	text-decoration: none;
+}
+.tituloboldcontacto {
+
+
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #812d74;
+	text-decoration: none;
+}
+.tituloboldgremial {
+
+
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #CC6666;
+	text-decoration: none;
+}
+.tituloboldblanco {
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #FFFFFF;
+	text-decoration: none;
+}
+.textonegromini {
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 9px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	color: #666666;
+	text-decoration: none;
+	letter-spacing: -1px;
+
+}
+.titulonegro {
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #666666;
+	text-decoration: none;
+}
+.tituloboldotros {
+
+
+
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #819702;
+	text-decoration: none;
+}
+.tituloboldotros2 {
+
+
+
+
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	color: #819702;
+	text-decoration: none;
+}
+.tituloboldbenefi {
+
+
+
+
+
+	font-family: Verdana, Arial, Helvetica, sans-serif;
+	font-size: 10px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: bold;
+	font-variant: normal;
+	text-transform: none;
+	color: #E18200;
+	text-decoration: none;
+}
+.textoitalic {
+
+
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 12px;
+	font-style: italic;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	color: #666666;
+	text-decoration: none;
+}
+.fondo02 {
+
+
+	background-image: url(images/fondo03.gif);
+}
+.tituloblanco {
+
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 18px;
+	font-style: normal;
+	line-height: normal;
+	font-weight: normal;
+	font-variant: normal;
+	text-transform: none;
+	color: #6FB7FF;
+	text-decoration: none;
+}
+.img1 {
+	background-image: url(images/new.jpg);
+	background-repeat: no-repeat;
+}
+.imgfond {
+	background-image: url(images/degrade.gif);
+	background-repeat: repeat-y;
+	background-color: #FFFFFF;
+}
+.titulogrande {
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 20px;
+	color: #044273;
+	text-decoration: none;
+}
+.titulogrande2 {
+
+	font-family: Georgia, "Times New Roman", Times, serif;
+	font-size: 16px;
+	color: #044273;
+	text-decoration: none;
+}
+.ultimomen {
+	background-image: url(images/ultimo%20momento_abril.gif);
+	background-repeat: no-repeat;
+}
+.mujer08 {
+
+	background-image: url(images/mujer08.gif);
+	background-repeat: no-repeat;
+}
+.paniales {
+
+
+
+	background-image: url(images/paniales.jpg);
+	background-repeat: no-repeat;
+}
+
+.Estilo12Cuarentena {
+    font-size: 22px;
+    color: #E74C3C;
+    font-weight: bold;
+    font-family: Helvetica, sans-serif;
+    font-weight: bold;
+}
+
+.titulocuarentena {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 12px;
+    font-style: normal;
+    line-height: normal;
+    font-weight: bold;
+    font-variant: normal;
+    text-transform: none;
+    color: #0278B5;
+    text-decoration: none;
+}
+
+.titulocuarentenadatos {
+    font-size: 15px;
+    color: #E74C3C;
+    font-family: Helvetica, sans-serif;
+    font-weight: bold;
+}
+
+.Estilo12 {
+    font-size: 15px;
+    color: #0278B5;
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+}
+
+.textonegro {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-style: normal;
+    line-height: normal;
+    font-weight: normal;
+    font-variant: normal;
+    text-transform: none;
+    color: #666666;
+    text-decoration: none;
+}
+
+.z-depth-0 {
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
+
+.tituloblanco2 {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-style: normal;
+    line-height: normal;
+    font-weight: bold;
+    font-variant: normal;
+    text-transform: none;
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
+.titulonegro {
+    font-family: Verdana, Arial, Helvetica, sans-serif;
+    font-size: 10px;
+    font-style: normal;
+    line-height: normal;
+    font-weight: bold;
+    font-variant: normal;
+    text-transform: none;
+    color: #666666;
+    text-decoration: none;
+}
+

@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 });
 
 Auth::routes([
@@ -26,5 +26,21 @@ Auth::routes([
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
 Route::group(['middleware' => 'auth'], function () {
-    Route::get('/dashboard', 'DashboardController@index')->name('dashboard');
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+});
+
+Route::get('/empresa', function () {
+    return view('empresa');
+});
+
+Route::get('/formulario', function () {
+    return view('formulario');
+});
+
+Route::get('/pago', function () {
+    return view('pago');
+});
+
+Route::get('/calendario', function () {
+    return view('calendario');
 });
