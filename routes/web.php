@@ -13,12 +13,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+Auth::routes([
+    'register' => false, // Deshabilitar el registro
+    'reset' => false,    // Deshabilitar la recuperación de contraseña
+    'verify' => false,   // Deshabilitar la verificación de correo electrónico
+]);
+
 Route::get('/', function () {
     return view('welcome');
 });
 
-Auth::routes();
+
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 
-
+Route::group(['middleware' => 'auth'], function () {
+    Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+});

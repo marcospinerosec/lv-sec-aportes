@@ -32,14 +32,10 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = RouteServiceProvider::HOME;
+    protected $redirectTo = '/dashboard';
 
 
-    protected function redirectTo()
-    {
-        // Personaliza la redirección aquí
-        return '/home';
-    }
+
 
 
     /**
@@ -52,7 +48,11 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
-
+    public function showLoginForm()
+    {
+        // Mostrar el formulario de inicio de sesión dentro del dashboard
+        return view('dashboard');
+    }
 
     protected function attemptLogin(Request $request)
     {
@@ -100,7 +100,7 @@ class LoginController extends Controller
                 // Puedes agregar otros campos según tus necesidades
             ]);
        // dd($request->session()->all());
-            return redirect()->intended($this->redirectPath());
+            return redirect()->intended($this->redirectTo);
         /*} else {
             // El usuario no está autenticado, maneja este caso según sea necesario
             // Puedes agregar un mensaje de error o realizar una redirección diferente

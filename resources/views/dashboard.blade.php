@@ -3,6 +3,7 @@
 @extends('layouts.app')
 
 @section('content')
+
     <div class="container-fluid">
         <div class="row">
 
@@ -41,7 +42,13 @@
                     <div class="card-header">Panel de Control</div>
 
                     <div class="card-body">
-                        ¡Bienvenido al panel de control, {{ Auth::check() ? auth()->user()->name : 'Invitado' }}!
+                        @guest
+                            <!-- Formulario de inicio de sesión -->
+                            @include('auth.login')
+                        @else
+                            <!-- Contenido para usuarios autenticados -->
+                            ¡Bienvenido al panel de control, {{ auth()->user()->name }}!
+                        @endguest
                     </div>
                 </div>
             </main>
