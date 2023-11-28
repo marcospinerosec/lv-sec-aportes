@@ -79,7 +79,20 @@
         </nav>
 
         <main class="py-4">
-            @yield('content')
+            <!-- Área específica del dashboard -->
+            <div class="container-fluid">
+                <div class="row">
+                    <!-- Sidebar del dashboard -->
+                    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+                        <!-- ... (contenido del menú lateral) -->
+                    </nav>
+
+                    <!-- Contenido principal del dashboard -->
+                    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                        @yield('content')
+                    </main>
+                </div>
+            </div>
         </main>
     </div>
 </body>
