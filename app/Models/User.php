@@ -19,11 +19,11 @@ class User extends Authenticatable
      *
      * @var string
      */
-    protected $primaryKey = 'idUsuario';
+    protected $primaryKey = 'IdUsuario';
 
     // Campos específicos de tu tabla de usuarios
     protected $fillable = [
-        'idUsuario', 'Clave', 'UsuarioNT', 'EMail', 'Compras', 'Activo',
+        'IdUsuario', 'Clave', 'Nombre', 'EMail', 'Telefono', 'Estado',
     ];
 
     public function getAuthPassword()

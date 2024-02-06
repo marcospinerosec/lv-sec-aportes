@@ -44,7 +44,7 @@
                                     Usuario:
                                 </div>
                                 <div style="width: 10%;">
-                                    <input id="email" type="text" size="5" maxlength="5" class="obligatorio" style="text-align: right;" name="email" value="{{ old('email') }}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); " required autocomplete="email" autofocus>
+                                    <input id="email" type="text" size="5" maxlength="5" class="obligatorio @error('email') is-invalid @enderror" style="text-align: right;" name="email" value="{{ old('email') }}" oninput="this.value = this.value.replace(/[^0-9]/g, ''); " required autocomplete="email" autofocus>
 
 
                                     @error('email')

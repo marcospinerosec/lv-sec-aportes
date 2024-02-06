@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', function () {
-    return view('home');
+    return view('dashboard');
 });
 
 Auth::routes([
@@ -23,10 +23,13 @@ Auth::routes([
     'verify' => false,   // Deshabilitar la verificación de correo electrónico
 ]);
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
 
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::post('/procesar', [App\Http\Controllers\HomeController::class, 'procesar']);
+
 });
 
 Route::get('/empresa', function () {

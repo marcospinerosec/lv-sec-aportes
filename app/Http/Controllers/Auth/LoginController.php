@@ -32,7 +32,7 @@ class LoginController extends Controller
      *
      * @var string
      */
-    protected $redirectTo = '/dashboard';
+    protected $redirectTo = '/home';
 
 
 
@@ -71,8 +71,8 @@ class LoginController extends Controller
         if (!empty($result)) {
             // Construir un objeto User manualmente
             $user = new User([
-                'idUsuario' => $result[0]->idUsuario,
-                'UsuarioNT' => $result[0]->UsuarioNT,
+                'IdUsuario' => $result[0]->IdUsuario,
+                'Nombre' => $result[0]->Nombre,
                 // Añadir otros campos según tus necesidades
             ]);
             //dd($request->session()->all());
@@ -95,8 +95,8 @@ class LoginController extends Controller
 
             // Personaliza la creación de la sesión aquí
             session([
-                'user_id' => auth()->user()->idUsuario,
-                'user_name' => auth()->user()->UsuarioNT,
+                'user_id' => auth()->user()->IdUsuario,
+                'user_name' => auth()->user()->Nombre,
                 // Puedes agregar otros campos según tus necesidades
             ]);
        // dd($request->session()->all());
@@ -114,13 +114,10 @@ class LoginController extends Controller
     protected function sendFailedLoginResponse(Request $request)
     {
 
-        /*throw ValidationException::withMessages([
+        throw ValidationException::withMessages([
             $this->username() => [trans('auth.failed')],
-        ]);*/
-        dd($request->session()->all());
-        return view('auth.login', [
-            'message' => 'Provided PIN is invalid. ',
         ]);
+
     }
 
 

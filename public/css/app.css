@@ -11977,3 +11977,9 @@ textarea.form-control-lg {
     display: none !important;
   }
 }
+
+.container-menu {
+
+    width: 1000px !important;
+
+}
