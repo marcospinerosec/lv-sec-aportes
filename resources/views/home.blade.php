@@ -13,7 +13,7 @@
                     <select class="form-control" id="empresa" name="empresa">
                         <option value=""/>Seleccionar...</option>
                         @foreach($empresas as $empresa)
-                            <option value="{{$empresa->IdEmpresa}}"/>{{$empresa->Codigo}} - {{$empresa->NombreReal}}</option>
+                            <option value="{{$empresa['IdEmpresa']}}"/>{{$empresa['Codigo']}} - {{$empresa['NombreReal']}}</option>
                         @endforeach
                     </select>
                 </div>

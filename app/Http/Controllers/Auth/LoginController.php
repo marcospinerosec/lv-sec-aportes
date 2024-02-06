@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use DB;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
+use GuzzleHttp\Client;
+
 
 
 
@@ -62,17 +64,31 @@ class LoginController extends Controller
         // Llama a tu procedimiento almacenado para validar las credenciales
         //$result = DB::select('CALL sp_ValidateUser(?, ?)', [$username, $password]);
 
-        $result=DB::select(DB::raw("exec ADM_EsUsuario :Param1, :Param2"),[
+        /*$result=DB::select(DB::raw("exec ADM_EsUsuario :Param1, :Param2"),[
             ':Param1' => $username,
             ':Param2' => $password,
-        ]);
+        ]);*/
+
+        $client = new Client();
+
+
+
+        $response = $client->get('http://localhost/lv-sec-digitalizar/public/api/verifica-usuario/' . $username . '/' . $password);
+
+        $result = json_decode($response->getBody(), true);
+
+
         //dd($result);
 
-        if (!empty($result)) {
-            // Construir un objeto User manualmente
+        if (!empty($result['result']) && is_array($result['result']) && count($result['result']) > 0) {
+            $firstResult = $result['result'][0];
+
+            // Acceder a los datos
+            $idUsuario = $firstResult['IdUsuario'];
+            $usuarioNT = $firstResult['Nombre'];
             $user = new User([
-                'IdUsuario' => $result[0]->IdUsuario,
-                'Nombre' => $result[0]->Nombre,
+                'IdUsuario' => $idUsuario,
+                'Nombre' => $usuarioNT,
                 // Añadir otros campos según tus necesidades
             ]);
             //dd($request->session()->all());

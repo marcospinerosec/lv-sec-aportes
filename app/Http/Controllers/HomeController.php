@@ -6,10 +6,13 @@ use Illuminate\Http\Request;
 use DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use GuzzleHttp\Client;
 
 
 class HomeController extends Controller
 {
+    const API_URL = 'http://localhost/lv-sec-digitalizar/public/api';
+
     /**
      * Create a new controller instance.
      *
@@ -27,13 +30,24 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
+        /*$empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
             ':Param1' => auth()->user()->IdUsuario,
         ]);
-        //dd($empresas);
+        //dd($empresas);*/
 
 
-        return view('home',compact('empresas'));
+
+        $client = new Client();
+
+        $response = $client->get(self::API_URL.'/empresa-usuario/' . auth()->user()->IdUsuario);
+
+        $result = json_decode($response->getBody(), true);
+
+
+
+        //return view('home',compact('empresas'));
+
+        return view('home', ['empresas' => $result['result']]);
     }
 
     public function procesar(Request $request)
@@ -66,27 +80,42 @@ class HomeController extends Controller
         // Realizar el procesamiento necesario aquí
 
         if (intval($year) * 100 + intval($mes) >= 201911) {
-            $verifica = DB::select(DB::raw("exec DDJJ_VerificaEmpleadosPorDebajoMinimo :Param1, :Param2, :Param3"), [
+            /*$verifica = DB::select(DB::raw("exec DDJJ_VerificaEmpleadosPorDebajoMinimo :Param1, :Param2, :Param3"), [
                 ':Param1' => $empresa,
                 ':Param2' => $mes,
                 ':Param3' => $year,
-            ]);
+            ]);*/
+
+            $client = new Client();
+
+            $response = $client->get(self::API_URL.'/verifica-empleado-debajo-minimo/' . $empresa.'/'.$mes.'/'.$year);
+
+            $result = json_decode($response->getBody(), true);
+
+            //dd($result);
 
             // Verificar si la consulta tiene resultados
-            if (!empty($verifica)) {
+            if (!empty($result['result'])) {
                 $error = "Alguno de los empleados tiene el importe para la base de la cuota de afiliación menor al permitido, por favor verifique";
                 return response()->json(['errors' => $error], 422);
             }
         }
 
-        $rsEmpresa=DB::select(DB::raw("exec DDJJ_EmpresaPorId :Param1"),[
+        /*$rsEmpresa=DB::select(DB::raw("exec DDJJ_EmpresaPorId :Param1"),[
             ':Param1' => $empresa,
-        ]);
+        ]);*/
+
+        $response = $client->get(self::API_URL.'/empresa/' . $empresa);
+
+        $result = json_decode($response->getBody(), true);
+
+        //dd($result);
 
         // Verificar si se obtuvieron resultados
-        if (!empty($rsEmpresa)) {
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
             // Obtener el CUIT de la empresa desde los resultados
-            $cuit = trim($rsEmpresa[0]->Cuit);
+            $cuit = trim($firstResult['Cuit']);
 
             // Calcular el dígito verificador del CUIT
             if (strlen($cuit) === 13) {
@@ -110,16 +139,22 @@ class HomeController extends Controller
             $mes2 = $mes;
         }
 
-        $vencimiento=DB::select(DB::raw("exec DDJJ_VencimientoTraer :Param1, :Param2, :Param3"),[
+        /*$vencimiento=DB::select(DB::raw("exec DDJJ_VencimientoTraer :Param1, :Param2, :Param3"),[
             ':Param1' => $mes,
             ':Param2' => $year,
             ':Param3' => $dv,
-        ]);
+        ]);*/
 
+        $response = $client->get(self::API_URL.'/vencimiento-traer/' . $mes.'/'.$year.'/'.$dv);
+
+        $result = json_decode($response->getBody(), true);
+
+        //dd($result);
 
 // Comprobar si $vencimiento no está vacío
-        if (!empty($vencimiento)) {
-            $fechavencimiento = $vencimiento[0]->Vencimiento;
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $fechavencimiento = $firstResult['Vencimiento'];
         } else {
             // CALCULA VENCIMIENTOS
             $fecha1o = date_create("$anio-$mes2-7");
@@ -132,11 +167,19 @@ class HomeController extends Controller
 
 
                 // Tu lógica para validar si la fecha es hábil
-                $dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+                /*$dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
                     ':Param1' => $fecha1String,
-                ]);
+                ]);*/
                 //dd($dia);
-                if (empty($dia)) {
+
+                $response = $client->get(self::API_URL.'/valida-dia/' . $fecha1String);
+
+                $result = json_decode($response->getBody(), true);
+
+                //dd($result);
+
+
+                if (empty($result['result'])) {
                     $nohabilini = false;
                 } else {
                     $fecha1->modify('+1 day');
@@ -154,13 +197,16 @@ class HomeController extends Controller
             $nohabilini = true;
             while ($nohabilini) {
                 //Log::info('Fecha2: ' . $fecha2, []);
-                Log::info('String2: ' . $fecha2String, []);
+                //Log::info('String2: ' . $fecha2String, []);
                 // Tu lógica para validar si la fecha es hábil
-                $dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
-                    ':Param1' => $fecha2String,
-                ]);
+                $response = $client->get(self::API_URL.'/valida-dia/' . $fecha2String);
 
-                if (empty($dia)) {
+                $result = json_decode($response->getBody(), true);
+
+                //dd($result);
+
+
+                if (empty($result['result'])) {
                     $nohabilini = false;
                 } else {
                     $fecha2->modify('+1 day');
@@ -178,13 +224,16 @@ class HomeController extends Controller
             $nohabilini = true;
             while ($nohabilini) {
                 //Log::info('Fecha3: ' . $fecha3, []);
-                Log::info('String3: ' . $fecha3String, []);
+                //Log::info('String3: ' . $fecha3String, []);
                 // Tu lógica para validar si la fecha es hábil
-                $dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
-                    ':Param1' => $fecha3String,
-                ]);
+                $response = $client->get(self::API_URL.'/valida-dia/' . $fecha3String);
 
-                if (empty($dia)) {
+                $result = json_decode($response->getBody(), true);
+
+                //dd($result);
+
+
+                if (empty($result['result'])) {
                     $nohabilini = false;
                 } else {
 
@@ -205,13 +254,16 @@ class HomeController extends Controller
             $nohabilini = true;
             while ($nohabilini) {
                 //Log::info('Fecha4: ' . $fecha4, []);
-                Log::info('String4: ' . $fecha4String, []);
+                //Log::info('String4: ' . $fecha4String, []);
                 // Tu lógica para validar si la fecha es hábil
-                $dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
-                    ':Param1' => $fecha4String,
-                ]);
+                $response = $client->get(self::API_URL.'/valida-dia/' . $fecha4String);
 
-                if (empty($dia)) {
+                $result = json_decode($response->getBody(), true);
+
+                //dd($result);
+
+
+                if (empty($result['result'])) {
                     $nohabilini = false;
                 } else {
                     $fecha4->modify('+1 day');
@@ -230,13 +282,16 @@ class HomeController extends Controller
             $nohabilini = true;
             while ($nohabilini) {
                 //Log::info('Fecha5: ' . $fecha5, []);
-                Log::info('String5: ' . $fecha5String, []);
+                //Log::info('String5: ' . $fecha5String, []);
                 // Tu lógica para validar si la fecha es hábil
-                $dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
-                    ':Param1' => $fecha5String,
-                ]);
+                $response = $client->get(self::API_URL.'/valida-dia/' . $fecha5String);
 
-                if (empty($dia)) {
+                $result = json_decode($response->getBody(), true);
+
+                //dd($result);
+
+
+                if (empty($result['result'])) {
                     $nohabilini = false;
                 } else {
                     $fecha5->modify('+1 day');
@@ -270,11 +325,18 @@ class HomeController extends Controller
 
         while ($nohabilini) {
 
-            $dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+            /*$dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
                 ':Param1' => $vencinicial,
-            ]);
+            ]);*/
 
-            if (empty($dia)) {
+            $response = $client->get(self::API_URL.'/valida-dia/' . $vencinicial);
+
+            $result = json_decode($response->getBody(), true);
+
+            //dd($result);
+
+
+            if (empty($result['result'])) {
                 $nohabilini = false;
             } else {
                 $vencinicial->modify('+1 day');
@@ -291,11 +353,18 @@ class HomeController extends Controller
             $nohabil = true;
             while ($nohabil) {
                 //$fechaVencString = date_format($venc, 'Y-m-d');
-                $dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+                /*$dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
                     ':Param1' => $venc,
-                ]);
+                ]);*/
 
-                if (empty($dia)) {
+                $response = $client->get(self::API_URL.'/valida-dia/' . $venc);
+
+                $result = json_decode($response->getBody(), true);
+
+                //dd($result);
+
+
+                if (empty($result['result'])) {
                     $nohabil = false;
                 } else {
                     $venc = strtotime('+1 day', $venc);
@@ -313,26 +382,64 @@ class HomeController extends Controller
 
 
 
-        $rsTotales2 = DB::select(DB::raw("exec DDJJ_BoletaPagoImpresion :Param1, :Param2, :Param3"), [
+        /*$rsTotales2 = DB::select(DB::raw("exec DDJJ_BoletaPagoImpresion :Param1, :Param2, :Param3"), [
             ':Param1' => $empresa,
             ':Param2' => $mes,
             ':Param3' => $year,
-        ]);
+        ]);*/
+
+        $response = $client->get(self::API_URL.'/boleta-pago-impresion/' . $empresa.'/'. $mes.'/'.$year);
+
+        $result = json_decode($response->getBody(), true);
+
+        //dd($result);
 
 
-        $tot = doubleval($rsTotales2[0]->ImporteArt100) + doubleval($rsTotales2[0]->ImporteCuotaAfi);
-        $tot2 = doubleval($rsTotales2[0]->ImporteArt100Total) + doubleval($rsTotales2[0]->ImporteCuotaAfiTotal);
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $cantArt100 = $firstResult['CantArt100'];
+            $cantAfi = $firstResult['CantAfi'];
+            $importeArt100 = $firstResult['ImporteArt100'];
+            $importeArt100Total = $firstResult['ImporteArt100Total'];
+            $importeCuotaAfi = $firstResult['ImporteCuotaAfi'];
+            $importeCuotaAfiTotal = $firstResult['ImporteCuotaAfiTotal'];
 
-        $rsNumero = DB::select(DB::raw("exec DDJJ_NumeroMensual :Param1, :Param2, :Param3"), [
+            $tot = doubleval($importeArt100) + doubleval($importeCuotaAfi);
+            $tot2 = doubleval($importeArt100Total) + doubleval($importeCuotaAfiTotal);
+        }
+
+        /*$rsNumero = DB::select(DB::raw("exec DDJJ_NumeroMensual :Param1, :Param2, :Param3"), [
             ':Param1' => $empresa,
             ':Param2' => $mes,
             ':Param3' => $year,
-        ]);
+        ]);*/
 
-        $rsPorcentaje = DB::select(DB::raw("exec DDJJ_PorcentajeInteresTraer"), [
+        $response = $client->get(self::API_URL.'/numero-mensual/' . $empresa.'/'. $mes.'/'.$year);
 
-        ]);
+        $result = json_decode($response->getBody(), true);
 
+        //dd($result);
+
+
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+        }
+
+        /*$rsPorcentaje = DB::select(DB::raw("exec DDJJ_PorcentajeInteresTraer"), [
+
+        ]);*/
+
+        $response = $client->get(self::API_URL.'/porcentaje-interes-traer');
+
+        $result = json_decode($response->getBody(), true);
+
+        //dd($result);
+
+
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $porcentaje = $firstResult['Porcentaje'];
+        }
 
 
 
@@ -356,7 +463,7 @@ class HomeController extends Controller
             $dias = 0;
         }
 
-        $intereses = (doubleval($tot) * doubleval($rsPorcentaje[0]->Porcentaje) / 100) * doubleval($dias);
+        $intereses = (doubleval($tot) * doubleval($porcentaje) / 100) * doubleval($dias);
 
 
 
@@ -384,15 +491,15 @@ class HomeController extends Controller
 </td>
 <td style="border: 1px solid; text-align: right">';
 
-        $tablaHtml .=$rsTotales2[0]->CantArt100;
+        $tablaHtml .=$cantArt100;
         $tablaHtml .='
 </td>
 <td style="border: 1px solid; text-align: right">';
-        $tablaHtml .=number_format($rsTotales2[0]->ImporteArt100Total,2,',','.');
+        $tablaHtml .=number_format($importeArt100Total,2,',','.');
         $tablaHtml .='
 </td>
 <td style="border: 1px solid; text-align: right">';
-        $tablaHtml .=number_format($rsTotales2[0]->ImporteArt100,2,',','.');
+        $tablaHtml .=number_format($importeArt100,2,',','.');
         $tablaHtml .='
 
 </td>
@@ -403,15 +510,15 @@ class HomeController extends Controller
 </td>
 <td style="border: 1px solid; text-align: right">';
 
-        $tablaHtml .=$rsTotales2[0]->CantAfi;
+        $tablaHtml .=$cantAfi;
         $tablaHtml .='
 </td>
 <td style="border: 1px solid; text-align: right">';
-        $tablaHtml .=number_format($rsTotales2[0]->ImporteCuotaAfiTotal,2,',','.');
+        $tablaHtml .=number_format($importeCuotaAfiTotal,2,',','.');
         $tablaHtml .='
 </td>
 <td style="border: 1px solid; text-align: right">';
-        $tablaHtml .=number_format($rsTotales2[0]->ImporteCuotaAfi,2,',','.');
+        $tablaHtml .=number_format($importeCuotaAfi,2,',','.');
         $tablaHtml .='
 
 </td>
