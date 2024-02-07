@@ -131,13 +131,17 @@ class HomeController extends Controller
             return response()->json(['errors' => 'No se encontró la empresa.'], 422);
         }
 
-        if ($mes == 13) {
+
+        $mes2 = intval($mes) + 1;
+        if ($mes2 == 13) {
             $mes2 = 1;
             $anio = intval($year) + 1;
         } else {
             $anio = intval($year);
-            $mes2 = $mes;
+            //$mes2 = $mes;
         }
+
+        Log::info('Mes: ' . $mes2, []);
 
         /*$vencimiento=DB::select(DB::raw("exec DDJJ_VencimientoTraer :Param1, :Param2, :Param3"),[
             ':Param1' => $mes,
@@ -316,7 +320,9 @@ class HomeController extends Controller
             }
         }
 
-        $venc = $fechavencimiento;
+        $venc = ($request->input('venc'))?$request->input('venc'):$fechavencimiento;
+        //$venc = $fechavencimiento;
+
         $vencinicial = $fechavencimiento;
 
         //$fechaVencInicialString = date_format($vencinicial, 'Y-m-d');
@@ -463,6 +469,9 @@ class HomeController extends Controller
             $dias = 0;
         }
 
+
+        Log::info('Total: ' . $tot.' porcentaje: '.$porcentaje.' dias: '.$dias, []);
+
         $intereses = (doubleval($tot) * doubleval($porcentaje) / 100) * doubleval($dias);
 
 
@@ -572,7 +581,7 @@ class HomeController extends Controller
         //$tablaHtml .= '</table>';
 
         // Devolver la tabla HTML como respuesta
-        return response()->json(['tabla' => $tablaHtml, 'original' => date_format($vencini, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.')]);
+        return response()->json(['tabla' => $tablaHtml, 'original' => date_format($vencini, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.')]);
     }
 
 

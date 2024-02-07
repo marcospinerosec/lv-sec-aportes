@@ -65,7 +65,7 @@
 
                 <div class="col-md-3">
 
-                    <button type="button" class="btn btn-primary btn-block" id="continuarBtn">Continuar</button>
+                    <button type="button" class="btn btn-primary btn-block" id="continuarVencimiento">Continuar</button>
                 </div>
 
             </div>
@@ -105,7 +105,7 @@
 
                 <div class="col-md-8 d-flex align-items-center">
                     <input type="hidden" class="form-control" id="txtTotal" name="txtTotal">
-                    <span style="font-size: 30px"> Total a pagar:<span id="spanTotal"></span></span>
+                    <span style="font-size: 30px"> Total a pagar: <span id="spanTotal"></span></span>
                 </div>
 
                 <div class="col-md-3 d-flex flex-column align-items-center">
@@ -143,7 +143,7 @@
                         // Actualizar la tabla con la respuesta HTML
                         $("#ListaEmpleadosActual").html(response.tabla);
                         $("#txtFOriginal").val(response.original);
-                        $("#txtFVencimiento").val(response.original);
+                        $("#txtFVencimiento").val(response.vencimiento);
                         $("#txtIntereses").val(response.intereses);
                         $("#spanIntereses").html(response.intereses);
                         $("#txtTotal").val(response.total);
@@ -179,6 +179,82 @@
                 showButtonPanel: true,
                 changeMonth: true,
                 changeYear: true,
+            });
+
+            $("#continuarVencimiento").click(function() {
+                //var txtVencimiento = $("#txtVencimiento").val();
+                if ($("#txtFVencimiento").val()!="") {
+                    var dtFechaActual = new Date();
+                    var fecha = $("#txtFVencimiento").val();
+                    var sAnio = fecha.substring(0, 4);
+                    var sMes = fecha.substring(5, 7);
+                    var sDia = fecha.substring(8, 10);
+                    var sFecha = sMes + "/" + sDia + "/" + sAnio + " 23:59:59";
+
+                    var fechao = $("#txtFOriginal").val();
+                    var sAnioo = fechao.substring(0, 4);
+                    var sMeso = fechao.substring(5, 7);
+                    var sDiao = fechao.substring(8, 10);
+                    var sFechao = sMeso + "/" + sDiao + "/" + sAnioo + " 23:59:59";
+                    //console.log(sFecha+' --- '+sFechao);
+                    if (Date.parse(sFecha) >= dtFechaActual && Date.parse(sFecha) >= Date.parse(sFechao)){
+                        var empresa = $("#empresa").val();
+                        var mes = $("#mes").val();
+                        var year = $("#year").val();
+                        var venc = $("#txtFVencimiento").val();
+                        $.ajax({
+                            type: 'POST',
+                            url: '{{ url('/procesar') }}',
+                            data: {
+                                empresa: empresa,
+                                mes: mes,
+                                year: year,
+                                venc: venc,
+                                _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
+                            },
+                            success: function(response) {
+                                // Manejar la respuesta del servidor, si es necesario
+                                //console.log('Respuesta del servidor:', response);
+
+                                // Actualizar la tabla con la respuesta HTML
+                                $("#ListaEmpleadosActual").html(response.tabla);
+                                $("#txtFOriginal").val(response.original);
+                                $("#txtFVencimiento").val(response.vencimiento);
+                                $("#txtIntereses").val(response.intereses);
+                                $("#spanIntereses").html(response.intereses);
+                                $("#txtTotal").val(response.total);
+                                $("#spanTotal").html(response.total);
+                                // Limpiar mensajes de error anteriores
+                                $('#errorContainer').html('');
+                            },
+                            error: function(error) {
+                                // Manejar los mensajes de error y mostrarlos
+                                if (error.responseJSON && error.responseJSON.errors) {
+                                    var errors = error.responseJSON.errors;
+                                    var errorMessage = '<ul>';
+                                    $.each(errors, function (index, value) {
+                                        errorMessage += '<li>' + value + '</li>';
+                                    });
+                                    errorMessage += '</ul>';
+                                    $('#errorContainer').html(errorMessage);
+                                } else {
+                                    $('#errorContainer').html('Error desconocido. Consulta la consola para obtener más detalles.');
+                                    //console.log('Error en la solicitud AJAX:', error);
+                                }
+                            },
+                            complete: function() {
+                                // Restaurar el texto del botón al finalizar la solicitud
+                                $("#continuarBtn").text('Continuar');
+                            }
+                        });
+                    }
+                    else {
+                        alert("Fecha de Pago incorrecta, por favor verifique");
+                    }
+                }
+
+                // Cambiar el texto del botón al inicio de la solicitud
+
             });
 
             // Otros scripts o funciones aquí...
