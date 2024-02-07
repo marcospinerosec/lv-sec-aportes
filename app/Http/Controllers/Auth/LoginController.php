@@ -73,7 +73,7 @@ class LoginController extends Controller
 
 
 
-        $response = $client->get('http://localhost/lv-sec-digitalizar/public/api/verifica-usuario/' . $username . '/' . $password);
+        $response = $client->get(\Constants\Constants::API_URL.'/verifica-usuario/' . $username . '/' . $password);
 
         $result = json_decode($response->getBody(), true);
 

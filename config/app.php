@@ -175,6 +175,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\MenuComposerServiceProvider::class,
 
     ],
 
@@ -232,5 +233,8 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
 
     ],
+
+
+
 
 ];
