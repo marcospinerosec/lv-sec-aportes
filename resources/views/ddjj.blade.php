@@ -2,10 +2,12 @@
 
 @section('content')
     @include('layouts.menu') <!-- Incluye el menú horizontal -->
+
     <div style="float: left; margin-right: 20px; border-color: #999999; margin-top: 20px;">
         <p class="titulocuarentena" style="margin-right: 20px;" >
             Generación de DDJJ de aportes y boleta de pago
         </p>
+        <div id="errorContainer" style="color: red"></div>
         <div class="container mt-5">
             <div class="row" style="border: 1px solid; padding: 10px;">
                 <div class="col-md-4 d-flex align-items-center">
@@ -29,7 +31,7 @@
 
                     <button type="button" class="btn btn-primary btn-block" id="continuarBtn">Continuar</button>
                 </div>
-                <div id="errorContainer" style="color: red"></div>
+
             </div>
         </div>
         <div class="container mt-5">
@@ -110,7 +112,8 @@
 
                 <div class="col-md-3 d-flex flex-column align-items-center">
                     <div class="mb-2">
-                        <button type="button" class="btn btn-primary btn-block">Generar Declaración Jurada</button>
+                        <input type="hidden" class="form-control" id="existeDeclaracion" name="existeDeclaracion">
+                        <button type="button" class="btn btn-primary btn-block" id="generarBtn">Generar Declaración Jurada</button>
                     </div>
 
                 </div>
@@ -202,6 +205,7 @@
                         var mes = $("#mes").val();
                         var year = $("#year").val();
                         var venc = $("#txtFVencimiento").val();
+                        $("#continuarVencimiento").text('Cargando...');
                         $.ajax({
                             type: 'POST',
                             url: '{{ url('/procesar') }}',
@@ -224,6 +228,7 @@
                                 $("#spanIntereses").html(response.intereses);
                                 $("#txtTotal").val(response.total);
                                 $("#spanTotal").html(response.total);
+                                $("#existeDeclaracion").val(response.existeDeclaracion);
                                 // Limpiar mensajes de error anteriores
                                 $('#errorContainer').html('');
                             },
@@ -244,7 +249,7 @@
                             },
                             complete: function() {
                                 // Restaurar el texto del botón al finalizar la solicitud
-                                $("#continuarBtn").text('Continuar');
+                                $("#continuarVencimiento").text('Continuar');
                             }
                         });
                     }
@@ -257,7 +262,111 @@
 
             });
 
-            // Otros scripts o funciones aquí...
+
+            $("#generarBtn").click(function() {
+                //var txtVencimiento = $("#txtVencimiento").val();
+                if ($("#txtFVencimiento").val()!="") {
+                    var dtFechaActual = new Date();
+                    var fecha = $("#txtFVencimiento").val();
+                    var sAnio = fecha.substring(0, 4);
+                    var sMes = fecha.substring(5, 7);
+                    var sDia = fecha.substring(8, 10);
+                    var sFecha = sMes + "/" + sDia + "/" + sAnio + " 23:59:59";
+
+                    var fechao = $("#txtFOriginal").val();
+                    var sAnioo = fechao.substring(0, 4);
+                    var sMeso = fechao.substring(5, 7);
+                    var sDiao = fechao.substring(8, 10);
+                    var sFechao = sMeso + "/" + sDiao + "/" + sAnioo + " 23:59:59";
+                    //console.log(sFecha+' --- '+sFechao);
+                    if (Date.parse(sFecha) >= dtFechaActual && Date.parse(sFecha) >= Date.parse(sFechao)){
+                        var empresa = $("#empresa").val();
+                        var mes = $("#mes").val();
+                        var year = $("#year").val();
+                        var venc = $("#txtFVencimiento").val();
+                        var vencOri = $("#txtFOriginal").val();
+                        var intereses = $("#txtIntereses").val();
+                        var existeDeclaracion = $("#existeDeclaracion").val();
+                        var continua = 1;
+                        if (existeDeclaracion!=0){
+                            if (!confirm("¿Ya existe una declaración jurada para la empresa y periodo seleccionado, es una rectificación de la misma?")){
+                                return false;
+                            }
+
+                        }
+
+                        hoy = new Date();
+                        anio = hoy.getFullYear();
+                        mesActual = hoy.getMonth() + 1;
+                        if ($("#mes").val()<1 || $("#mes").val()>12){
+                            alert("Mes incorrecto");
+                            return;
+                        }
+                        //if ($("#txtAnio").val()> anio || $("#txtAnio").val()<= (anio - 2))
+                        if ($("#year").val()> anio){
+                            alert("Año incorrecto");
+                            return;
+                        }
+
+                        pi=parseFloat($("#year").val()) * 100 + parseFloat($("#mes").val());
+                        pa=parseFloat(anio) * 100 + parseFloat(mesActual);
+
+                        if (pa<pi){
+                            alert("Período incorrecto, por favor verifique");
+                            return;
+                        }
+
+                        $("#generarBtn").text('Cargando...');
+                        $.ajax({
+                            type: 'POST',
+                            url: '{{ url('/generar') }}',
+                            data: {
+                                empresa: empresa,
+                                mes: mes,
+                                year: year,
+                                venc: venc,
+                                vencOri: vencOri,
+                                intereses: intereses,
+                                _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
+                            },
+                            success: function(response) {
+                                // Manejar la respuesta del servidor, si es necesario
+                                //console.log('Respuesta del servidor:', response);
+
+                                // Actualizar la tabla con la respuesta HTML
+
+                                // Limpiar mensajes de error anteriores
+                                $('#errorContainer').html('');
+                            },
+                            error: function(error) {
+                                // Manejar los mensajes de error y mostrarlos
+                                if (error.responseJSON && error.responseJSON.errors) {
+                                    var errors = error.responseJSON.errors;
+                                    var errorMessage = '<ul>';
+                                    $.each(errors, function (index, value) {
+                                        errorMessage += '<li>' + value + '</li>';
+                                    });
+                                    errorMessage += '</ul>';
+                                    $('#errorContainer').html(errorMessage);
+                                } else {
+                                    $('#errorContainer').html('Error desconocido. Consulta la consola para obtener más detalles.');
+                                    //console.log('Error en la solicitud AJAX:', error);
+                                }
+                            },
+                            complete: function() {
+                                // Restaurar el texto del botón al finalizar la solicitud
+                                $("#generarBtn").text('Generar Declaración Jurada');
+                            }
+                        });
+                    }
+                    else {
+                        alert("Fecha de Pago incorrecta, por favor verifique");
+                    }
+                }
+
+                // Cambiar el texto del botón al inicio de la solicitud
+
+            });
 
             $("#BtVerListaEmpleados").click(function() {
                 alert("Mostrar lista de empleados");

@@ -31,6 +31,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
     Route::get('/ddjj', [App\Http\Controllers\DDJJController::class, 'index'])->name('ddjj');
     Route::post('/procesar', [App\Http\Controllers\DDJJController::class, 'procesar']);
+    Route::post('/generar', [App\Http\Controllers\DDJJController::class, 'generar']);
 
 });
 

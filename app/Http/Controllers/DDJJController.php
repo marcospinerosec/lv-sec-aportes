@@ -429,6 +429,7 @@ class DDJJController extends Controller
 
         if (!empty($result['result'])) {
             $firstResult = $result['result'][0];
+            $existeDeclaracion = $firstResult['Numero'];
         }
 
         /*$rsPorcentaje = DB::select(DB::raw("exec DDJJ_PorcentajeInteresTraer"), [
@@ -581,9 +582,252 @@ class DDJJController extends Controller
         //$tablaHtml .= '</table>';
 
         // Devolver la tabla HTML como respuesta
-        return response()->json(['tabla' => $tablaHtml, 'original' => date_format($vencini, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.')]);
+        return response()->json(['tabla' => $tablaHtml, 'original' => date_format($vencini, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.'),'existeDeclaracion' => $existeDeclaracion]);
     }
 
 
 
+    public function generar(Request $request)
+    {
+
+        $validator = Validator::make($request->all(), [
+            'empresa' => 'required',
+            'mes' => 'required|numeric',
+            'year' => 'required|numeric',
+            'venc' => 'required|date',
+        ], [
+            'empresa.required' => 'El campo empresa es obligatorio.',
+            'mes.required' => 'El campo mes es obligatorio.',
+            'mes.numeric' => 'El campo mes debe ser un valor numérico.',
+            'year.required' => 'El campo año es obligatorio.',
+            'year.numeric' => 'El campo año debe ser un valor numérico.',
+            'venc.required' => 'El campo estimada de pago es obligatorio.',
+            'venc.date' => 'El campo estimada de pago debe ser una fecha válida.',
+        ]);
+
+        // Verificar si hay errores de validación
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()->all()], 422);
+        }
+
+
+        // Obtener los datos del formulario
+        $empresa = $request->input('empresa');
+        $mes = $request->input('mes');
+        $year = $request->input('year');
+        $venc = $request->input('venc');
+        $intereses = $request->input('intereses');
+        $vencimientoOriginal = $request->input('vencOri');
+
+        $client = new Client();
+
+        $response = $client->get(\Constants\Constants::API_URL . '/verifica-boleta/' . $empresa . '/' . $mes . '/' . $year);
+
+        $result = json_decode($response->getBody(), true);
+
+        //dd($result);
+
+
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $carti100 = $firstResult['CantArt100'];
+            $cart100 = str_pad(strval($carti100), 4, "0", STR_PAD_LEFT);
+            $iarti100 = $firstResult['ImporteArt100'];
+            $iart100 = str_pad(strval($iarti100), 8, "0", STR_PAD_LEFT);
+            $cafil = $firstResult['CantAfi'];
+            $cafi = str_pad(strval($cafil), 4, "0", STR_PAD_LEFT);
+            $iafil = $firstResult['ImporteCuotaAfi'];
+            $iafi = str_pad(strval($iafil), 8, "0", STR_PAD_LEFT);
+
+            $iafi = floatval($iafil);
+
+
+            $total = number_format($iarti100 + $iafi + $intereses, 2, '.', '');
+
+            $tot = strval(number_format(floatval($total) * 100, 0, '.', ''));
+            $tot = str_pad($tot, 9, "0", STR_PAD_LEFT);
+        }
+
+
+        if (strlen($carti100) > 4) {
+            return response()->json(['errors' => array('Valores incorrectos, por favor verifique')], 422);
+        }
+
+        if (strlen($cafil) > 4) {
+            return response()->json(['errors' => array('Valores incorrectos, por favor verifique')], 422);
+        }
+
+        /*$response = $client->get(\Constants\Constants::API_URL.'/empleados-empresa-ddjj/' . $empresa.'/'. $mes.'/'.$year);
+
+        $result = json_decode($response->getBody(), true);
+
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+        }*/
+
+        $response = $client->get(\Constants\Constants::API_URL . '/empresa/' . $empresa);
+
+        $result = json_decode($response->getBody(), true);
+
+        //dd($result);
+
+        // Verificar si se obtuvieron resultados
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $produccion = ($firstResult['Codigo'] == 4189) ? 0 : 1;
+            $empresaCodigo = strval($firstResult['Codigo']);
+
+            $empresaNombre = strval($firstResult['NombreReal']);
+
+            $empresaCodigo = str_pad(strval($empresaCodigo), 5, "0", STR_PAD_LEFT);
+
+            $empresa2 = str_pad(strval($empresaCodigo), 9, "0", STR_PAD_LEFT);
+
+            $nombre = $empresaCodigo . substr(strval($year), 2, 2) . $mes;
+        }
+
+        $response = $client->get(\Constants\Constants::API_URL . '/numero-mensual/' . $empresa . '/' . $mes . '/' . $year);
+
+        $result = json_decode($response->getBody(), true);
+
+        //dd($result);
+
+        $numero = 0;
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $numeroActual = $firstResult['Numero'];
+            $numero = $firstResult['Numero'];
+        }
+
+        $mes = str_pad($mes, 2, "0", STR_PAD_LEFT);
+
+        $numero++;
+
+        $response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj/' . $empresa . '/' . $mes . '/' . $year . '/0/' . $numero . '/' . $intereses . '/' . $venc . '/' . $vencimientoOriginal . '//' . auth()->user()->IdUsuario);
+
+        $result = json_decode($response->getBody(), true);
+
+        $response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj-comprobante/' . $empresa . '/' . $mes . '/' . $year . '/' . $numero);
+
+        $result = json_decode($response->getBody(), true);
+
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $nroComprobante = $firstResult['NroComprobante'];
+
+
+            $nroComprobante = str_pad($nroComprobante, 10, "0", STR_PAD_LEFT);
+        }
+
+        $fechaPartes = explode("-", $venc);
+        $vencimiento = $fechaPartes[2] . $fechaPartes[1] . $fechaPartes[0];
+
+        $barras = "2861" . $empresaCodigo . $nroComprobante . "1" . $vencimiento . $tot;
+
+        $sumete = doubleval(substr($barras, 0, 1));
+        $ponderador = 3;
+
+        for ($i = 1; $i < strlen($barras); $i++) {
+            $sumete += doubleval(substr($barras, $i, 1)) * $ponderador;
+            $ponderador += 2;
+
+            if ($ponderador == 11) {
+                $ponderador = 3;
+            }
+        }
+
+        $sumete1 = $sumete / 2;
+        $sumete2 = intval($sumete1) / 10;
+        $dv = ltrim(strval(intval(round(($sumete2 - intval($sumete2)) * 10))));
+        $barras .= $dv;
+
+        $empresaStr = $empresaCodigo . ' - ' . $empresaNombre;
+
+        $proceso = mes . "-" . $year;
+
+        $response = $client->get(\Constants\Constants::API_URL . '/cetral-pagos/' . $produccion);
+
+        $result = json_decode($response->getBody(), true);
+
+        //dd($result);
+
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $token = $firstResult['token'];
+        }
+
+        $ml = (date("m") < 10) ? "0" . date("m") : date("m");
+        $dl = (date("d") < 10) ? "0" . date("d") : date("d");
+        $hl = (date("H") < 10) ? "0" . date("H") : date("H");
+        $mil = (date("i") < 10) ? "0" . date("i") : date("i");
+        $sl = (date("s") < 10) ? "0" . date("s") : date("s");
+
+        $fechalote = date("Y") . "-" . $ml . "-" . $dl . "T" . $hl . ":" . $mil . ":" . $sl . "Z";
+        $vencimientocp = $venc . " 23:59:59";
+
+        $obs = "Periodo:" . $proceso;
+        if ($numeroActual <> 1) {
+
+            $obs = $obs . " R:" .$numeroActual;
+        }
+
+        $totcp = floatval($total) * 100;
+
+        $longi = strlen(strval($nroComprobante));
+        $desde = $longi - 5 + 1;
+
+        $code = strval($nroComprobante);
+        $alternative_code = strval($empresa2);
+        $ccf_code = strval($empresa2);
+
+        $first_name = $empresa;
+        $last_name = "-";
+        $importe = str_replace(",", ".", strval($total));
+
+        $fechaActual = new DateTime();
+        $fechaFormateada = $fechaActual->format('Y-m-d H:i:s');
+
+        $cliente = array( "first_name"=> $first_name,
+            "last_name"=> $last_name,
+            "extra"=> []);
+        $body = array("code"=> $code,"alternative_code"=> $alternative_code, "ccf_code"=> $ccf_code,"ccf_client_id"=> $code, "ccf_client_data"=> $cliente,"ccf_extra"=> [], "payment_methods"=> "all", "subdebts"=> [array(
+            "unique_reference"=> trim($code),
+            "amount"=> trim($importe),
+            "due_date"=> $vencimientocp,
+            "texts"=> [
+                [
+                    $obs
+                ]
+            ]
+        )
+        ]
+        );
+
+
+        $url = "https://core.sandbox.simp2.com/api/v1/debt";
+
+        $client = new Client(self::getHttpHeaders());
+
+        $response = $client->post($url, [
+
+            'body' => json_encode($body),
+        ]);
+
+        var_dump($response);
+
+
+        return response()->json([]);
+    }
+
+    public static function getHttpHeaders(){
+
+        $apikey = 'rDoyf7pwG5dmm7JobqCuht7TAAeGiDtX';
+        $headers    =   [
+            'headers' => [
+                'Content-Type' => 'application/json',
+                'X-API-KEY' => $apikey,
+            ],
+        ];
+        return $headers;
+    }
 }
