@@ -7,7 +7,7 @@ use DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
-
+use Milon\Barcode\DNS1D;
 
 class DDJJController extends Controller
 {
@@ -141,7 +141,7 @@ class DDJJController extends Controller
             //$mes2 = $mes;
         }
 
-        Log::info('Mes: ' . $mes2, []);
+        //Log::info('Mes: ' . $mes2, []);
 
         /*$vencimiento=DB::select(DB::raw("exec DDJJ_VencimientoTraer :Param1, :Param2, :Param3"),[
             ':Param1' => $mes,
@@ -631,16 +631,27 @@ class DDJJController extends Controller
         if (!empty($result['result'])) {
             $firstResult = $result['result'][0];
             $carti100 = $firstResult['CantArt100'];
+            //Log::info('CantArt100: ' . $carti100, []);
             $cart100 = str_pad(strval($carti100), 4, "0", STR_PAD_LEFT);
             $iarti100 = $firstResult['ImporteArt100'];
+            //Log::info('ImporteArt100: ' . $iarti100, []);
             $iart100 = str_pad(strval($iarti100), 8, "0", STR_PAD_LEFT);
             $cafil = $firstResult['CantAfi'];
+            //Log::info('CantAfi: ' . $cafil, []);
             $cafi = str_pad(strval($cafil), 4, "0", STR_PAD_LEFT);
             $iafil = $firstResult['ImporteCuotaAfi'];
+            //Log::info('ImporteCuotaAfi: ' . $iafil, []);
             $iafi = str_pad(strval($iafil), 8, "0", STR_PAD_LEFT);
 
             $iafi = floatval($iafil);
+            /*Log::info('ImporteCuotaAfi: ' . $iafil, []);
+            Log::info('Intereses: ' . $intereses, []);*/
 
+            $intereses = str_replace('.', '', $intereses);
+            $intereses = str_replace(',', '.', $intereses);
+
+            // Convertir la cadena a un valor decimal
+            $intereses = floatval($intereses);
 
             $total = number_format($iarti100 + $iafi + $intereses, 2, '.', '');
 
@@ -703,7 +714,7 @@ class DDJJController extends Controller
 
         $numero++;
 
-        $response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj/' . $empresa . '/' . $mes . '/' . $year . '/0/' . $numero . '/' . $intereses . '/' . $venc . '/' . $vencimientoOriginal . '//' . auth()->user()->IdUsuario);
+        $response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj/' . $empresa . '/' . $mes . '/' . $year . '/0/' . $numero . '/' . $intereses . '/' . $venc . '/' . $vencimientoOriginal . '/0/' . auth()->user()->IdUsuario);
 
         $result = json_decode($response->getBody(), true);
 
@@ -717,12 +728,15 @@ class DDJJController extends Controller
 
 
             $nroComprobante = str_pad($nroComprobante, 10, "0", STR_PAD_LEFT);
+            Log::info('Comprobante: ' . $nroComprobante, []);
         }
 
         $fechaPartes = explode("-", $venc);
         $vencimiento = $fechaPartes[2] . $fechaPartes[1] . $fechaPartes[0];
 
         $barras = "2861" . $empresaCodigo . $nroComprobante . "1" . $vencimiento . $tot;
+
+        Log::info('Barras: ' . $barras, []);
 
         $sumete = doubleval(substr($barras, 0, 1));
         $ponderador = 3;
@@ -754,6 +768,7 @@ class DDJJController extends Controller
         if (!empty($result['result'])) {
             $firstResult = $result['result'][0];
             $token = $firstResult['token'];
+            Log::info('Token: ' . $token, []);
         }
 
         $ml = (date("m") < 10) ? "0" . date("m") : date("m");
@@ -764,6 +779,8 @@ class DDJJController extends Controller
 
         $fechalote = date("Y") . "-" . $ml . "-" . $dl . "T" . $hl . ":" . $mil . ":" . $sl . "Z";
         $vencimientocp = $venc . " 23:59:59";
+        Log::info('Lote: ' . $fechalote, []);
+        Log::info('Vencimiento: ' . $vencimientocp, []);
 
         $obs = "Periodo:" . $proceso;
         if ($numeroActual <> 1) {
@@ -771,10 +788,16 @@ class DDJJController extends Controller
             $obs = $obs . " R:" .$numeroActual;
         }
 
+        Log::info('Obs: ' . $obs, []);
+
         $totcp = floatval($total) * 100;
+
+        Log::info('totcp: ' . $totcp, []);
 
         $longi = strlen(strval($nroComprobante));
         $desde = $longi - 5 + 1;
+
+        Log::info('desde: ' . $desde, []);
 
         $code = strval($nroComprobante);
         $alternative_code = strval($empresa2);
@@ -813,7 +836,9 @@ class DDJJController extends Controller
             'body' => json_encode($body),
         ]);
 
-        var_dump($response);
+        //var_dump($response);
+
+        self::generarCodigoBarras($barras);
 
 
         return response()->json([]);
@@ -829,5 +854,27 @@ class DDJJController extends Controller
             ],
         ];
         return $headers;
+    }
+
+    public function generarCodigoBarras($codigo)
+    {
+        // Generar el código de barras
+        $barcode = new DNS1D();
+        $barcode->setStorPath(storage_path('app/barcodes'));
+
+        // El segundo parámetro indica el tipo de código de barras (puedes cambiarlo según tus necesidades)
+        $barcodeData = $barcode->getBarcodeHTML($codigo, 'C39');
+
+        // Crear un array con los datos que quieras incluir en el PDF
+        $data = [
+            'codigo' => $codigo,
+            'barcode' => $barcodeData,
+        ];
+
+        // Renderizar la vista del PDF
+        $pdf = \PDF::loadView('ddjjpdf', $data);
+
+        // Guardar o descargar el PDF según tus necesidades
+        return $pdf->download('archivo.pdf');
     }
 }
