@@ -757,9 +757,9 @@ class DDJJController extends Controller
 
         $empresaStr = $empresaCodigo . ' - ' . $empresaNombre;
 
-        $proceso = mes . "-" . $year;
+        $proceso = $mes . "-" . $year;
 
-        $response = $client->get(\Constants\Constants::API_URL . '/cetral-pagos/' . $produccion);
+        $response = $client->get(\Constants\Constants::API_URL . '/central-pagos/' . $produccion);
 
         $result = json_decode($response->getBody(), true);
 
@@ -767,7 +767,7 @@ class DDJJController extends Controller
 
         if (!empty($result['result'])) {
             $firstResult = $result['result'][0];
-            $token = $firstResult['token'];
+            $token = $firstResult['Token'];
             Log::info('Token: ' . $token, []);
         }
 
@@ -807,7 +807,7 @@ class DDJJController extends Controller
         $last_name = "-";
         $importe = str_replace(",", ".", strval($total));
 
-        $fechaActual = new DateTime();
+        $fechaActual = new \DateTime();
         $fechaFormateada = $fechaActual->format('Y-m-d H:i:s');
 
         $cliente = array( "first_name"=> $first_name,
@@ -836,12 +836,13 @@ class DDJJController extends Controller
             'body' => json_encode($body),
         ]);
 
+        Log::info('paso', []);
         //var_dump($response);
 
         self::generarCodigoBarras($barras);
 
 
-        return response()->json([]);
+        //return response()->json([]);
     }
 
     public static function getHttpHeaders(){
@@ -858,13 +859,14 @@ class DDJJController extends Controller
 
     public function generarCodigoBarras($codigo)
     {
+        //Log::info('entra', []);
         // Generar el código de barras
         $barcode = new DNS1D();
         $barcode->setStorPath(storage_path('app/barcodes'));
 
         // El segundo parámetro indica el tipo de código de barras (puedes cambiarlo según tus necesidades)
         $barcodeData = $barcode->getBarcodeHTML($codigo, 'C39');
-
+        //Log::info('entra: '.$barcodeData, []);
         // Crear un array con los datos que quieras incluir en el PDF
         $data = [
             'codigo' => $codigo,
@@ -874,7 +876,18 @@ class DDJJController extends Controller
         // Renderizar la vista del PDF
         $pdf = \PDF::loadView('ddjjpdf', $data);
 
-        // Guardar o descargar el PDF según tus necesidades
-        return $pdf->download('archivo.pdf');
+        $pdf->save(storage_path('app/public/archivo.pdf'));
+
+
+        $file = storage_path('app/public/archivo.pdf');
+
+        return response()->make(file_get_contents($file), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline; filename=nombre_personalizado.pdf',
+        ]);
+
+
+
+
     }
 }
