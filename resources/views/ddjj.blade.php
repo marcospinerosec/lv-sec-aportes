@@ -330,13 +330,22 @@
                                 _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
                             },
                             success: function(response) {
-                                // Manejar la respuesta del servidor, si es necesario
-                                //console.log('Respuesta del servidor:', response);
+                                if (response.success) {
+                                    // Recuperar el contenido del PDF
+                                    var pdfContent = atob(response.pdf_content);
 
-                                // Actualizar la tabla con la respuesta HTML
-
-                                // Limpiar mensajes de error anteriores
-                                $('#errorContainer').html('');
+                                    // Verificar si el contenido es válido (no vacío)
+                                    if (pdfContent.length > 0) {
+                                        // Ejemplo: Mostrar el PDF en una ventana nueva
+                                        var blob = new Blob([pdfContent], { type: 'application/pdf' });
+                                        var url = URL.createObjectURL(blob);
+                                        window.open(url);
+                                    } else {
+                                        console.error('El contenido del PDF está vacío o no es válido.');
+                                    }
+                                } else {
+                                    console.error('Error al obtener el PDF:', response.message);
+                                }
                             },
                             error: function(error) {
                                 // Manejar los mensajes de error y mostrarlos

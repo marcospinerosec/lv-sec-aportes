@@ -77,6 +77,7 @@ class DDJJController extends Controller
         $mes = $request->input('mes');
         $year = $request->input('year');
 
+        $client = new Client();
         // Realizar el procesamiento necesario aquí
 
         if (intval($year) * 100 + intval($mes) >= 201911) {
@@ -86,7 +87,7 @@ class DDJJController extends Controller
                 ':Param3' => $year,
             ]);*/
 
-            $client = new Client();
+
 
             $response = $client->get(\Constants\Constants::API_URL.'/verifica-empleado-debajo-minimo/' . $empresa.'/'.$mes.'/'.$year);
 
@@ -836,10 +837,10 @@ class DDJJController extends Controller
             'body' => json_encode($body),
         ]);
 
-        Log::info('paso', []);
+        //Log::info('paso', []);
         //var_dump($response);
 
-        self::generarCodigoBarras($barras);
+        return self::generarCodigoBarras($barras);
 
 
         //return response()->json([]);
@@ -874,20 +875,22 @@ class DDJJController extends Controller
         ];
 
         // Renderizar la vista del PDF
-        $pdf = \PDF::loadView('ddjjpdf', $data);
+       /* $pdf = \PDF::loadView('ddjjpdf', $data);
 
         $pdf->save(storage_path('app/public/archivo.pdf'));
 
 
-        $file = storage_path('app/public/archivo.pdf');
+        $file = storage_path('app/public/archivo.pdf');*/
 
-        return response()->make(file_get_contents($file), 200, [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'inline; filename=nombre_personalizado.pdf',
+        // Renderizar la vista del PDF y obtener el contenido
+        $pdfContent = \PDF::loadView('ddjjpdf', $data)->output();
+
+
+// Devolver el contenido del PDF como una respuesta JSON
+        return response()->json([
+            'success' => true,
+            'pdf_content' => base64_encode($pdfContent),
         ]);
-
-
-
 
     }
 }
