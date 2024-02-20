@@ -331,18 +331,11 @@
                             },
                             success: function(response) {
                                 if (response.success) {
-                                    // Recuperar el contenido del PDF
-                                    var pdfContent = atob(response.pdf_content);
+                                    // Obtener la URL del PDF
+                                    var pdfUrl = response.pdf_url;
 
-                                    // Verificar si el contenido es válido (no vacío)
-                                    if (pdfContent.length > 0) {
-                                        // Ejemplo: Mostrar el PDF en una ventana nueva
-                                        var blob = new Blob([pdfContent], { type: 'application/pdf' });
-                                        var url = URL.createObjectURL(blob);
-                                        window.open(url);
-                                    } else {
-                                        console.error('El contenido del PDF está vacío o no es válido.');
-                                    }
+                                    // Abrir el PDF en una nueva ventana
+                                    window.open(pdfUrl);
                                 } else {
                                     console.error('Error al obtener el PDF:', response.message);
                                 }

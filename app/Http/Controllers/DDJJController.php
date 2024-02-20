@@ -875,21 +875,29 @@ class DDJJController extends Controller
         ];
 
         // Renderizar la vista del PDF
-       /* $pdf = \PDF::loadView('ddjjpdf', $data);
+       $pdf = \PDF::loadView('ddjjpdf', $data);
 
-        $pdf->save(storage_path('app/public/archivo.pdf'));
+        $filePath = 'app/ddjj/'.$codigo.'.pdf';
+
+        $pdf->save(storage_path($filePath));
 
 
-        $file = storage_path('app/public/archivo.pdf');*/
+        //$file = storage_path('app/public/archivo.pdf');
 
         // Renderizar la vista del PDF y obtener el contenido
-        $pdfContent = \PDF::loadView('ddjjpdf', $data)->output();
+        /*$pdfContent = \PDF::loadView('ddjjpdf', $data)->output();
 
 
-// Devolver el contenido del PDF como una respuesta JSON
+        // Devolver el contenido del PDF como una respuesta JSON
         return response()->json([
             'success' => true,
             'pdf_content' => base64_encode($pdfContent),
+        ]);*/
+
+        // Devolver la URL del archivo generado
+        return response()->json([
+            'success' => true,
+            'pdf_url' => asset('../storage/' . $filePath),
         ]);
 
     }
