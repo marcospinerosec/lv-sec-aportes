@@ -17,6 +17,8 @@
     <!-- DataTables -->
     <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.6-rc.0/js/select2.min.js"></script>
+
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
@@ -34,7 +36,7 @@
 
     <!-- DataTables CSS (puedes descargarlo o usar un CDN) -->
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
-
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
     <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/animate.css">
     <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/menu-20191120.css">

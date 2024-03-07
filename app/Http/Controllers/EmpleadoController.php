@@ -195,10 +195,36 @@ class EmpleadoController extends Controller
      */
     public function edit($id)
     {
-        //
-        $jugador=jugador::findOrFail($id);
+        $client = new Client();
 
-        return view('jugadores.edit', compact('jugador','jugador'));
+        $response = $client->get(\Constants\Constants::API_URL.'/empleado/' . $id);
+
+        $result = json_decode($response->getBody(), true);
+
+        $response = $client->get(\Constants\Constants::API_URL.'/categorias/');
+
+        $categorias = json_decode($response->getBody(), true);
+
+        $response = $client->get(\Constants\Constants::API_URL.'/tipos-novedades/');
+
+        $tiposNovedades = json_decode($response->getBody(), true);
+
+        $exceptuadas['result']=array();
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $response = $client->get(\Constants\Constants::API_URL . '/empresas-exceptuadas-validacion-minimo-traer-por-empresa/' . $firstResult['IdEmpresa']);
+
+            $exceptuadas = json_decode($response->getBody(), true);
+        }
+
+        $response = $client->get(\Constants\Constants::API_URL.'/empresas-importe-minimo/');
+
+        $importeMinimo = json_decode($response->getBody(), true);
+
+        //dd($categorias['result']);
+
+
+        return view('empleados.edit', ['empleado' => $result['result'],'categorias' => $categorias['result'],'tiposNovedades' => $tiposNovedades['result'],'exceptuadas' => $exceptuadas['result'],'importeMinimo' => $importeMinimo['result']]);
     }
 
     /**
