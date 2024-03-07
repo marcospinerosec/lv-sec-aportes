@@ -10,9 +10,9 @@
     <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ml-auto">
             @if(!$esAdmin)
-                <li class="nav-item">
+                <li class="nav-item {{ request()->is('empleados/index') ? 'active' : '' }}">
 
-                    <a class="nav-link" href="{{ url('/') }}">Empleados</a>
+                    <a class="nav-link" href="{{ url('/empleados/index') }}">Empleados</a>
                 </li>
                 <li class="nav-item {{ request()->is('ddjj') ? 'active' : '' }}">
                     <a class="nav-link" href="{{ url('/ddjj') }}">Generación de DDJJ y Boleta de pago</a>

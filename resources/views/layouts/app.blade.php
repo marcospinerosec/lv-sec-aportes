@@ -13,6 +13,10 @@
     <script src="{{ asset('js/app.js') }}" defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/2.2.3/jquery.min.js" integrity="sha384-I6F5OKECLVtK/BL+8iSLDEHowSAfUo76ZL9+kGAgTRdiByINKJaqTPH/QVNS1VDb" crossorigin="anonymous"></script>
     <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <!-- DataTables -->
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+
     <!-- Fonts -->
     <link rel="dns-prefetch" href="//fonts.gstatic.com">
     <link href="https://fonts.googleapis.com/css?family=Nunito" rel="stylesheet">
@@ -25,13 +29,54 @@
     <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 
 
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+
+
+    <!-- DataTables CSS (puedes descargarlo o usar un CDN) -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+
+
     <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/animate.css">
     <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/menu-20191120.css">
     <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/style-20190606.css">
 
+    <style>
+
+
+        .fa-btn {
+            margin-right: 6px;
+        }
+        .load{
+            position: fixed;
+            z-index: 9999;
+            width: 100%;
+            height: 100%;
+        }
+        .load .in{
+            width: 400px;
+            text-align: center;
+            margin-right: auto;
+            margin-left: auto;
+            margin-top: 10%;
+        }
+        .wrapper {
+            filter: blur(3px);
+        }
+        img {
+            vertical-align: middle;
+        }
+        img {
+            border: 0;
+        }
+
+
+    </style>
 </head>
 <body>
     <div id="app">
+        <div class="load">
+            <div class="in"><img width="20%" src="{{ url('/images/hourglass.svg') }}"></div>
+        </div>
         <nav id="nav-menu" class="navbar navbar-expand-md navbar-light shadow-sm z-depth-0" style="margin-bottom: 20px;">
             <div class="container">
 
@@ -157,4 +202,12 @@
         </main>
     </div>
 </body>
+<script>
+    $(window).on('load',function(){
+
+        $('.load').hide();
+        $('.wrapper').css('filter','blur(0)');
+
+    });
+</script>
 </html>

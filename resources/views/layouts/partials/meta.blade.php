@@ -18,3 +18,5 @@
 <link href="{{ asset('css/app.css') }}" rel="stylesheet">
 <!-- Agrega este enlace para incluir Bootstrap CSS -->
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+
