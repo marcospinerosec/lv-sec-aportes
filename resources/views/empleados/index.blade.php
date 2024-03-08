@@ -45,6 +45,12 @@
         @endif
 
         <br>
+        <div class="box-header with-border">
+
+
+            <a class="btn btn-primary " style="float: left;" href="{{ url('/empleados/create')}}"><i class="fa fa-plus"></i> Nuevo </a>
+        </div>
+        <br><br>
         <div class="box-body responsive-table">
 
         <div id="lista_item_wrapper" class="dataTables_wrapper form-inline dt-bootstrap">

@@ -212,7 +212,8 @@ class EmpleadoController extends Controller
         $exceptuadas['result']=array();
         if (!empty($result['result'])) {
             $firstResult = $result['result'][0];
-            $response = $client->get(\Constants\Constants::API_URL . '/empresas-exceptuadas-validacion-minimo-traer-por-empresa/' . $firstResult['IdEmpresa']);
+            $empresa=$firstResult['IdEmpresa'];
+            $response = $client->get(\Constants\Constants::API_URL . '/empresas-exceptuadas-validacion-minimo-traer-por-empresa/' .$empresa );
 
             $exceptuadas = json_decode($response->getBody(), true);
         }
@@ -221,11 +222,59 @@ class EmpleadoController extends Controller
 
         $importeMinimo = json_decode($response->getBody(), true);
 
-        //dd($categorias['result']);
+        //dd($result['result']);
 
 
-        return view('empleados.edit', ['empleado' => $result['result'],'categorias' => $categorias['result'],'tiposNovedades' => $tiposNovedades['result'],'exceptuadas' => $exceptuadas['result'],'importeMinimo' => $importeMinimo['result']]);
+        return view('empleados.edit', ['empleado' => $result['result'],'categorias' => $categorias['result'],'tiposNovedades' => $tiposNovedades['result'],'exceptuadas' => $exceptuadas['result'],'importeMinimo' => $importeMinimo['result'],'empresa'=>$empresa]);
     }
+
+
+
+
+
+    public function ValidarCuitNueva($cuit) {
+        // Eliminar caracteres no numéricos
+        $cuit = preg_replace('/[^\d]/', '', $cuit);
+
+        // Verificar longitud del CUIT
+        if (strlen($cuit) != 11) {
+            return false;
+        }
+
+        $rv = false;
+        $resultado = 0;
+        $cuit_nro = str_replace("-", "", $cuit);
+
+        $codes = "6789456789";
+        $cuit_long = intVal($cuit_nro);
+        $verificador = intVal($cuit_nro[strlen($cuit_nro)-1]);
+
+        $x = 0;
+
+        while ($x < 10)
+        {
+            $digitoValidador = intVal(substr($codes, $x, 1));
+            $digito = intVal(substr($cuit_nro, $x, 1));
+            $digitoValidacion = $digitoValidador * $digito;
+            $resultado += $digitoValidacion;
+            $x++;
+        }
+        $resultado = intVal($resultado) % 11;
+
+        /*Log::debug('resultado: '.$resultado);
+        Log::debug('verificador: '.$verificador);*/
+
+        $rv = $resultado == $verificador;
+        return $rv;
+
+
+
+    }
+
+
+
+
+
 
     /**
      * Update the specified resource in storage.
@@ -236,51 +285,102 @@ class EmpleadoController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
-        $this->validate($request,[ 'tipoJugador'=>'required','nombre'=>'required', 'apellido'=>'required','foto' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048']);
+        //dd($request);
+
+        $idEmpleado=$id;
+        // Ensure that empty values are set to null
+        $cuil = empty(request('cuil')) ? null : request('cuil');
+        $hCuil = empty(request('hCuil')) ? null : request('hCuil');
+        $nombre = empty(request('nombre')) ? null : request('nombre');
+        $idCategoria = empty(request('categoria')) ? null : request('categoria');
+        $afiliado = empty(request('afiliado')) ? null : request('afiliado');
+        $hAfiliado = empty(request('hAfiliado')) ? null : request('hAfiliado');
+        $ingreso = empty(request('ingreso')) ? null : request('ingreso');
+        $idNovedad = empty(request('novedades')) ? null : request('novedades');
+        $egreso = empty(request('egreso')) ? null : request('egreso');
+        $ia100 = empty(request('importeArt100')) ? null : request('importeArt100');
+        $ica = empty(request('importeCuotaAfil')) ? null : request('importeCuotaAfil');
+        $empresa = empty(request('empresa')) ? null : request('empresa');
+
+        /*Log::debug('cuil: '.$cuil);
+        Log::debug('nombre: '.$nombre);
+        Log::debug('idCategoria: '.$idCategoria);
+        Log::debug('afiliado: '.$afiliado);
+        Log::debug('ingreso: '.$ingreso);
+        Log::debug('idNovedad: '.$idNovedad);
+        Log::debug('egreso: '.$egreso);
+        Log::debug('ia100: '.$ia100);
+        Log::debug('ica: '.$ica);*/
 
 
-        if ($files = $request->file('foto')) {
-            $image = $request->file('foto');
-            $name = time().'.'.$image->getClientOriginalExtension();
-            $destinationPath = public_path('/images');
-            $image->move($destinationPath, $name);
 
 
-            /*$destinationPath = 'public/image/'; // upload path
-            $profileImage = date('YmdHis') . "." . $files->getClientOriginalExtension();
-            Log::info($profileImage);
-            $files->move($destinationPath, $profileImage);*/
-            $update['foto'] = "$name";
+        $arrayValidation = [ 'cuil'=>'required','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100'=>'required','categoria'=>'required'];
+
+        if ($idNovedad){
+            $arrayValidation['egreso']='required|date';
+        }
+        else{
+            $egreso=null;
+        }
+        if ($afiliado==1){
+            $arrayValidation['importeCuotaAfil']='required';
         }
 
-        $update['nombre'] = $request->get('nombre');
-        $update['apellido'] = $request->get('apellido');
-        $update['email'] = $request->get('email');
-        $update['telefono'] = $request->get('telefono');
-        $update['ciudad'] = $request->get('ciudad');
-        $update['nacionalidad'] = $request->get('nacionalidad');
-        $update['altura'] = $request->get('altura');
-        $update['peso'] = $request->get('peso');
-        $update['observaciones'] = $request->get('observaciones');
-        $update['tipoDocumento'] = $request->get('tipoDocumento');
-        $update['documento'] = $request->get('documento');
-        $update['nacimiento'] = $request->get('nacimiento');
-        $update['fallecimiento'] = $request->get('fallecimiento');
+        $this->validate($request,$arrayValidation);
 
-        $updateJ['tipoJugador'] = $request->get('tipoJugador');
+        // Additional logic for CUIL validation (if needed)
+        if (!$this->ValidarCuitNueva($cuil)) {
+            return redirect()->back()->withInput()->withErrors(['cuil' => 'El CUIL no es válido.']); // Adjust the error message as needed
+        }
 
-        $updateJ['pie'] = $request->get('pie');
+        $client = new Client();
+        if($cuil!=$hCuil){
+            //Log::debug('CUILs distintos');
+            $response = $client->get(\Constants\Constants::API_URL . '/empleados-traer-por-cuil/'.$cuil.'/' .$empresa );
+
+            $result = json_decode($response->getBody(), true);
+            //Log::debug(print_r($result));
+            if (!empty($result['result'])) {
+                //Log::debug('CUILs distinto');
+                return redirect()->back()->withInput()->withErrors(['cuil' => 'El nuevo cuil ya existe en la empresa, por favor verifique']); // Adjust the error message as needed
+            }
+        }
 
 
 
 
+        // Construye la URL directamente
+        $url = \Constants\Constants::API_URL . '/empleados-actualizar/' . $idEmpleado . '/' . urlencode($cuil) . '/' . urlencode($nombre) . '/' . $idCategoria . '/' . ($afiliado ? urlencode($afiliado) : '0') . '/' . urlencode($ingreso) . '/' . ($idNovedad !== null ? urlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? urlencode($egreso) : 'null') . '/' . urlencode($ia100) . '/' . urlencode($ica) . '/' . auth()->user()->IdUsuario;
+        //Log::debug('url: '.$url);
+// Realiza la solicitud PUT
+        $response = $client->put($url);
 
-        $jugador=jugador::find($id);
-        $jugador->update($updateJ);
-        $jugador->persona()->update($update);
+        $result = json_decode($response->getBody(), true);
 
-        return redirect()->route('jugadores.index')->with('success','Registro actualizado satisfactoriamente');
+
+
+        if (isset($result['message'])){
+
+
+
+
+            $respuestaID='success';
+            $respuestaMSJ='Empleado actualizado satisfactoriamente';
+
+            if($afiliado!=$hAfiliado){
+                $respuestaMSJ .='<br>Al informar la baja del AFILIADO, debe acompañar la solicitud firmada por el mismo al email beneficios@seclaplata.org.ar  o al whatsapp 2216809844 / Art 11 del Estatuto Social. Art 4 Ley 23551.';
+            }
+        }
+        if (isset($result['error'])){
+
+            $respuestaID='error';
+            $respuestaMSJ=$result['error'];
+        }
+
+
+
+        return redirect()->route('empleados.index',  array('empresa' => $empresa))->with($respuestaID,$respuestaMSJ);
 
     }
 
