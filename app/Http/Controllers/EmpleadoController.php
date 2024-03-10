@@ -61,119 +61,47 @@ class EmpleadoController extends Controller
     public function create(Request $request)
     {
 
-        if ($request->get('plantillaId')){
-            $plantilla_id = $request->get('plantillaId');
-            $vista =view('jugadores.create', compact('plantilla_id'));
-        }
-        elseif($request->get('torneoId')){
-            $torneo_id = $request->get('torneoId');
-            $vista =view('jugadores.create', compact('torneo_id'));
-        }
-        else {
-            $vista =view('jugadores.create');
+        // Verifica si el parámetro está presente en la URL
+        if (!$request->has('empresa') || empty($request->input('empresa'))) {
+            // Redirige al índice con un mensaje de error
+            return redirect()->route('empleados.index')->with('error', 'Debe seleccionar una empresa.');
         }
 
-        return $vista;
+        // Obtiene el valor del parámetro desde la solicitud
+        $empresa = $request->input('empresa');
+
+        $client = new Client();
+
+
+
+        $response = $client->get(\Constants\Constants::API_URL.'/categorias/');
+
+        $categorias = json_decode($response->getBody(), true);
+
+        $response = $client->get(\Constants\Constants::API_URL.'/tipos-novedades/');
+
+        $tiposNovedades = json_decode($response->getBody(), true);
+
+        /*$exceptuadas['result']=array();
+        if (!empty($result['result'])) {
+            $firstResult = $result['result'][0];
+            $empresa=$firstResult['IdEmpresa'];
+            $response = $client->get(\Constants\Constants::API_URL . '/empresas-exceptuadas-validacion-minimo-traer-por-empresa/' .$empresa );
+
+            $exceptuadas = json_decode($response->getBody(), true);
+        }
+
+        $response = $client->get(\Constants\Constants::API_URL.'/empresas-importe-minimo/');
+
+        $importeMinimo = json_decode($response->getBody(), true);*/
+
+        //dd($result['result']);
+
+
+        return view('empleados.create', ['categorias' => $categorias['result'],'tiposNovedades' => $tiposNovedades['result'],'empresa'=>$empresa]);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-        //Log::info(print_r($request->file(), true));
 
-        $this->validate($request,[ 'tipoJugador'=>'required','nombre'=>'required', 'apellido'=>'required','foto' => 'image|mimes:jpeg,png,jpg,gif,svg|max:2048']);
-
-
-        if ($files = $request->file('foto')) {
-            $image = $request->file('foto');
-            $name = time().'.'.$image->getClientOriginalExtension();
-            $destinationPath = public_path('/images');
-            $image->move($destinationPath, $name);
-
-
-            /*$destinationPath = 'public/image/'; // upload path
-            $profileImage = date('YmdHis') . "." . $files->getClientOriginalExtension();
-            Log::info($profileImage);
-            $files->move($destinationPath, $profileImage);*/
-            $insert['foto'] = "$name";
-        }
-
-        $insert['nombre'] = $request->get('nombre');
-        $insert['apellido'] = $request->get('apellido');
-        $insert['email'] = $request->get('email');
-        $insert['telefono'] = $request->get('telefono');
-        $insert['ciudad'] = $request->get('ciudad');
-        $insert['nacionalidad'] = $request->get('nacionalidad');
-        $insert['altura'] = $request->get('altura');
-        $insert['peso'] = $request->get('peso');
-        $insert['observaciones'] = $request->get('observaciones');
-        $insert['tipoDocumento'] = $request->get('tipoDocumento');
-        $insert['documento'] = $request->get('documento');
-        $insert['nacimiento'] = $request->get('nacimiento');
-        $insert['fallecimiento'] = $request->get('fallecimiento');
-
-        $insert['tipoJugador'] = $request->get('tipoJugador');
-
-        $insert['pie'] = $request->get('pie');
-
-
-
-
-
-
-
-
-        try {
-            $persona = Persona::create($insert);
-            $persona->jugador()->create($insert);
-
-            $respuestaID='success';
-            $respuestaMSJ='Registro creado satisfactoriamente';
-        }catch(QueryException $ex){
-
-            try {
-                $persona = Persona::where('nombre','=',$insert['nombre'])->Where('apellido','=',$insert['apellido'])->Where('nacimiento','=',$insert['nacimiento'])->first();
-                if (!empty($persona)){
-                    $persona->update($insert);
-                    $persona->jugador()->create($insert);
-                    $respuestaID='success';
-                    $respuestaMSJ='Registro creado satisfactoriamente';
-                }
-            }catch(QueryException $ex){
-
-                $respuestaID='error';
-                $errorCode = $ex->errorInfo[1];
-
-                if ($errorCode == 1062) {
-                    $respuestaMSJ='Jugador repetido';
-                }
-                //$respuestaMSJ=$ex->getMessage();
-
-            }
-
-
-        }
-
-        if($request->get('plantilla_id')){
-            $plantilla_id = $request->get('plantilla_id');
-            $redirect = redirect()->route('plantillas.edit',[$plantilla_id])->with($respuestaID,$respuestaMSJ);
-
-        }
-        elseif($request->get('torneo_id')){
-            $redirect = redirect()->route('plantillas.create', ['grupoId' => $request->get('grupo_id')])->with($respuestaID,$respuestaMSJ);
-        }
-        else{
-            $redirect = redirect()->route('jugadores.index')->with($respuestaID,$respuestaMSJ);
-        }
-
-        return $redirect;
-    }
 
     /**
      * Display the specified resource.
@@ -209,23 +137,23 @@ class EmpleadoController extends Controller
 
         $tiposNovedades = json_decode($response->getBody(), true);
 
-        $exceptuadas['result']=array();
+        //$exceptuadas['result']=array();
         if (!empty($result['result'])) {
             $firstResult = $result['result'][0];
             $empresa=$firstResult['IdEmpresa'];
-            $response = $client->get(\Constants\Constants::API_URL . '/empresas-exceptuadas-validacion-minimo-traer-por-empresa/' .$empresa );
+            /*$response = $client->get(\Constants\Constants::API_URL . '/empresas-exceptuadas-validacion-minimo-traer-por-empresa/' .$empresa );
 
-            $exceptuadas = json_decode($response->getBody(), true);
+            $exceptuadas = json_decode($response->getBody(), true);*/
         }
 
-        $response = $client->get(\Constants\Constants::API_URL.'/empresas-importe-minimo/');
+        /*$response = $client->get(\Constants\Constants::API_URL.'/empresas-importe-minimo/');
 
-        $importeMinimo = json_decode($response->getBody(), true);
+        $importeMinimo = json_decode($response->getBody(), true);*/
 
         //dd($result['result']);
 
 
-        return view('empleados.edit', ['empleado' => $result['result'],'categorias' => $categorias['result'],'tiposNovedades' => $tiposNovedades['result'],'exceptuadas' => $exceptuadas['result'],'importeMinimo' => $importeMinimo['result'],'empresa'=>$empresa]);
+        return view('empleados.edit', ['empleado' => $result['result'],'categorias' => $categorias['result'],'tiposNovedades' => $tiposNovedades['result'],'empresa'=>$empresa]);
     }
 
 
@@ -272,9 +200,127 @@ class EmpleadoController extends Controller
     }
 
 
+    /**
+     * Update the specified resource in storage.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $id
+     * @return \Illuminate\Http\Response
+     */
+    public function save(Request $request)
+    {
+        //dd($request);
+
+
+        // Ensure that empty values are set to null
+        $empresa = empty(request('empresa')) ? null : request('empresa');
+        $cuil = empty(request('cuil')) ? null : request('cuil');
+        $hCuil = empty(request('hCuil')) ? null : request('hCuil');
+        $nombre = empty(request('nombre')) ? null : request('nombre');
+        $idCategoria = empty(request('categoria')) ? null : request('categoria');
+        $afiliado = empty(request('afiliado')) ? null : request('afiliado');
+        $hAfiliado = empty(request('hAfiliado')) ? null : request('hAfiliado');
+        $ingreso = empty(request('ingreso')) ? null : request('ingreso');
+        $idNovedad = empty(request('novedades')) ? null : request('novedades');
+        $egreso = empty(request('egreso')) ? null : request('egreso');
+        $ia100 = empty(request('importeArt100')) ? null : request('importeArt100');
+        $ica = empty(request('importeCuotaAfil')) ? null : request('importeCuotaAfil');
+        $empresa = empty(request('empresa')) ? null : request('empresa');
+
+        /*Log::debug('cuil: '.$cuil);
+        Log::debug('nombre: '.$nombre);
+        Log::debug('idCategoria: '.$idCategoria);
+        Log::debug('afiliado: '.$afiliado);
+        Log::debug('ingreso: '.$ingreso);
+        Log::debug('idNovedad: '.$idNovedad);
+        Log::debug('egreso: '.$egreso);
+        Log::debug('ia100: '.$ia100);
+        Log::debug('ica: '.$ica);*/
 
 
 
+
+        $arrayValidation = [ 'cuil'=>'required','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100'=>'required','categoria'=>'required'];
+
+        if ($idNovedad){
+            $arrayValidation['egreso']='required|date';
+        }
+        else{
+            $egreso=null;
+        }
+        if ($afiliado==1){
+            $arrayValidation['importeCuotaAfil']='required';
+        }
+
+        $this->validate($request,$arrayValidation);
+
+        // Additional logic for CUIL validation (if needed)
+        if (!$this->ValidarCuitNueva($cuil)) {
+            return redirect()->back()->withInput()->withErrors(['cuil' => 'El CUIL no es válido.']); // Adjust the error message as needed
+        }
+
+        $client = new Client();
+
+            //Log::debug('CUILs distintos');
+            $response = $client->get(\Constants\Constants::API_URL . '/empleados-traer-por-cuil/'.$cuil.'/' .$empresa );
+
+            $result = json_decode($response->getBody(), true);
+            //Log::debug(print_r($result));
+            if (!empty($result['result'])) {
+                //Log::debug('CUILs distinto');
+                return redirect()->back()->withInput()->withErrors(['cuil' => 'El nuevo cuil ya existe en la empresa, por favor verifique']); // Adjust the error message as needed
+            }
+
+
+
+
+
+        // Construye la URL directamente
+        $url = \Constants\Constants::API_URL . '/empleados-agregar/' . rawurlencode($empresa) . '/' . rawurlencode($cuil) . '/' . rawurlencode($nombre) . '/' . rawurlencode($idCategoria) . '/' . ($afiliado ? rawurlencode($afiliado) : '0') . '/' . rawurlencode($ingreso) . '/' . ($idNovedad !== null ? rawurlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? rawurlencode($egreso) : 'null') . '/' . rawurlencode($ia100) . '/' . ($ica !== null ? rawurlencode($ica) : 'null') . '/' . rawurlencode(auth()->user()->IdUsuario);
+
+// Rest of your code...
+
+        //Log::debug('url: '.$url);
+// Realiza la solicitud PUT
+        $response = $client->put($url);
+
+        $result = json_decode($response->getBody(), true);
+
+
+
+        if (isset($result['message'])){
+
+
+
+
+            $respuestaID='success';
+            $respuestaMSJ='Empleado agregado satisfactoriamente';
+
+
+        }
+        if (isset($result['error'])){
+
+            $respuestaID='error';
+            $respuestaMSJ=$result['error'];
+        }
+
+
+
+        return redirect()->route('empleados.index',  array('empresa' => $empresa))->with($respuestaID,$respuestaMSJ);
+
+    }
+
+    public function convertirMayusculasEspeciales($str) {
+        //$str = mb_strtoupper($str, 'UTF-8');
+        Log::debug('Antes: '.$str);
+        $str = str_replace(
+            ['á', 'é', 'í', 'ó', 'ú', 'ü', 'ñ'],
+            ['Á', 'É', 'Í', 'Ó', 'Ú', 'Ü', 'Ñ'],
+            $str
+        );
+        Log::debug('Despues: '.$str);
+        return $str;
+    }
 
     /**
      * Update the specified resource in storage.
@@ -351,10 +397,14 @@ class EmpleadoController extends Controller
 
 
         // Construye la URL directamente
-        $url = \Constants\Constants::API_URL . '/empleados-actualizar/' . $idEmpleado . '/' . urlencode($cuil) . '/' . urlencode($nombre) . '/' . $idCategoria . '/' . ($afiliado ? urlencode($afiliado) : '0') . '/' . urlencode($ingreso) . '/' . ($idNovedad !== null ? urlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? urlencode($egreso) : 'null') . '/' . urlencode($ia100) . '/' . urlencode($ica) . '/' . auth()->user()->IdUsuario;
-        //Log::debug('url: '.$url);
-// Realiza la solicitud PUT
-        $response = $client->put($url);
+
+        $url = \Constants\Constants::API_URL . '/empleados-actualizar/' . rawurlencode($idEmpleado) . '/' . rawurlencode($cuil) . '/' . rawurlencode($this->convertirMayusculasEspeciales($nombre)) . '/' . rawurlencode($idCategoria) . '/' . ($afiliado ? rawurlencode($afiliado) : '0') . '/' . rawurlencode($ingreso) . '/' . ($idNovedad !== null ? rawurlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? rawurlencode($egreso) : 'null') . '/' . rawurlencode($ia100) . '/' . ($ica !== null ? rawurlencode($ica) : 'null') . '/' . rawurlencode(auth()->user()->IdUsuario);
+
+        $headers = [
+            'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8',
+        ];
+        $response = $client->put($url, ['headers' => $headers]);
+
 
         $result = json_decode($response->getBody(), true);
 

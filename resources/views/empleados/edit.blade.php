@@ -116,7 +116,7 @@
                             <div class="col-md-7">
                                 <div class="form-group" id="divCuota">
                                     <label for="importeCuotaAfil">Rem.Cuota Afil.</label>
-                                    <input type="number" required maxlength="200" name="importeCuotaAfil" id="importeCuotaAfil" value="{{old('importeCuotaAfil',$empleado[0]['ImporteCuotaAfil'])}}" class="form-control" placeholder="Rem.Art.100">
+                                    <input type="number" maxlength="200" name="importeCuotaAfil" id="importeCuotaAfil" value="{{old('importeCuotaAfil',$empleado[0]['ImporteCuotaAfil'])}}" class="form-control" placeholder="Rem.Art.100">
                                 </div>
                             </div>
 

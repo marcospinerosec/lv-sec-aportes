@@ -48,7 +48,7 @@
         <div class="box-header with-border">
 
 
-            <a class="btn btn-primary " style="float: left;" href="{{ url('/empleados/create')}}"><i class="fa fa-plus"></i> Nuevo </a>
+            <a class="btn btn-primary " style="float: left;" href="{{ url('/empleados/create?empresa='. (isset($_GET['empresa'])? $_GET['empresa'] : '')) }}"><i class="fa fa-plus"></i> Nuevo </a>
         </div>
         <br><br>
         <div class="box-body responsive-table">
@@ -98,7 +98,7 @@
                             {{method_field('DELETE')}}
                             {{ csrf_field() }}
 
-                            <a class="btn btn-sm btn-default"  href="{{ url('/empleados/detalle')}}/{{ $empleado['IdEmpleado']}}"><i class="fa fa fa-eye"></i></a>
+                            <!--<a class="btn btn-sm btn-default"  href="{{ url('/empleados/detalle')}}/{{ $empleado['IdEmpleado']}}"><i class="fa fa fa-eye"></i></a>-->
                             <a class="btn btn-sm btn-default" href="{{ url('/empleados/edit')}}/{{ $empleado['IdEmpleado']}}"><i class="fa fa-edit"></i></a>
                             <button onclick='if(confirmDel() == false){return false;}' class="btn btn-sm btn-default" type="submit"><i class="fa fa-trash"></i></button>
                         </form>
