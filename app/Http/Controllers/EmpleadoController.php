@@ -434,37 +434,20 @@ class EmpleadoController extends Controller
 
     }
 
+
     /**
-     * Remove the specified resource from storage.
+     * Show the form for editing the specified resource.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
-        $jugador = Jugador::find($id);
-
-        $jugador->delete();
-        return redirect()->route('empleados.index')->with('success','Registro eliminado satisfactoriamente');
-    }
-
-
-
-
-
-
-
-
-
-    public function importar(Request $request)
+    public function eliminar($empresa)
     {
 
 
-        //
-        return view('jugadores.importar');
+
+        return view('empleados.eliminar',['empresa'=>$empresa]);
     }
-
-
 
 
 

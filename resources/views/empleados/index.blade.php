@@ -94,13 +94,14 @@
 
                     <td>
 
-                        <form role="form" action = "{{ url('/empleados/eliminar')}}/{{ $empleado['IdEmpleado']}}" method="post"  enctype="multipart/form-data">
+                        <!--<form role="form" action = "{{ url('/empleados/eliminar')}}/{{ $empleado['IdEmpleado']}}" method="post"  enctype="multipart/form-data">-->
                             {{method_field('DELETE')}}
                             {{ csrf_field() }}
 
                             <!--<a class="btn btn-sm btn-default"  href="{{ url('/empleados/detalle')}}/{{ $empleado['IdEmpleado']}}"><i class="fa fa fa-eye"></i></a>-->
                             <a class="btn btn-sm btn-default" href="{{ url('/empleados/edit')}}/{{ $empleado['IdEmpleado']}}"><i class="fa fa-edit"></i></a>
-                            <button onclick='if(confirmDel() == false){return false;}' class="btn btn-sm btn-default" type="submit"><i class="fa fa-trash"></i></button>
+                            <a class="btn btn-sm btn-default" href="{{ url('/empleados/eliminar')}}/{{ $_GET['empresa']}}"><i class="fa fa-trash"></i></a>
+                            <!--<button onclick='if(confirmDel() == false){return false;}' class="btn btn-sm btn-default" type="submit"><i class="fa fa-trash"></i></button>-->
                         </form>
 
                     </td>
