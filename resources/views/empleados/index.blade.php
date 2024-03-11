@@ -48,7 +48,8 @@
         <div class="box-header with-border">
 
 
-            <a class="btn btn-primary " style="float: left;" href="{{ url('/empleados/create?empresa='. (isset($_GET['empresa'])? $_GET['empresa'] : '')) }}"><i class="fa fa-plus"></i> Nuevo </a>
+            <a class="btn btn-primary " style="float: left;margin-right: 5px;" href="{{ url('/empleados/create?empresa='. (isset($_GET['empresa'])? $_GET['empresa'] : '')) }}"><i class="fa fa-plus"></i> Nuevo </a>
+            <a class="btn btn-info " style="float: left;" href="{{ url('/empleados/importar/'. (isset($_GET['empresa'])? $_GET['empresa'] : '')) }}"><i class="fa fa-upload"></i> Importar </a>
         </div>
         <br><br>
         <div class="box-body responsive-table">

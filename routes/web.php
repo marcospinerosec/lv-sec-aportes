@@ -44,9 +44,14 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('/empleados/editar/{id}', [App\Http\Controllers\EmpleadoController::class, 'update']);
     //eliminar /empleados
     //Route::delete('/empleados/eliminar/{id}', [App\Http\Controllers\EmpleadoController::class, 'destroy']);
-    Route::get('/empleados/eliminar/{id}', [App\Http\Controllers\EmpleadoController::class, 'eliminar'])->name('empleados.eliminar');
+    Route::get('/empleados/eliminar/{empresa}', [App\Http\Controllers\EmpleadoController::class, 'eliminar'])->name('empleados.eliminar');
     //detalle
     Route::get('/empleados/detalle/{id}', [App\Http\Controllers\EmpleadoController::class, 'detalle'])->name('empleados.detalle');
+
+    Route::get('/empleados/importar/{empresa}', [App\Http\Controllers\EmpleadoController::class, 'importar'])->name('empleados.importar');
+    Route::put('/empleados/procesar', [App\Http\Controllers\EmpleadoController::class, 'procesar']);
+
+    Route::get('/empleados/formatoArchivo', [App\Http\Controllers\EmpleadoController::class, 'formatoArchivo'])->name('empleados.formato');
 
 });
 

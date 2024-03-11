@@ -45,7 +45,7 @@
                 <button type="button" class="btn btn-primary btn-block">Seleccionar otra DDJJ</button>
                 </div>
                     <div class="mb-2">
-                    <button type="button" class="btn btn-primary btn-block">Editar nómina de empleados y/o remuneraciones</button>
+                    <button type="button" class="btn btn-primary btn-block" id="btnEditarEmpleados">Editar nómina de empleados y/o remuneraciones</button>
                     </div>
             </div>
         </div>
@@ -182,6 +182,24 @@
                 showButtonPanel: true,
                 changeMonth: true,
                 changeYear: true,
+            });
+
+            $("#btnEditarEmpleados").click(function() {
+                // Obtener el valor del parámetro empresa (puedes cambiar esto según tus necesidades)
+                var empresa = $("#empresa").val();
+
+                if(empresa){
+                    // Construir la URL con el parámetro empresa
+                    var nuevaURL = "{{ route('empleados.index') }}?empresa=" + encodeURIComponent(empresa);
+
+                    // Redirigir a la nueva URL
+                    window.location.href = nuevaURL;
+                }
+                else{
+                    alert('Debe seleccionar una empresa');
+                }
+
+
             });
 
             $("#continuarVencimiento").click(function() {
