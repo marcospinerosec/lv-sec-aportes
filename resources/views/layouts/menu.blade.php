@@ -1,4 +1,7 @@
 <!-- resources/views/layouts/hmenu.blade.php -->
+@php
+    $current_path = request()->path();
+@endphp
 
 <nav class="navbar navbar-expand-lg navbar-light bg-light">
 
@@ -14,8 +17,8 @@
                     <a class="nav-link" href="{{ url('/empleados/index') }}">Empleados</a>
                 </li>
 
-                <li class="nav-item {{ request()->is('ddjj') ? 'active' : '' }}">
-                    <a class="nav-link" href="{{ url('/ddjj') }}">Generación de DDJJ y Boleta de pago</a>
+                <li class="nav-item {{ $current_path === 'ddjjs/ddjj' ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('/ddjjs/ddjj') }}">Generación de DDJJ y Boleta de pago</a>
                 </li>
                 @if($imprimeBoleta)
                     <li class="nav-item">
@@ -27,8 +30,8 @@
                         <a class="nav-link" href="{{ url('/') }}">Boleta de pago de actas</a>
                     </li>
                 @endif
-                <li class="nav-item">
-                    <a class="nav-link" href="{{ url('/') }}">Consulta DDJJ anteriores</a>
+                <li class="nav-item {{ $current_path === 'ddjjs/anteriores' ? 'active' : '' }}">
+                    <a class="nav-link" href="{{ url('/ddjjs/anteriores') }}">Consulta DDJJ anteriores</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{{ url('/') }}">Importar historial</a>

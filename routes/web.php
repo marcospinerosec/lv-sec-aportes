@@ -30,7 +30,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
     Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-    Route::get('/ddjj', [App\Http\Controllers\DDJJController::class, 'index'])->name('ddjj');
+    Route::get('/ddjjs/ddjj', [App\Http\Controllers\DDJJController::class, 'index'])->name('ddjjs.ddjj');
+    Route::get('/ddjjs/anteriores', [App\Http\Controllers\DDJJController::class, 'anteriores'])->name('ddjjs.anteriores');
+    Route::post('/ddjjs/listar', [App\Http\Controllers\DDJJController::class, 'listar']);
     Route::post('/procesar', [App\Http\Controllers\DDJJController::class, 'procesar']);
     Route::post('/generar', [App\Http\Controllers\DDJJController::class, 'generar']);
 

@@ -47,7 +47,7 @@ class DDJJController extends Controller
 
         //return view('home',compact('empresas'));
 
-        return view('ddjj', ['empresas' => $result['result']]);
+        return view('ddjjs.ddjj', ['empresas' => $result['result']]);
     }
 
     public function procesar(Request $request)
@@ -875,7 +875,7 @@ class DDJJController extends Controller
         ];
 
         // Renderizar la vista del PDF
-       $pdf = \PDF::loadView('ddjjpdf', $data);
+       $pdf = \PDF::loadView('ddjjs/ddjjpdf', $data);
 
         $filePath = 'app/ddjj/'.$codigo.'.pdf';
 
@@ -900,5 +900,87 @@ class DDJJController extends Controller
             'pdf_url' => asset('../storage/' . $filePath),
         ]);
 
+    }
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function anteriores(Request $request)
+    {
+
+
+        $client = new Client();
+
+        $response = $client->get(\Constants\Constants::API_URL.'/empresa-usuario/' . auth()->user()->IdUsuario);
+
+        $result = json_decode($response->getBody(), true);
+
+        $empleados['result']=array();
+        if($request->query('empresa')) {
+            $empresa_id = $request->query('empresa');
+            $response = $client->get(\Constants\Constants::API_URL.'/empleados-por-empresa-sin-novedades/' . $empresa_id);
+
+            $empleados = json_decode($response->getBody(), true);
+        }
+        //dd($empleados);
+        //return view('home',compact('empresas'));
+
+        return view('ddjjs.anteriores', ['empresas' => $result['result'],'empleados' => $empleados['result']]);
+
+    }
+
+    public function listar(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'empresa' => 'required',
+
+            'year' => 'required|numeric',
+        ], [
+            'empresa.required' => 'El campo empresa es obligatorio.',
+
+            'year.required' => 'El campo año es obligatorio.',
+            'year.numeric' => 'El campo año debe ser un valor numérico.',
+        ]);
+
+        // Verificar si hay errores de validación
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()->all()], 422);
+        }
+
+        // Obtener los datos del formulario
+        $empresa = $request->input('empresa');
+        $year = $request->input('year');
+
+        $client = new Client();
+        $response = $client->get(\Constants\Constants::API_URL.'/ddjj-historial/' . $empresa. '/' . $year);
+
+        $anteriores = json_decode($response->getBody(), true);
+        //dd($anteriores);
+        // Formatear los datos en un array asociativo
+        $datosTabla = [];
+        foreach ($anteriores['result'] as $ddjj) {
+
+
+            $datosTabla[] = [
+                'mes' => $ddjj['Mes'],
+                'envio' => $ddjj['NumeroEnvio'],
+                'generada' => ($ddjj['FechaGenerada'])?date('d/m/Y', strtotime($ddjj['FechaGenerada'])):'',
+                'CantArt100' => $ddjj['CantArt100'],
+                'ImporteArt100' => number_format($ddjj['ImporteArt100'], 2, ',', '.'),
+                'CantAfi' => $ddjj['CantAfi'],
+                'ImporteCuotaAfi' => number_format($ddjj['ImporteCuotaAfi'], 2, ',', '.'),
+                'Intereses' => number_format($ddjj['Intereses'], 2, ',', '.'),
+                'InteresesPagoFueraTermino' => number_format($ddjj['InteresesPagoFueraTermino'], 2, ',', '.'),
+                'total' => number_format($ddjj['ImporteArt100']+$ddjj['ImporteCuotaAfi']+$ddjj['Intereses']+$ddjj['InteresesPagoFueraTermino'], 2, ',', '.'),
+                'vencimientos' => ($ddjj['Vencimientos'])?$ddjj['Vencimientos'].'<br><br><br>'.($ddjj['FechaVencimiento'])?date('d/m/Y', strtotime($ddjj['FechaVencimiento'])):'':($ddjj['FechaVencimiento'])?date('d/m/Y', strtotime($ddjj['FechaVencimiento'])):'',
+
+
+            ];
+        }
+
+        // Devolver los datos en formato JSON
+        return response()->json($datosTabla);
     }
 }
