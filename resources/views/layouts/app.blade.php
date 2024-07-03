@@ -28,8 +28,9 @@
     <link href="{{ asset('css/stile_sec.css') }}" rel="stylesheet">
     <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
     <!-- Agrega este enlace para incluir Bootstrap CSS -->
-    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-
+    <!--<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">-->
+    <!-- Bootstrap 3.3.7 -->
+    <link rel="stylesheet" href="{{ asset('bower_components/bootstrap/dist/css/bootstrap.min.css') }}">
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
 
@@ -38,9 +39,9 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
 
-    <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/animate.css">
-    <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/menu-20191120.css">
-    <link media="all" type="text/css" rel="stylesheet" href="http://www.seclaplata.org.ar/css/style-20190606.css">
+    <link media="all" type="text/css" rel="stylesheet" href="{{ asset('css/animate.css') }}">
+    <link media="all" type="text/css" rel="stylesheet" href="{{ asset('css/menu-20191120.css') }}">
+    <link media="all" type="text/css" rel="stylesheet" href="{{ asset('css/style-20190606.css') }}">
 
     <style>
 
@@ -86,7 +87,7 @@
                 <div class="collapse navbar-collapse nav-wrapper" id="navbarSupportedContent">
                     <div class="container-menu">
                         <div id="contenido-menu">
-                            <img id="logo-sec" src="http://www.seclaplata.org.ar/assets/img/sys/logo-sec.png" alt="">
+                            <img id="logo-sec" src="{{ url('/images/logo-sec.png') }}" alt="">
                             <hr id="menu-linea-vertical-blanca" class="z-depth-0">
                             <h6 id="menu-titulo-1" style="color: #fff; font-weight: 400">SINDICATO DE</h6>
                             <h6 id="menu-titulo-2" style="color: #fff; font-weight: 400">EMPLEADOS DE COMERCIO</h6>
@@ -156,37 +157,37 @@
                             <ul class="nav flex-column">
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ url('/empresa') }}" style="display: flex; align-items: center;">
-                                        <img src="{{ url('images/mensaje.jpg') }}" height="49" width="37" style="margin-right: 10px;">
+                                        <!--<img src="{{ url('images/mensaje.jpg') }}" height="49" width="37" style="margin-right: 10px;">-->
                                         Información importante para los empleadores
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ url('/formulario') }}" style="display: flex; align-items: center;">
-                                        <img src="{{ url('images/formu.jpg') }}" height="41" width="45" style="margin-right: 10px;">
+                                        <!--<img src="{{ url('images/formu.jpg') }}" height="41" width="45" style="margin-right: 10px;">-->
                                         Formulario de inscripción al S.E.C.
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ url('/login') }}" style="display: flex; align-items: center;">
-                                        <img src="{{ url('images/icon_net.png') }}" height="41" width="45" style="margin-right: 10px;">
+                                        <!--<img src="{{ url('images/icon_net.png') }}" height="41" width="45" style="margin-right: 10px;">-->
                                         Sistema de DDJJ de empleados e impresión de boletas de pago On-Line
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ url('/pago') }}" style="display: flex; align-items: center;">
-                                        <img src="{{ url('images/pago.jpg') }}" height="35" width="45" style="margin-right: 10px;">
+                                        <!--<img src="{{ url('images/pago.jpg') }}" height="35" width="45" style="margin-right: 10px;">-->
                                         Lugares de pago
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="{{ url('/calendario') }}" style="display: flex; align-items: center;">
-                                        <img src="{{ url('images/calendario.jpg') }}" height="48" width="37" style="margin-right: 10px;">
+                                        <!--<img src="{{ url('images/calendario.jpg') }}" height="48" width="37" style="margin-right: 10px;">-->
                                         Calendario de ingreso de aportes
                                     </a>
                                 </li>
                                 <li class="nav-item">
                                     <a class="nav-link" href="mailto:contaduria@seclaplata.org.ar" style="display: flex; align-items: center;">
-                                        <img src="{{ url('images/mail.jpg') }}" height="30" width="39" style="margin-right: 10px;">
+                                        <!--<img src="{{ url('images/mail.jpg') }}" height="30" width="39" style="margin-right: 10px;">-->
                                         Consultas
                                     </a>
                                 </li>
@@ -202,6 +203,13 @@
                 </div>
             </div>
         </main>
+        <!-- Footer -->
+        <footer class="bg-light text-center text-lg-start">
+
+            <div class="text-center p-3" style="background-color: rgba(0, 0, 0, 0.2);">
+                Copyright &copy; 2024-{{ Carbon\carbon::now()->year }} <a href="http://www.seclaplata.org.ar" target="_blank">Sindicato de Empleados de Comercio.</a> Todos los derechos reservados.
+            </div>
+        </footer>
     </div>
 </body>
 <script>

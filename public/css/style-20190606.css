@@ -1,0 +1,429 @@
+@font-face {
+    font-family: latoBlack;
+    src: url(../assets/fonts/lato/Lato-Black.ttf);
+}
+
+@font-face {
+    font-family: latoBlackItalic;
+    src: url(../assets/fonts/lato/Lato-BlackItalic.ttf);
+}
+
+@font-face {
+    font-family: latoBold;
+    src: url(../assets/fonts/lato/Lato-Bold.ttf);
+}
+
+@font-face {
+    font-family: latoHairline;
+    src: url(../assets/fonts/lato/Lato-Hairline.ttf);
+}
+
+@font-face {
+    font-family: latoHairlineItalic;
+    src: url(../assets/fonts/lato/Lato-HairlineItalic.ttf);
+}
+
+@font-face {
+    font-family: latoItalic;
+    src: url(../assets/fonts/lato/Lato-Italic.ttf);
+}
+
+@font-face {
+    font-family: latoLight;
+    src: url(../assets/fonts/lato/Lato-Light.ttf);
+}
+
+@font-face {
+    font-family: latoLightItalic;
+    src: url(../assets/fonts/lato/Lato-LightItalic.ttf);
+}
+
+@font-face {
+    font-family: latoRegular;
+    src: url(../assets/fonts/lato/Lato-Regular.ttf);
+}
+
+@font-face {
+    font-family: dinBold;
+    src: url(../assets/fonts/din/din-bold_2.ttf);
+}
+
+@font-face {
+    font-family: dinLight;
+    src: url(../assets/fonts/din/din-light_5.ttf);
+}
+
+@font-face {
+    font-family: dinMedium;
+    src: url(../assets/fonts/din/din-medium_1.ttf);
+}
+
+@font-face {
+    font-family: dinFFBold;
+    src: url(../assets/fonts/din/FF_DIN_Bold_1.otf);
+}
+
+@font-face {
+    font-family: univers57Condensed;
+    src: url(../assets/fonts/univers/univers_57_condensed.ttf);
+}
+
+@font-face {
+    font-family: univers45Bold;
+    src: url(../assets/fonts/univers/Univers-45-Bold.ttf);
+}
+
+@font-face {
+    font-family: univers45Light;
+    src: url(../assets/fonts/univers/Univers-45-Light.otf);
+}
+
+@font-face {
+    font-family: univers47CondensedLightBold;
+    src: url(../assets/fonts/univers/Univers-47-CondensedLight-Bold.ttf);
+}
+
+@font-face {
+    font-family: univers55;
+    src: url(../assets/fonts/univers/Univers-55.ttf);
+}
+
+@font-face {
+    font-family: universCnBd;
+    src: url(../assets/fonts/univers/UniversCnBd.ttf);
+}
+
+@font-face {
+    font-family: universLTStdLight;
+    src: url(../assets/fonts/univers/UniversLTStd-Light.otf);
+}
+
+@font-face {
+    font-family: universLTStdLightCn;
+    src: url(../assets/fonts/univers/UniversLTStd-LightCn.otf);
+}
+
+@font-face {
+    font-family: universLTStdLightObl;
+    src: url(../assets/fonts/univers/UniversLTStd-LightObl.otf);
+}
+
+@font-face {
+    font-family: univers57W;
+    src: url(../assets/fonts/univers/UNVR57W.ttf);
+}
+
+@font-face {
+    font-family: univers65Bold;
+    src: url(../assets/fonts/univers/Univers-65-Bold.ttf);
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    margin: 0px;
+    background-image: none;
+    background-color: white;
+    font-size: 12px;
+    font-family: universLTStdLight, latoLight, Helvetica, Sans-Serif, Arial, Verdana, "Trebuchet MS";
+    color: rgb(25, 24, 24);
+}
+
+strong > span, span > strong{
+    font-weight: bold;
+}
+
+.barra-titulo-seccion-01{
+    position: relative;
+    background-color: #2D5077;
+    width: 100%;
+    height: 45px;
+}
+
+.barra-titulo-seccion-02{
+    position: relative;
+    background-color: #2D5077;
+    width: 100%;
+    height: 45px;
+}
+
+.columna-barra-titulo-seccion-01{
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.columna-barra-titulo-seccion-02{
+    padding-right: 0;
+}
+
+.titulo-seccion-02{
+    position: absolute;
+    color: #FFF;
+    padding-left: 20px;
+    font-family: univers57Condensed, dinMedium, Helvetica, Sans-Serif;
+    font-size: 2.5em;
+    margin-top: 0px
+}
+
+.mar-t-20{
+    margin-top: 20px;
+}
+
+.contenido-desktop{
+    display: block;
+}
+
+.contenido-mobile{
+    display: none;
+}
+
+.font-lbl{
+    font-family: latoBlack!important;
+}
+
+.font-lbli{
+    font-family: latoBlackItalic!important;
+}
+
+.font-lb{
+    font-family: latoBold!important;
+}
+
+.font-lhl{
+    font-family: latoHairline!important;
+}
+
+.font-lhli{
+    font-family: latoHairlineItalic!important;
+}
+
+.font-li{
+    font-family: latoItalic!important;
+}
+
+.font-ll{
+    font-family: latoLight!important;
+}
+
+.font-lli{
+    font-family: latoLightItalic!important;
+}
+
+.font-lr{
+    font-family: latoRegular!important;
+}
+
+.font-db{
+    font-family: dinBold!important;
+}
+
+.font-dl{
+    font-family: dinLight!important;
+}
+
+.font-dm{
+    font-family: dinMedium!important;
+}
+
+.font-dffb{
+    font-family: dinFFBold!important;
+}
+
+.font-u57c{
+    font-family: univers57Condensed!important;
+}
+
+.font-u45b{
+    font-family: univers45Bold!important;
+}
+
+.font-u45l{
+    font-family: univers45Light!important;
+}
+
+.font-u47clb{
+    font-family: univers47CondensedLightBold!important;
+}
+
+.font-u55{
+    font-family: univers55!important;
+}
+
+.font-u55r{
+    font-family: univers55!important;
+}
+
+.font-ucb{
+    font-family: universCnBd!important;
+}
+
+.font-ultl{
+    font-family: universLTStdLight!important;
+}
+
+.font-ultc{
+    font-family: universLTStdLightCn!important;
+}
+
+.font-ultlo{
+    font-family: universLTStdLightObl!important;
+}
+
+.font-u57w{
+    font-family: univers57W!important;
+}
+
+.font-u65b{
+    font-family: univers65Bold!important;
+}
+
+.portada-mobile{
+    display: none;
+}
+
+#dropdown1{
+    min-width: 230px!important;
+}
+
+#dropdown2{
+    min-width: 150px!important;
+}
+
+#dropdown3{
+    min-width: 150px!important;
+}
+
+#fila-general{
+    margin-top: 20px;
+}
+
+#footer {
+    background-color: #2D5077!important;
+}
+
+#footer-developer-logo{
+    position: absolute;
+    top: -5px;
+}
+
+.portada-desktop{
+    display: block;
+}
+
+.portada-mobile{
+    display: none;
+}
+
+.color-azul-claro{
+    color: #116F99;
+}
+
+.color-azul-oscuro{
+    color: #2D5077;
+}
+
+.container-sec {
+    position: relative;
+    margin: 0 auto;
+    /*max-width: 1112px;*/
+    width: 1112px;
+}
+
+.derecha{
+    text-align: right!important;
+}
+
+.dropdown-content {
+    top: -24px;
+}
+
+.dropdown-content li {
+    min-height: 22px;
+}
+
+.dropdown-content li > a, .dropdown-content li > span {
+    font-size: 0.47em;
+    color: rgb(25, 24, 24);
+    line-height: 5px;
+    padding: 10px 5px;
+}
+
+.no-margin-bottom{
+    margin-bottom: 0px!important;
+}
+
+.no-margin-left{
+    margin-left: 0px!important;
+}
+
+.no-margin-right{
+    margin-right: 0px!important;
+}
+
+.no-margin-top{
+    margin-top: 0px!important;
+}
+
+.no-padding-bottom{
+    padding-bottom: 0px!important;
+}
+
+.no-padding-left{
+    padding-left: 0px!important;
+}
+
+.no-padding-right{
+    padding-right: 0px!important;
+}
+
+.no-padding-top{
+    padding-top: 0px!important;
+}
+
+.relative{
+    position: relative;
+}
+
+.tablas-encabezados{
+    color:#fff;
+    background-color: #2d5077;
+    padding-bottom: 2px;
+    padding-top: 2px;
+    font-size: 1.2em;
+    font-family: univers45Light;
+}
+
+.tablas-filas{
+    height: 10px!important;
+    max-height: 10px!important;
+}
+
+.bc-light-grey{
+    background-color: #e2e3e6;
+}
+
+.portada-max{
+    max-height: 450px!important;
+}
+
+@media (max-width: 1110px) {
+    .container-sec {
+        width: 100%;
+    }
+
+    .contenido-mobile{
+        display: block;
+    }
+
+    .contenido-desktop{
+        display: none;
+    }
+
+    .portada-desktop{
+        display: none;
+    }
+
+    .portada-mobile{
+        display: block;
+    }
+}

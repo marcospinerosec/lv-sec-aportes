@@ -42,7 +42,7 @@
         </div>
             <div class="col-md-3 d-flex flex-column align-items-center">
                 <div class="mb-2">
-                <button type="button" class="btn btn-primary btn-block">Seleccionar otra DDJJ</button>
+                <!--<button type="button" class="btn btn-primary btn-block">Seleccionar otra DDJJ</button>-->
                 </div>
                     <div class="mb-2">
                     <button type="button" class="btn btn-primary btn-block" id="btnEditarEmpleados">Editar nómina de empleados y/o remuneraciones</button>
