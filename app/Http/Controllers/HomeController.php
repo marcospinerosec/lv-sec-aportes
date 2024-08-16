@@ -20,7 +20,10 @@ class HomeController extends Controller
      */
     public function __construct()
     {
+
         $this->middleware('auth');
+        // Agrega esto para verificar si el constructor se está llamando
+
     }
 
     /**
@@ -30,12 +33,16 @@ class HomeController extends Controller
      */
     public function index()
     {
+
+        // Depura para ver si el método se está llamando
+        //Log::info('HomeController index method called');
+
         /*$empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
             ':Param1' => auth()->user()->IdUsuario,
         ]);
         //dd($empresas);*/
 
-
+        //dd($this->getMiddleware());
 
         $client = new Client();
 

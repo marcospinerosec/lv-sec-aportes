@@ -2,51 +2,51 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
+use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+use Illuminate\Auth\Authenticatable;
 
-class User extends Authenticatable
+class User implements AuthenticatableContract
 {
-    use HasApiTokens, HasFactory, Notifiable;
+    use Authenticatable;
 
+    public $IdUsuario;
+    public $Nombre;
 
-    protected $table = 'ADM_Usuarios';
-    /**
-     * The primary key associated with the table.
-     *
-     * @var string
-     */
-    protected $primaryKey = 'IdUsuario';
+    public function __construct(array $attributes = [])
+    {
+        foreach ($attributes as $key => $value) {
+            $this->{$key} = $value;
+        }
+    }
 
-    // Campos específicos de tu tabla de usuarios
-    protected $fillable = [
-        'IdUsuario', 'Clave', 'Nombre', 'EMail', 'Telefono', 'Estado',
-    ];
+    public function getAuthIdentifierName()
+    {
+        return 'IdUsuario';
+    }
+
+    public function getAuthIdentifier()
+    {
+        return $this->IdUsuario;
+    }
 
     public function getAuthPassword()
     {
-        return $this->Clave;
+        return ''; // No es necesario en este caso
     }
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var array<int, string>
-     */
-    protected $hidden = [
-        'Clave',
-        'remember_token',
-    ];
+    public function getRememberToken()
+    {
+        return null;
+    }
 
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-    ];
+    public function setRememberToken($value)
+    {
+        // No es necesario en este caso
+    }
+
+    public function getRememberTokenName()
+    {
+        return '';
+    }
 }
+

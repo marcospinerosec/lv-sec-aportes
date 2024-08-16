@@ -540,14 +540,16 @@ class EmpleadoController extends Controller
                 foreach($importData_arr as $importData){
                     Log::debug('CUIL: '.$importData[0]);
                     Log::debug('Nombre: '.$importData[1]);
-                    Log::debug('Afiliado: '.$importData[2]);
-                    Log::debug('Categoria: '.$importData[3]);
+                    Log::debug('Categoria: '.$importData[2]);
+                    Log::debug('Afiliado: '.$importData[3]);
                     Log::debug('Ingreso: '.$importData[4]);
                     Log::debug('Egreso: '.$importData[5]);
                     Log::debug('Novedad: '.$importData[6]);
                     Log::debug('Art 100: '.$importData[7]);
                     Log::debug('Cuota: '.$importData[8]);
                 }
+
+
 
 
             }else{

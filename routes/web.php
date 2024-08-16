@@ -72,3 +72,11 @@ Route::get('/pago', function () {
 Route::get('/calendario', function () {
     return view('calendario');
 });
+
+Route::get('/check-auth', function () {
+    if (Auth::check()) {
+        return 'User is authenticated';
+    } else {
+        return 'User is not authenticated';
+    }
+});

@@ -29,7 +29,7 @@
                             @include('auth.login')
                         @else
                             <!-- Contenido para usuarios autenticados -->
-                            ¡Bienvenido al panel de control, {{ auth()->user()->name }}!
+                            ¡Bienvenido al panel de control, {{ auth()->user()->Nombre }}!
                         @endguest
                     </div>
                 </div>

@@ -10,8 +10,8 @@ use DB;
 use Illuminate\Validation\ValidationException;
 use App\Models\User;
 use GuzzleHttp\Client;
-
-
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 
 class LoginController extends Controller
@@ -50,13 +50,46 @@ class LoginController extends Controller
         $this->middleware('guest')->except('logout');
     }
 
+    protected function guard()
+    {
+        return Auth::guard('web'); // Asegúrate de que 'web' sea el guard correcto que deseas usar
+    }
+
     public function showLoginForm()
     {
         // Mostrar el formulario de inicio de sesión dentro del dashboard
         return view('dashboard');
     }
 
+
     protected function attemptLogin(Request $request)
+    {
+        $credentials = [
+            'username' => $request->input($this->username()),
+            'password' => $request->input('password')
+        ];
+
+        $provider = $this->guard()->getProvider();
+        $user = $provider->retrieveByCredentials($credentials);
+
+
+
+        if ($user && $provider->validateCredentials($user, $credentials)) {
+
+
+            $this->guard()->login($user, $request->filled('remember'));
+            // Verificar la sesión después del login
+
+            return $this->sendLoginResponse($request);
+        }
+
+        Log::info('User credentials not validated', ['credentials' => $credentials]);
+        return $this->sendFailedLoginResponse($request);
+    }
+
+
+
+    protected function attemptLogin_old(Request $request)
     {
         $username = $request->input($this->username());
         $password = $request->input('password');
@@ -91,6 +124,7 @@ class LoginController extends Controller
                 'Nombre' => $usuarioNT,
                 // Añadir otros campos según tus necesidades
             ]);
+            //dd($user);
             //dd($request->session()->all());
             // Autenticar el usuario manualmente
             auth()->login($user);
@@ -103,27 +137,22 @@ class LoginController extends Controller
 
     protected function sendLoginResponse(Request $request)
     {
+        $request->session()->regenerate();
 
 
-        //if (auth()->check()) {
-            // El usuario está autenticado, realiza la redirección
-            $request->session()->regenerate();
+        // Obtén el usuario autenticado
+        $user = auth()->user();
 
-            // Personaliza la creación de la sesión aquí
-            session([
-                'user_id' => auth()->user()->IdUsuario,
-                'user_name' => auth()->user()->Nombre,
-                // Puedes agregar otros campos según tus necesidades
-            ]);
-       // dd($request->session()->all());
-            return redirect()->intended($this->redirectTo);
-        /*} else {
-            // El usuario no está autenticado, maneja este caso según sea necesario
-            // Puedes agregar un mensaje de error o realizar una redirección diferente
-            return redirect()->back()->withInput($request->only($this->username(), 'remember'))->withErrors([
-                $this->username() => trans('auth.failed'),
-            ]);
-        }*/
+        // Almacena el usuario en la sesión usando múltiples claves
+        session([
+            /*'user_id' => $user->IdUsuario,
+            'user_name' => $user->Nombre,*/
+            'user_' . $user->IdUsuario => $user,
+        ]);
+
+        //Log::info('Session data set', ['session' => session()->all()]);
+
+        return redirect()->intended($this->redirectTo);
     }
 
 
