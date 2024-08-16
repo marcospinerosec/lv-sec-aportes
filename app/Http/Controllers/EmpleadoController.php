@@ -278,6 +278,9 @@ class EmpleadoController extends Controller
         // Construye la URL directamente
         $url = \Constants\Constants::API_URL . '/empleados-agregar/' . rawurlencode($empresa) . '/' . rawurlencode($cuil) . '/' . rawurlencode($nombre) . '/' . rawurlencode($idCategoria) . '/' . ($afiliado ? rawurlencode($afiliado) : '0') . '/' . rawurlencode($ingreso) . '/' . ($idNovedad !== null ? rawurlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? rawurlencode($egreso) : 'null') . '/' . rawurlencode($ia100) . '/' . ($ica !== null ? rawurlencode($ica) : 'null') . '/' . rawurlencode(auth()->user()->IdUsuario);
 
+
+        Log::debug('URL: '.$url);
+
 // Rest of your code...
 
         //Log::debug('url: '.$url);
@@ -475,7 +478,7 @@ class EmpleadoController extends Controller
     }
 
 
-    public function procesar(Request $request)
+    public function procesar_old(Request $request)
     {
 
         set_time_limit(0);
@@ -583,6 +586,83 @@ class EmpleadoController extends Controller
 
         //
         return redirect()->route('empleados.index', array('empresa' => $empresa))->with($respuestaID,$respuestaMSJ);
+    }
+
+    public function procesar(Request $request)
+    {
+        set_time_limit(0);
+
+        $empresa = empty(request('empresa')) ? null : request('empresa');
+        $idUsuario = auth()->user()->IdUsuario; // Suponiendo que el usuario está autenticado y se obtiene el ID del usuario
+
+        $file = $request->file('archivo');
+
+        // Validar archivo
+        $valid_extension = ["csv", "txt"];
+        $maxFileSize = 2097152; // 2MB en Bytes
+
+        if (!$file) {
+            return redirect()->back()->withErrors(['error' => 'Archivo no proporcionado.']);
+        }
+
+        $extension = $file->getClientOriginalExtension();
+        $fileSize = $file->getSize();
+
+        if (!in_array(strtolower($extension), $valid_extension)) {
+            return redirect()->back()->withErrors(['error' => 'Extensión de archivo no válida.']);
+        }
+
+        if ($fileSize > $maxFileSize) {
+            return redirect()->back()->withErrors(['error' => 'Archivo demasiado grande. El archivo debe ser menor que 2MB.']);
+        }
+
+        try {
+            // Preparar el cliente HTTP
+            $client = new Client();
+            $url = \Constants\Constants::API_URL . '/importar-empleados';
+
+            // Configurar los headers
+            $headers = [
+                'Content-Type' => 'multipart/form-data',
+            ];
+
+            // Preparar los datos del formulario para la solicitud
+            $multipart = [
+                [
+                    'name'     => 'file',
+                    'contents' => fopen($file->getRealPath(), 'r'),
+                    'filename' => $file->getClientOriginalName(),
+                ],
+                [
+                    'name'     => 'idEmpresa',
+                    'contents' => $empresa,
+                ],
+                [
+                    'name'     => 'idUsuario',
+                    'contents' => $idUsuario,
+                ],
+            ];
+            //Log::debug('Multipart Data: ', $multipart);
+            // Realizar la solicitud POST
+            $response = $client->post($url, [
+                //'headers' => $headers,
+                'multipart' => $multipart,
+            ]);
+
+            // Manejar la respuesta
+            $result = json_decode($response->getBody(), true);
+
+            if (isset($result['success']) && $result['success']) {
+
+                return redirect()->route('empleados.index', ['empresa' => $empresa])->with('success', 'Importación exitosa.');
+            } else {
+                $errorMessage = isset($result['error']) ? $result['error'] : 'Error desconocido.';
+                return redirect()->route('empleados.index', ['empresa' => $empresa])->with(['error' => $errorMessage]);
+            }
+        } catch (\Exception $e) {
+            Log::error('Error en la importación de empleados: ' . $e->getMessage());
+            return redirect()->route('empleados.index', ['empresa' => $empresa])->with(['error' => 'Error en la importación de empleados.']);
+        }
     }
 
 }
