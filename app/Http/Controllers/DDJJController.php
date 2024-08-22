@@ -974,7 +974,17 @@ class DDJJController extends Controller
                 'Intereses' => number_format($ddjj['Intereses'], 2, ',', '.'),
                 'InteresesPagoFueraTermino' => number_format($ddjj['InteresesPagoFueraTermino'], 2, ',', '.'),
                 'total' => number_format($ddjj['ImporteArt100']+$ddjj['ImporteCuotaAfi']+$ddjj['Intereses']+$ddjj['InteresesPagoFueraTermino'], 2, ',', '.'),
-                'vencimientos' => ($ddjj['Vencimientos'])?$ddjj['Vencimientos'].'<br><br><br>'.($ddjj['FechaVencimiento'])?date('d/m/Y', strtotime($ddjj['FechaVencimiento'])):'':($ddjj['FechaVencimiento'])?date('d/m/Y', strtotime($ddjj['FechaVencimiento'])):'',
+                'vencimientos' => $ddjj['Vencimientos']
+                    ? $ddjj['Vencimientos'] . '<br><br><br>' .
+                    ($ddjj['FechaVencimiento']
+                        ? date('d/m/Y', strtotime($ddjj['FechaVencimiento']))
+                        : ''
+                    )
+                    : ($ddjj['FechaVencimiento']
+                        ? date('d/m/Y', strtotime($ddjj['FechaVencimiento']))
+                        : ''
+                    ),
+
 
 
             ];
