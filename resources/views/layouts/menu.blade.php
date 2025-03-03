@@ -11,7 +11,7 @@
     </button>
 
     <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ml-auto">
+        <ul class="navbar-nav">
             @if(!$esAdmin)
                 <li class="nav-item {{ (str_starts_with(request()->path(), 'empleados')) ? 'active' : '' }}">
                     <a class="nav-link" href="{{ url('/empleados/index') }}">Empleados</a>

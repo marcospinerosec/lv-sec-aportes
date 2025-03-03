@@ -15,17 +15,17 @@
                     <select class="form-control" id="empresa" name="empresa">
                         <option value=""/>Seleccionar...</option>
                         @foreach($empresas as $empresa)
-                            <option value="{{$empresa['IdEmpresa']}}"/>{{$empresa['Codigo']}} - {{$empresa['NombreReal']}}</option>
+                            <option value="{{$empresa['IdEmpresa']}}" {{ session('filtro_empresa') == $empresa['IdEmpresa'] ? 'selected' : '' }}>{{$empresa['Codigo']}} - {{$empresa['NombreReal']}}</option>
                         @endforeach
                     </select>
                 </div>
                 <div class="col-md-2 d-flex align-items-center">
                     <label for="mes" class="mr-2">Mes:</label>
-                    <input type="number" class="form-control" id="mes" name="mes" placeholder="mes">
+                    <input type="number" class="form-control" id="mes" name="mes" placeholder="mes" value="{{session('filtro_mes')}}">
                 </div>
                 <div class="col-md-2 d-flex align-items-center">
                     <label for="year" class="mr-2">Año:</label>
-                    <input type="number" class="form-control" id="year" name="year" placeholder="año">
+                    <input type="number" class="form-control" id="year" name="year" placeholder="año" value="{{session('filtro_year')}}">
                 </div>
                 <div class="col-md-3">
 
@@ -54,13 +54,13 @@
             <div class="row" style="border: 1px solid; padding: 10px;">
 
                 <div class="col-md-8">
-                    <div class="d-flex">
+                    <div class="d-flex" style="margin-bottom: 2%;">
                         <label for="txtFOriginal" class="mr-2">Vencimiento original:</label>
-                        <input type="text" class="form-control" id="txtFOriginal" name="txtFOriginal" disabled style="width: 100px;margin-left: 25px;">
+                        <input type="text" class="form-control" id="txtFOriginal" name="txtFOriginal" disabled style="width: 100px;margin-left: 5%;">
                     </div>
                     <div class="d-flex">
                         <label for="txtFVencimiento" class="mr-2">Fecha estimada de pago:</label>
-                        <input type="text" class="form-control" id="txtFVencimiento" name="txtFVencimiento" style="width: 100px;">
+                        <input type="text" class="form-control" id="txtFVencimiento" name="txtFVencimiento" style="width: 100px;margin-left: 0.5%;">
                     </div>
 
                 </div>
@@ -123,6 +123,19 @@
     </div>
     <script>
         $(document).ready(function() {
+            function formatDate(dateString) {
+                // Asegurarse de que la fecha sea en formato 'yyyy-mm-dd' sin hora
+                let date = new Date(dateString + 'T00:00:00'); // Añadir una hora para evitar que el tiempo cambie la fecha
+                let day = String(date.getDate()).padStart(2, '0');
+                let month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses van de 0 a 11
+                let year = String(date.getFullYear()).slice(-4); // Obtener los últimos 2 dígitos del año
+
+                return `${day}/${month}/${year}`;
+            }
+            function parseFecha(fechaStr) {
+                var partes = fechaStr.split("/");
+                return new Date(partes[2], partes[1] - 1, partes[0], 23, 59, 59); // Año, Mes (0-11), Día
+            }
             $("#continuarBtn").click(function() {
                 var empresa = $("#empresa").val();
                 var mes = $("#mes").val();
@@ -145,8 +158,8 @@
 
                         // Actualizar la tabla con la respuesta HTML
                         $("#ListaEmpleadosActual").html(response.tabla);
-                        $("#txtFOriginal").val(response.original);
-                        $("#txtFVencimiento").val(response.vencimiento);
+                        $("#txtFOriginal").val(formatDate(response.original));
+                        $("#txtFVencimiento").val(formatDate(response.vencimiento));
                         $("#txtIntereses").val(response.intereses);
                         $("#spanIntereses").html(response.intereses);
                         $("#txtTotal").val(response.total);
@@ -178,7 +191,7 @@
 
             // Configura el selector de fecha en el campo txtFVencimiento
             $("#txtFVencimiento").datepicker({
-                dateFormat: 'yy-mm-dd', // Formato de fecha deseado
+                dateFormat: 'dd/mm/yy', // Formato de fecha deseado
                 showButtonPanel: true,
                 changeMonth: true,
                 changeYear: true,
@@ -207,22 +220,21 @@
                 if ($("#txtFVencimiento").val()!="") {
                     var dtFechaActual = new Date();
                     var fecha = $("#txtFVencimiento").val();
-                    var sAnio = fecha.substring(0, 4);
-                    var sMes = fecha.substring(5, 7);
-                    var sDia = fecha.substring(8, 10);
-                    var sFecha = sMes + "/" + sDia + "/" + sAnio + " 23:59:59";
-
                     var fechao = $("#txtFOriginal").val();
-                    var sAnioo = fechao.substring(0, 4);
-                    var sMeso = fechao.substring(5, 7);
-                    var sDiao = fechao.substring(8, 10);
-                    var sFechao = sMeso + "/" + sDiao + "/" + sAnioo + " 23:59:59";
-                    //console.log(sFecha+' --- '+sFechao);
-                    if (Date.parse(sFecha) >= dtFechaActual && Date.parse(sFecha) >= Date.parse(sFechao)){
+
+
+                    var fechaVencimiento = parseFecha(fecha);
+                    var fechaOriginal = parseFecha(fechao);
+                    //console.log(fechaVencimiento + ' --- ' + fechaOriginal+' ---- '+dtFechaActual);
+                    if (fechaVencimiento >= dtFechaActual && fechaVencimiento >= fechaOriginal) {
                         var empresa = $("#empresa").val();
                         var mes = $("#mes").val();
                         var year = $("#year").val();
-                        var venc = $("#txtFVencimiento").val();
+                        var txtVenc = $("#txtFVencimiento").val();
+                        var partes = txtVenc.split("/"); // Se divide en [día, mes, año]
+                        var venc = partes[2].slice(-4) + "-" + partes[1] + "-" + partes[0]; // Formato yy-mm-dd
+
+                       // console.log(venc); // Mostrará la fecha en formato yyyy-mm-dd
                         $("#continuarVencimiento").text('Cargando...');
                         $.ajax({
                             type: 'POST',
@@ -240,8 +252,8 @@
 
                                 // Actualizar la tabla con la respuesta HTML
                                 $("#ListaEmpleadosActual").html(response.tabla);
-                                $("#txtFOriginal").val(response.original);
-                                $("#txtFVencimiento").val(response.vencimiento);
+                                $("#txtFOriginal").val(formatDate(response.original));
+                                $("#txtFVencimiento").val(formatDate(response.vencimiento));
                                 $("#txtIntereses").val(response.intereses);
                                 $("#spanIntereses").html(response.intereses);
                                 $("#txtTotal").val(response.total);
@@ -284,25 +296,30 @@
             $("#generarBtn").click(function() {
                 //var txtVencimiento = $("#txtVencimiento").val();
                 if ($("#txtFVencimiento").val()!="") {
+
+
                     var dtFechaActual = new Date();
                     var fecha = $("#txtFVencimiento").val();
-                    var sAnio = fecha.substring(0, 4);
-                    var sMes = fecha.substring(5, 7);
-                    var sDia = fecha.substring(8, 10);
-                    var sFecha = sMes + "/" + sDia + "/" + sAnio + " 23:59:59";
-
                     var fechao = $("#txtFOriginal").val();
-                    var sAnioo = fechao.substring(0, 4);
-                    var sMeso = fechao.substring(5, 7);
-                    var sDiao = fechao.substring(8, 10);
-                    var sFechao = sMeso + "/" + sDiao + "/" + sAnioo + " 23:59:59";
-                    //console.log(sFecha+' --- '+sFechao);
-                    if (Date.parse(sFecha) >= dtFechaActual && Date.parse(sFecha) >= Date.parse(sFechao)){
+
+
+
+                    var fechaVencimiento = parseFecha(fecha);
+                    var fechaOriginal = parseFecha(fechao);
+                    //console.log(fechaVencimiento + ' --- ' + fechaOriginal+' ---- '+dtFechaActual);
+                    if (fechaVencimiento >= dtFechaActual && fechaVencimiento >= fechaOriginal) {
                         var empresa = $("#empresa").val();
                         var mes = $("#mes").val();
                         var year = $("#year").val();
-                        var venc = $("#txtFVencimiento").val();
-                        var vencOri = $("#txtFOriginal").val();
+
+                        var txtVenc = $("#txtFVencimiento").val();
+                        var partes = txtVenc.split("/"); // Se divide en [día, mes, año]
+                        var venc = partes[2].slice(-4) + "-" + partes[1] + "-" + partes[0]; // Formato yy-mm-dd
+
+                        var txtVencO = $("#txtFOriginal").val();
+                        var partes = txtVencO.split("/"); // Se divide en [día, mes, año]
+                        var vencOri = partes[2].slice(-4) + "-" + partes[1] + "-" + partes[0]; // Formato yy-mm-dd
+
                         var intereses = $("#txtIntereses").val();
                         var existeDeclaracion = $("#existeDeclaracion").val();
                         var continua = 1;
@@ -391,6 +408,8 @@
             $("#BtVerListaEmpleados").click(function() {
                 alert("Mostrar lista de empleados");
             });
+            $("#continuarBtn").trigger("click");
         });
+
     </script>
 @endsection

@@ -53,6 +53,14 @@ class DDJJController extends Controller
     public function procesar(Request $request)
     {
 
+        // Obtener los datos del formulario
+        $empresa = $request->input('empresa');
+        $request->session()->put('filtro_empresa', $request->input('empresa'));
+        $mes = $request->input('mes');
+        $request->session()->put('filtro_mes', $request->input('mes'));
+        $year = $request->input('year');
+        $request->session()->put('filtro_year', $request->input('year'));
+
         $validator = Validator::make($request->all(), [
             'empresa' => 'required',
             'mes' => 'required|numeric',
@@ -72,10 +80,7 @@ class DDJJController extends Controller
 
 
 
-        // Obtener los datos del formulario
-        $empresa = $request->input('empresa');
-        $mes = $request->input('mes');
-        $year = $request->input('year');
+
 
         $client = new Client();
         // Realizar el procesamiento necesario aquí
@@ -320,8 +325,11 @@ class DDJJController extends Controller
                 $fechavencimiento = $fecha5->format('Y-m-d');
             }
         }
-
+        Log::info('Vencimiento: ' . $request->input('venc').' venc: '.$fechavencimiento, []);
         $venc = ($request->input('venc'))?$request->input('venc'):$fechavencimiento;
+
+        Log::info('Vencimiento final: ' .$venc , []);
+
         //$venc = $fechavencimiento;
 
         $vencinicial = $fechavencimiento;
@@ -581,7 +589,7 @@ class DDJJController extends Controller
 </tbody></table>';
         // ... (Agrega el contenido de la tabla aquí)
         //$tablaHtml .= '</table>';
-
+        Log::info('Vencimiento pasado: ' .date_format($venc, 'Y-m-d') , []);
         // Devolver la tabla HTML como respuesta
         return response()->json(['tabla' => $tablaHtml, 'original' => date_format($vencini, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.'),'existeDeclaracion' => $existeDeclaracion]);
     }

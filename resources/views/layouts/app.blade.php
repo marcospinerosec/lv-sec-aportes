@@ -44,7 +44,22 @@
     <link media="all" type="text/css" rel="stylesheet" href="{{ asset('css/style-20190606.css') }}">
 
     <style>
+        /* El contenedor principal ocupa toda la altura disponible */
+        #app {
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+        }
 
+        /* El contenido principal ocupa el espacio restante */
+        main {
+            flex: 1;
+        }
+
+        /* El footer siempre estará al final */
+        footer {
+            margin-top: auto;
+        }
 
         .fa-btn {
             margin-right: 6px;
@@ -151,7 +166,9 @@
                 <div class="row">
                     <!-- Sidebar del dashboard -->
                     <!-- Sidebar -->
+                    @if(false)
                     <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light sidebar">
+
                         <div class="position-sticky">
                             <!-- Aquí puedes agregar elementos del menú lateral -->
                             <ul class="nav flex-column">
@@ -193,11 +210,12 @@
                                 </li>
                             </ul>
                         </div>
+
                     </nav>
 
-
+                    @endif
                     <!-- Contenido principal del dashboard -->
-                    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
+                    <main class="col-md-9 ms-sm-auto col-lg-12 px-md-4">
                         @yield('content')
                     </main>
                 </div>

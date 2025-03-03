@@ -598,7 +598,7 @@ class EmpleadoController extends Controller
         $file = $request->file('archivo');
 
         // Validar archivo
-        $valid_extension = ["csv", "txt"];
+        /*$valid_extension = ["csv", "txt"];
         $maxFileSize = 2097152; // 2MB en Bytes
 
         if (!$file) {
@@ -614,7 +614,12 @@ class EmpleadoController extends Controller
 
         if ($fileSize > $maxFileSize) {
             return redirect()->back()->withErrors(['error' => 'Archivo demasiado grande. El archivo debe ser menor que 2MB.']);
-        }
+        }*/
+
+        $this->validate($request, [
+            'archivo' => 'required|file|mimes:csv,txt|max:2048', // 2048KB = 2MB
+        ]);
+
 
         try {
             // Preparar el cliente HTTP
