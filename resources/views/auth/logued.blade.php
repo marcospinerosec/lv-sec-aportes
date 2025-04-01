@@ -24,42 +24,26 @@
 
         <!-- Portfolio Item 1-->
         <div class="col-md-6 col-lg-4 mb-5">
-
-            <p class="masthead-subheading font-weight-light mb-0">Ingreso Sistema On-Line</p>
+            <?php //print_r(Auth::user()) ?>
+            <p class="masthead-subheading font-weight-light mb-0">Bienvenido/a: {{ Auth::user()->Nombre }}</p>
+            <p class="masthead-subheading font-weight-light mb-0">Email: CORREOUSUARIO</p>
             <br><br>
-            <form method="POST" action="{{ route('login') }}">
-                @csrf
-            <div class="input-group-text" style="margin-bottom: 5%;">
-                <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
-                <input required id="email" type="text" autofocus="autofocus" class="form-control" name="email" placeholder="Usuario" maxlength="50" class="obligatorio @error('email') is-invalid @enderror" value="{{ old('email') }}">
-				@error('email')
-                <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                @enderror
-            </div>
-
-            <div class="input-group-text">
-                <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
-                <input required id="password" type="password" class="form-control" name="password" placeholder="Password" maxlength="50" class="obligatorio @error('password') is-invalid @enderror">
-                @error('password')
-                <span class="invalid-feedback" role="alert">
-                                        <strong>{{ $message }}</strong>
-                                    </span>
-                @enderror
-            </div>
-
-            <br><br>
+            <p class="masthead-subheading font-weight-light mb-0"><small>Mantenga sus datos actualizados.<br>De haber cambios le pedimos que se comunique a sistemas@seclaplata.org.ar indicando los mismos.</small></p>
+            <hr>
             <div class="text-center mt-4">
-                <button type="submit" class="btn btn-xl btn-outline-light">
+
+                <a class="btn btn-xl btn-outline-light" href="{{ route('logout') }}"
+                   onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                    CERRAR SESIÓN
+                </a>
+                <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                    @csrf
+                </form>
+                <a class="btn btn-xl btn-outline-light" href="{{ route('home') }}">
                     <!--<i class="fas fa-download me-2"></i>-->
-                    Ingresar
-                </button>
+                    Ingresar al sistema
+                </a>
             </div>
-            </form>
-
-
-
 
         </div>
 
@@ -82,10 +66,7 @@
                 <br> (221) 427-1125 interno 20 (sector APORTES)  <br> o a aportesonline@seclaplata.org.ar
                 <hr>
                 <div class="text-center mt-4">
-                    <a class="btn btn-xl btn-outline-light" href="">
-                        <!--<i class="fas fa-download me-2"></i>-->
-                        Solicitar usuario
-                    </a>
+
                     <a class="btn btn-xl btn-outline-light" href="">
                         <!--<i class="fas fa-download me-2"></i>-->
                         Instructivo del sistema

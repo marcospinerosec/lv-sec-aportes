@@ -1,6 +1,6 @@
 <!-- resources/views/dashboard.blade.php -->
 
-@extends('layouts.app')
+@extends('layouts.app_login')
 
 @section('content')
 
@@ -21,15 +21,14 @@
 
                 <!-- Contenido del panel de control -->
                 <div class="card">
-                    <div class="card-header">Panel de Control</div>
+
 
                     <div class="card-body">
                         @guest
                             <!-- Formulario de inicio de sesión -->
                             @include('auth.login')
                         @else
-                            <!-- Contenido para usuarios autenticados -->
-                            ¡Bienvenido al panel de control, {{ auth()->user()->Nombre }}!
+                            @include('auth.logued')
                         @endguest
                     </div>
                 </div>
