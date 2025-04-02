@@ -26,7 +26,7 @@
         <div class="col-md-6 col-lg-4 mb-5">
             <?php //print_r(Auth::user()) ?>
             <p class="masthead-subheading font-weight-light mb-0">Bienvenido/a: {{ Auth::user()->Nombre }}</p>
-            <p class="masthead-subheading font-weight-light mb-0">Email: CORREOUSUARIO</p>
+            <p class="masthead-subheading font-weight-light mb-0">Email: {{ Auth::user()->Email }}</p>
             <br><br>
             <p class="masthead-subheading font-weight-light mb-0"><small>Mantenga sus datos actualizados.<br>De haber cambios le pedimos que se comunique a sistemas@seclaplata.org.ar indicando los mismos.</small></p>
             <hr>

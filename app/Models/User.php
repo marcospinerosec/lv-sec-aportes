@@ -11,6 +11,7 @@ class User implements AuthenticatableContract
 
     public $IdUsuario;
     public $Nombre;
+    public $Email;
 
     public function __construct(array $attributes = [])
     {

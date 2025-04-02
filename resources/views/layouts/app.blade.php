@@ -17,6 +17,7 @@
     <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
 
     <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -35,6 +36,9 @@
     <script src="{{ asset('js/scripts.js') }}"></script>
 </head>
 <body class="sb-nav-fixed">
+@php
+    $current_path = request()->path();
+@endphp
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
     <!-- Navbar Brand-->
     <a class="navbar-brand" href="#page-top"><img class="img-fluid" src="{{ asset('assets/img/LogoSEC4.jpg')}}" alt="Pricipal" /></a>
@@ -57,7 +61,9 @@
                         {{ __('Logout') }}
                     </a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
-                    @csrf</li>
+                    @csrf
+                    </form>
+                </li>
             </ul>
         </li>
     </ul>
@@ -68,7 +74,7 @@
             <div class="sb-sidenav-menu">
                 <div class="nav">
                     <div class="sb-sidenav-menu-heading">    </div>
-                    <a class="nav-link" href="index.html">
+                    <a class="nav-link {{ $current_path === 'ddjjs/ddjj' ? 'active' : '' }}" href="{{ url('/ddjjs/ddjj') }}">
                         <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                         GENERACIÓN DDJJ
                     </a>

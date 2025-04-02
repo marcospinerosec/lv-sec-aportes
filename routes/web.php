@@ -29,7 +29,9 @@ Auth::routes([
 Route::group(['middleware' => 'auth'], function () {
     Route::get('/dashboard', [App\Http\Controllers\DashboardController::class, 'index'])->name('dashboard');
 
-    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    Route::get('/home', function () {
+        return redirect()->route('ddjjs.ddjj');
+    })->name('home');
     Route::get('/ddjjs/ddjj', [App\Http\Controllers\DDJJController::class, 'index'])->name('ddjjs.ddjj');
     Route::get('/ddjjs/anteriores', [App\Http\Controllers\DDJJController::class, 'anteriores'])->name('ddjjs.anteriores');
     Route::post('/ddjjs/listar', [App\Http\Controllers\DDJJController::class, 'listar']);

@@ -2,7 +2,7 @@
 
 @section('content')
 
-    @include('layouts.menu') <!-- Incluye el menú horizontal -->
+      <!-- Incluye el menú horizontal -->
 
 
 @endsection

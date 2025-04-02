@@ -489,97 +489,97 @@ class DDJJController extends Controller
 
 
         // Ejemplo: Crear la tabla HTML
-        $tablaHtml = '<table style="width: 100%;">
+        $tablaHtml = '<table id="tableEmpleados" style="width: 100%; color: white;font-size: 20px;">
 <tbody><tr>
 <th>
 &nbsp;
 </th>
-<th style="border: 1px solid; text-align: center">
+<th style="border: 1px solid black; text-align: center">
 <b>Nro Aportantes</b>
 </th>
-<th style="border: 1px solid; text-align: center">
+<th style="border: 1px solid black; text-align: center">
 <b>Base para cálculo</b>
 </th>
-<th style="border: 1px solid; text-align: center">
+<th style="border: 1px solid black; text-align: center">
 <b>Importe a pagar</b>
 </th>
 </tr>
 <tr>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 <b>Artículo 100</b>
 </td>
-<td style="border: 1px solid; text-align: right">';
+<td style="border: 1px solid black; text-align: right">';
 
         $tablaHtml .=$cantArt100;
         $tablaHtml .='
 </td>
-<td style="border: 1px solid; text-align: right">';
+<td style="border: 1px solid black; text-align: right">';
         $tablaHtml .=number_format($importeArt100Total,2,',','.');
         $tablaHtml .='
 </td>
-<td style="border: 1px solid; text-align: right">';
+<td style="border: 1px solid black; text-align: right">';
         $tablaHtml .=number_format($importeArt100,2,',','.');
         $tablaHtml .='
 
 </td>
 </tr>
 <tr>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 <b>Afiliados</b>
 </td>
-<td style="border: 1px solid; text-align: right">';
+<td style="border: 1px solid black; text-align: right">';
 
         $tablaHtml .=$cantAfi;
         $tablaHtml .='
 </td>
-<td style="border: 1px solid; text-align: right">';
+<td style="border: 1px solid black; text-align: right">';
         $tablaHtml .=number_format($importeCuotaAfiTotal,2,',','.');
         $tablaHtml .='
 </td>
-<td style="border: 1px solid; text-align: right">';
+<td style="border: 1px solid black; text-align: right">';
         $tablaHtml .=number_format($importeCuotaAfi,2,',','.');
         $tablaHtml .='
 
 </td>
 </tr>
 <!--<tr>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 <b>Otros Conceptos</b>
 </td>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 &nbsp;
 </td>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 &nbsp;
 </td>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 <input type="text" id="txtIntereses" name="txtIntereses" size="12" maxlength="12" class="noobligatorio" style="text-align:right;" onkeypress="return SoloNumeroDecimal(event.keyCode)" onblur="this.value=formateaNumeroConComa(this.value, 12, 9, 2);CambiaImporte();">
 </td>
 </tr>
 <tr>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 <b>Intereses pago fuera de término:</b>
 </td>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 &nbsp;
 </td>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 &nbsp;
 </td>
-<td style="border: 1px solid">
+<td style="border: 1px solid black">
 <input type="text" id="txtInteresesPFT" name="txtInteresesPFT" size="12" maxlength="12" class="noobligatorio" style="text-align:right;" disabled="" value="2.378,80">
 </td>
 </tr>
 <tr>-->
-<td style="border: 2px solid; font-weight: bold" colspan="2">
+<td style="border: 2px solid black; font-weight: bold" colspan="2">
 <strong>Totales</strong>
 </td>
 
-<td style="border: 2px solid;text-align: right; font-weight: bold">';
+<td style="border: 2px solid black;text-align: right; font-weight: bold">';
         $tablaHtml .='<strong>'.number_format($tot2,2,',','.').'</strong>';
         $tablaHtml .='
 </td>
-<td style="border: 2px solid; text-align: right; font-weight: bold">';
+<td style="border: 2px solid black; text-align: right; font-weight: bold">';
         $tablaHtml .='<strong>'.number_format($tot,2,',','.').'</strong>';
         $tablaHtml .='
 

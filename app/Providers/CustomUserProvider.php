@@ -45,13 +45,27 @@ class CustomUserProvider implements UserProvider
             $response = $client->get(\Constants\Constants::API_URL . '/verifica-usuario/' . $username . '/' . $password);
             $result = json_decode($response->getBody(), true);
 
+
+
+
+
             //Log::info('API Response', ['response' => $result]);
 
             if (!empty($result['result']) && is_array($result['result']) && count($result['result']) > 0) {
                 $firstResult = $result['result'][0];
+                $responseDatos = $client->get(\Constants\Constants::API_URL.'/usuario-datos/' . $firstResult['IdUsuario'] );
+
+                $resultDatos = json_decode($responseDatos->getBody(), true);
+                //log::info(print_r($resultDatos, true));
+                $email = null;
+                if (!empty($resultDatos['result']) && is_array($resultDatos['result']) && count($resultDatos['result']) > 0) {
+                    $firstResultDatos = $resultDatos['result'][0];
+                    $email = $firstResultDatos['EMail'];
+                }
                 $user = new User([
                     'IdUsuario' => $firstResult['IdUsuario'],
                     'Nombre' => $firstResult['Nombre'],
+                    'Email' => $email,
                 ]);
                 //Log::info('User found', ['user' => $user]);
                 return $user;
