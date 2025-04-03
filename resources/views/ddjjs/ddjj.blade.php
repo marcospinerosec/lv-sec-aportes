@@ -3,8 +3,7 @@
 @section('content')
      <!-- Incluye el menú horizontal -->
 
-     <div id="layoutSidenav_content">
-         <main>
+
              <div class="container-fluid px-4">
                  <h1 class="mt-4">Generación de DDJJ de aportes y boleta de pago</h1>
                  <ol class="breadcrumb mb-4">
@@ -72,7 +71,7 @@
                              </button>
                          </div>
                          <div style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
-                             </button>
+
                              <button class="btn btn-secondary" id="btnContinuar2">
                                  CONTINUAR
                              </button><br><br><br>
@@ -93,7 +92,7 @@
                      <div style=" float: left;  position: relative;     height: auto;">
                          <img src="{{ asset('assets/img//Boton3.png')}}" >
                      </div>
-                     <div style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
+                     <div id="divFechas" style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
                          <font style="color: #ffffff; font-size: 1.25rem; font-family: Arial;"> Vencimiento original: </font> <input type="text" style="width:150px" id="txtFOriginal" name="txtFOriginal" disabled>
                          <br>
                          <br>
@@ -101,7 +100,7 @@
                      </div>
 
                      <div style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
-                         </button>
+
                          <button class="btn btn-secondary" id="continuarVencimiento">
                              CONTINUAR
                          </button>
@@ -124,6 +123,7 @@
                      <div style=" float: left;  position: relative;     height: auto;">
                          <img src="{{ asset('assets/img/Boton3.png')}}" >
                      </div>
+                     <div id="divIntereses" style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
                      <table id="tableIntereses" style="width: 100%;color: white;font-size: 20px;">
                          <tbody><tr>
 
@@ -140,13 +140,35 @@
 
 
                          </tbody></table>
+                         <table id="tableTotal" style="width: 100%;color: white;font-size: 20px;">
+                             <tbody><tr>
+
+                                 <th style="border: 2px solid black;width: 400px;">
+                                     <b>Total a pagar</b>
+                                 </th>
+                                 <th style="border: 2px solid black;text-align: right;">
+                                     <b><input type="hidden" class="form-control" id="txtTotal" name="txtTotal">
+                                         <span id="spanTotal"></span>
+                                     </b>
+                                 </th>
+
+                             </tr>
+
+
+                             </tbody></table>
+                     </div>
+                     <div style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
+                         <button class="btn btn-secondary" id="generarBtn">
+                             <input type="hidden" class="form-control" id="existeDeclaracion" name="existeDeclaracion">
+                             Generar Declaración Jurada
+                         </button>
+                     </div>
 
                  </div>
              </div>
 
 
-         </main>
-     </div>
+
      <script>
          $(document).ready(function() {
              function formatDate(dateString) {
@@ -187,6 +209,15 @@
                  $("#btnOtroPeridodo").hide();
                  $("#btnEditarEmpleados").hide();
                  $("#btnContinuar2").hide();
+
+                 $("#paso3").css("background", "#0275D8"); // Nuevo color de fondo
+
+                 // Cambiar la imagen dentro de #float
+                 $("#paso3 img").attr("src", "{{ asset('assets/img/Boton3.png') }}"); // Nueva imagen
+                 $("#divFechas font").css("color", "#FFFFFF");
+
+                 $("#btnCancelar2").show();
+                 $("#continuarVencimiento").show();
              });
 
              $("#continuarBtn").click(function() {
@@ -213,6 +244,18 @@
 
                          // Cambiar la imagen dentro de #float
                          $("#float img").attr("src", "{{ asset('assets/img/Boton1off.png') }}"); // Nueva imagen
+                         $("#paso2").css("background", "#0275D8"); // Nuevo color de fondo
+
+                         // Cambiar la imagen dentro de #float
+                         $("#paso2 img").attr("src", "{{ asset('assets/img/Boton2.png') }}"); // Nueva imagen
+                         $("#tableEmpleados").css("color", "#FFFFFF"); // Nuevo color de fondo
+
+                         $("#btnCancelar").show();
+                         $("#btnOtroPeridodo").show();
+                         $("#btnEditarEmpleados").show();
+                         $("#btnContinuar2").show();
+
+
                          // Actualizar la tabla con la respuesta HTML
                          $("#ListaEmpleadosActual").html(response.tabla);
                          $("#txtFOriginal").val(formatDate(response.original));
@@ -322,11 +365,12 @@
                                  $("#paso3 img").attr("src", "{{ asset('assets/img/Boton3off.png') }}"); // Nueva imagen
 
                                  $("#paso4").css("display","flex");
+
                                  /*$("#btnCancelar2").hide();
 
                                  $("#btnContinuar3").hide();*/
 
-
+                                 $("#divFechas font").css("color", "#000000");
 
                                  // Actualizar la tabla con la respuesta HTML
                                  $("#ListaEmpleadosActual").html(response.tabla);
@@ -340,7 +384,7 @@
                                  // Limpiar mensajes de error anteriores
                                  $('#errorContainer').html('');
                                  $("#tableEmpleados").css("color", "#000000"); // Nuevo color de fondo
-                                 $("#tableIntereses").css("color", "#000000"); // Nuevo color de fondo
+                                 $("#tableIntereses").css("color", "#FFFFFF"); // Nuevo color de fondo
                              },
                              error: function(error) {
                                  // Manejar los mensajes de error y mostrarlos
