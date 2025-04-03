@@ -32,6 +32,7 @@
                          </select>
                          <div style="display: flex; align-items: center; gap: 10px;margin: 0 20px;">
                              <label for="mes" style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif;">Mes:</label>
+
                              <input type="number" class="form-control" id="mes" name="mes" placeholder="mes" value="{{session('filtro_mes')}}" style="width: 80px;">
                          </div>
                          <div style="display: flex; align-items: center; gap: 10px;">
@@ -121,7 +122,7 @@
 		box-shadow:0 0 10px #666;
 		background:#0275D8; display: none;">
                      <div style=" float: left;  position: relative;     height: auto;">
-                         <img src="{{ asset('assets/img/Boton3.png')}}" >
+                         <img src="{{ asset('assets/img/Boton4.png')}}" >
                      </div>
                      <div id="divIntereses" style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
                      <table id="tableIntereses" style="width: 100%;color: white;font-size: 20px;">
@@ -191,6 +192,8 @@
                  $("#paso2").css("display","none");
                  $("#paso3").css("display","none");
                  $("#paso4").css("display","none");
+                 $("#float font").css("color", "#FFFFFF");
+                 $("#float label").css("color", "#FFFFFF");
              });
              $("#btnCancelar").click(function() {
                  $("#btnOtroPeridodo").click();
@@ -241,7 +244,8 @@
                          //console.log('Respuesta del servidor:', response);
                          // Cambiar el background de #float
                          $("#float").css("background", "#FFFFFF"); // Nuevo color de fondo
-
+                         $("#float font").css("color", "#000000");
+                         $("#float label").css("color", "#000000");
                          // Cambiar la imagen dentro de #float
                          $("#float img").attr("src", "{{ asset('assets/img/Boton1off.png') }}"); // Nueva imagen
                          $("#paso2").css("background", "#0275D8"); // Nuevo color de fondo
@@ -294,10 +298,18 @@
                  });
              });
 
-             // Configura el selector de fecha en el campo txtFVencimiento
+             // Configurar el calendario en español
+             $.datepicker.setDefaults($.datepicker.regional["es"]);
+
+             // Inicializar el datepicker en español
              $("#txtFVencimiento").datepicker({
-                 dateFormat: 'dd/mm/yy', // Formato de fecha deseado
-                 showButtonPanel: true,
+                 dateFormat: "dd/mm/yy", // Formato de fecha
+                 dayNames: ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"],
+                 dayNamesMin: ["Do", "Lu", "Ma", "Mi", "Ju", "Vi", "Sa"],
+                 monthNames: ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"],
+                 monthNamesShort: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                 firstDay: 0,
+                 showButtonPanel: false,
                  changeMonth: true,
                  changeYear: true,
              });
