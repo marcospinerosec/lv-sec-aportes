@@ -2,11 +2,12 @@
 
 @section('content')
 
-    <div style="float: left; margin-right: 20px; border-color: #999999; margin-top: 20px;">
+    <div style="float: left; border-color: #999999; margin: 0 2%;">
+        <h1 class="mt-4">
+            Nuevo empleado
+        </h1>
         <div class="box box-primary">
-            <p class="titulocuarentena" style="margin-right: 20px;" >
-                Nuevo empleado
-            </p>
+
             <!-- if validation in the controller fails, show the errors -->
             @if ($errors->any())
                 <div class="alert alert-danger">
@@ -17,7 +18,13 @@
                     </ul>
                 </div>
             @endif
-            <div class="row" style="border: 1px solid; padding: 10px;">
+            <div id="float" style="font-size:12px;
+	 	margin:20px;
+		padding:25px 25px 25px;
+		border:1px solid #666;
+		border-radius:10px;
+		box-shadow:0 0 10px #666;
+		background:#0275D8; display: flex;">
 
                 <form role="form" action="{{ url('/empleados/save')}}" method="post">
                     @csrf
@@ -29,7 +36,7 @@
                             <div class="col-md-5">
                                 <div class="form-group">
                                     <label for="cuil">CUIL</label>
-                                    <input type="text" required maxlength="200" name="cuil" id="cuil" value="{{old('cuil')}}" class="form-control" placeholder="Cuil">
+                                    <input type="text" required maxlength="200" name="cuil" id="cuil" value="{{old('cuil')}}" class="form-control" placeholder="CUIL">
                                 </div>
                             </div>
 
@@ -92,7 +99,7 @@
                         <div class="row">
                             <div class="col-md-10">
                                 <div class="form-group">
-                                    <label for="categoria">Categoria</label>
+                                    <label for="categoria">Categoría</label>
                                     <select required class="form-control js-example-basic-single" id="categoria" name="categoria">
                                         <option value=""/>Seleccionar...</option>
                                         @foreach($categorias as $categoria)
@@ -123,8 +130,8 @@
                     </div>
 
                     <div class="box-footer">
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                        <a href="{{ route('empleados.index',  array('empresa' => $empresa))}}" class="btn btn-success">Volver</a>
+                        <button type="submit" class="btn btn-secondary">Guardar</button>
+                        <a href="{{ route('empleados.index',  array('empresa' => $empresa))}}" class="btn btn-secondary">Volver</a>
                     </div>
                 </form>
 

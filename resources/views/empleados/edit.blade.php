@@ -2,11 +2,12 @@
 
 @section('content')
 
-    <div style="float: left; margin-right: 20px; border-color: #999999; margin-top: 20px;">
-        <div class="box box-primary">
-        <p class="titulocuarentena" style="margin-right: 20px;" >
+    <div style="float: left; border-color: #999999; margin: 0 2%;">
+        <h1 class="mt-4">
             Editar empleado
-        </p>
+        </h1>
+        <div class="box box-primary">
+
             <!-- if validation in the controller fails, show the errors -->
             @if ($errors->any())
                 <div class="alert alert-danger">
@@ -17,7 +18,13 @@
                     </ul>
                 </div>
             @endif
-            <div class="row" style="border: 1px solid; padding: 10px;">
+            <div id="float" style="font-size:12px;
+	 	margin:20px;
+		padding:25px 25px 25px;
+		border:1px solid #666;
+		border-radius:10px;
+		box-shadow:0 0 10px #666;
+		background:#0275D8; display: flex;">
 
                 <form role="form" action="{{ url('/empleados/editar')}}/{{$empleado[0]['IdEmpleado']}}" method="post">
                     @csrf
@@ -124,8 +131,8 @@
                     </div>
 
                     <div class="box-footer">
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                        <a href="{{ route('empleados.index',  array('empresa' => $empresa))}}" class="btn btn-success">Volver</a>
+                        <button type="submit" class="btn btn-secondary">Guardar</button>
+                        <a href="{{ route('empleados.index',  array('empresa' => $empresa))}}" class="btn btn-secondary">Volver</a>
                     </div>
                 </form>
 

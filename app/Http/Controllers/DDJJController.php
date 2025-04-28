@@ -61,7 +61,7 @@ class DDJJController extends Controller
         $year = $request->input('year');
         $request->session()->put('filtro_year', $request->input('year'));
 
-        /*$validator = Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'empresa' => 'required',
             'mes' => 'required|numeric',
             'year' => 'required|numeric',
@@ -75,8 +75,9 @@ class DDJJController extends Controller
 
         // Verificar si hay errores de validación
         if ($validator->fails()) {
-            return response()->json(['errors' => $validator->errors()->all()], 422);
-        }*/
+            //return response()->json(['errors' => $validator->errors()->all()], 422);
+            return response()->json(['errors' => $validator->errors()->toArray()], 422);
+        }
 
 
 

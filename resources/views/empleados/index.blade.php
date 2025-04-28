@@ -2,17 +2,17 @@
 
 @section('content')
 
-    <div style="float: left; margin-right: 20px; border-color: #999999; margin-top: 20px;">
-        <p class="titulocuarentena" style="margin-right: 20px;" >
+    <div style="float: left; border-color: #999999; margin: 0 2%;">
+        <h1 class="mt-4">
             Empleados
-        </p>
+        </h1>
 
-        <hr/>
-        <div class="row" style="border: 1px solid; padding: 10px;">
-            <div class="col-md-20 d-flex align-items-center">
-                <form class="form-inline">
-                <label for="empresa" class="mr-2">Empresa:</label>
-                <select class="form-control" id="empresa" name="empresa" onchange="this.form.submit()">
+
+        <div class="row" style="border: 1px solid; padding: 10px;background:#0275D8;display: flex;">
+
+                <form class="form-inline" style="display: flex; align-items: center; gap: 10px;">
+                    <font style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif; margin-right: 10px;">Empresa:</font>
+                <select class="form-control" id="empresa" name="empresa" onchange="this.form.submit()" style="width:300px;">
                     <option value=""/>Seleccionar...</option>
                     @foreach($empresas as $empresa)
                         <option value="{{$empresa['IdEmpresa']}}" @if(isset($_GET['empresa']) && $empresa['IdEmpresa']==$_GET['empresa']) selected="selected" @endif>
@@ -22,7 +22,7 @@
                     @endforeach
                 </select>
                 </form>
-            </div>
+
 
 
 
@@ -48,8 +48,8 @@
         <div class="box-header with-border">
 
 
-            <a class="btn btn-primary " style="float: left;margin-right: 5px;" href="{{ url('/empleados/create?empresa='. (isset($_GET['empresa'])? $_GET['empresa'] : '')) }}"><i class="fa fa-plus"></i> Nuevo </a>
-            <a class="btn btn-info " style="float: left;margin-right: 5px;" href="{{ url('/empleados/importar/'. (isset($_GET['empresa'])? $_GET['empresa'] : '')) }}"><i class="fa fa-upload"></i> Importar </a>
+            <a class="btn btn-secondary " style="float: left;margin-right: 5px;" href="{{ url('/empleados/create?empresa='. (isset($_GET['empresa'])? $_GET['empresa'] : '')) }}"><i class="fa fa-plus"></i> Nuevo </a>
+            <a class="btn btn-secondary " style="float: left;margin-right: 5px;" href="{{ url('/empleados/importar/'. (isset($_GET['empresa'])? $_GET['empresa'] : '')) }}"><i class="fa fa-upload"></i> Importar </a>
             <a class="btn btn-secondary" style="float: left;" href="{{ url('/ddjjs/ddjj') }}">
                 <i class="fa fa-arrow-left"></i> Volver
             </a>

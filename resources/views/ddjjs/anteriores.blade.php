@@ -157,7 +157,7 @@
                         errorMessage += '</ul>';
                         $('#errorContainer').html(errorMessage);
                     } else {
-                        $('#errorContainer').html('Error desconocido. Consulta la consola para obtener más detalles.');
+                        $('#errorContainer').html('Error. Intente nuevamente más tarde');
                         //console.log('Error en la solicitud AJAX:', error);
                     }
                 },

@@ -141,7 +141,7 @@
 
 
                          </tbody></table>
-                         <table id="tableTotal" style="width: 100%;color: white;font-size: 20px;">
+                         <table id="tableTotal" style="width: 100%;color: white;font-size: 20px; padding: 8px 12px;">
                              <tbody><tr>
 
                                  <th style="border: 2px solid black;width: 400px;">
@@ -199,7 +199,9 @@
                  $("#btnOtroPeridodo").click();
              });
              $("#btnCancelar3").click(function() {
-                 $("#btnOtroPeridodo").click();
+                 $("#paso3").css("display","none");
+                 $("#paso4").css("display","none");
+                 $("#continuarBtn").click();
              });
              $("#btnContinuar2").click(function() {
                  $("#paso2").css("background", "#FFFFFF"); // Nuevo color de fondo
@@ -227,6 +229,7 @@
                  var empresa = $("#empresa").val();
                  var mes = $("#mes").val();
                  var year = $("#year").val();
+                 _token: '{{ csrf_token() }}'
                  // Cambiar el texto del botón al inicio de la solicitud
                  $("#continuarBtn").text('Cargando...');
                  // Realizar una solicitud AJAX al controlador de Laravel
@@ -240,6 +243,7 @@
                          _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
                      },
                      success: function(response) {
+                         $('.error-message').remove();
                          // Manejar la respuesta del servidor, si es necesario
                          //console.log('Respuesta del servidor:', response);
                          // Cambiar el background de #float
@@ -276,17 +280,26 @@
                          //$(this).hide();
                      },
                      error: function(error) {
-                         // Manejar los mensajes de error y mostrarlos
+                         // Limpiar errores anteriores
+                         $('.error-message').remove();
+
                          if (error.responseJSON && error.responseJSON.errors) {
                              var errors = error.responseJSON.errors;
-                             var errorMessage = '<ul>';
-                             $.each(errors, function (index, value) {
-                                 errorMessage += '<li>' + value + '</li>';
+
+                             $.each(errors, function(field, messages) {
+                                 // messages es un array, pueden ser varios errores para un mismo campo
+                                 var message = messages[0]; // tomamos solo el primer error
+
+                                 if (field === 'empresa') {
+                                     $('#empresa').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
+                                 } else if (field === 'mes') {
+                                     $('#mes').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
+                                 } else if (field === 'year') {
+                                     $('#year').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
+                                 }
                              });
-                             errorMessage += '</ul>';
-                             $('#errorContainer').html(errorMessage);
                          } else {
-                             $('#errorContainer').html('Error desconocido. Consulta la consola para obtener más detalles.');
+                             $('#errorContainer').html('Error. Intente nuevamente más tarde');
                              //console.log('Error en la solicitud AJAX:', error);
                          }
                      },
@@ -409,7 +422,7 @@
                                      errorMessage += '</ul>';
                                      $('#errorContainer').html(errorMessage);
                                  } else {
-                                     $('#errorContainer').html('Error desconocido. Consulta la consola para obtener más detalles.');
+                                     $('#errorContainer').html('Error. Intente nuevamente más tarde');
                                      //console.log('Error en la solicitud AJAX:', error);
                                  }
                              },
@@ -522,7 +535,7 @@
                                      errorMessage += '</ul>';
                                      $('#errorContainer').html(errorMessage);
                                  } else {
-                                     $('#errorContainer').html('Error desconocido. Consulta la consola para obtener más detalles.');
+                                     $('#errorContainer').html('Error. Intente nuevamente más tarde');
                                      //console.log('Error en la solicitud AJAX:', error);
                                  }
                              },
