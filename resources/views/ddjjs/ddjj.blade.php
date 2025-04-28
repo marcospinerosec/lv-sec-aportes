@@ -22,7 +22,7 @@
                      </div>
                      <div style="display: flex; align-items: center; padding-top: 11px; padding-left: 10px; margin-left: 30px;">
                          <font style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif; margin-right: 10px;">Empresa:</font>
-                         <select class="form-control" id="empresa" name="empresa" style="width:300px;">
+                         <select class="form-control" id="empresa" name="empresa" style="width:300px;" required>
                              <option value=""/>Seleccionar...</option>
                              @foreach($empresas as $empresa)
                                  <option value="{{$empresa['IdEmpresa']}}" {{ session('filtro_empresa') == $empresa['IdEmpresa'] ? 'selected' : '' }}>
@@ -33,11 +33,11 @@
                          <div style="display: flex; align-items: center; gap: 10px;margin: 0 20px;">
                              <label for="mes" style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif;">Mes:</label>
 
-                             <input type="number" class="form-control" id="mes" name="mes" placeholder="mes" value="{{session('filtro_mes')}}" style="width: 80px;">
+                             <input type="number" class="form-control" id="mes" name="mes" placeholder="mes" value="{{session('filtro_mes')}}" style="width: 80px;" required>
                          </div>
                          <div style="display: flex; align-items: center; gap: 10px;">
                              <label for="year" style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif;">Año:</label>
-                             <input type="number" class="form-control" id="year" name="year" placeholder="año" value="{{session('filtro_year')}}" style="width: 80px;">
+                             <input type="number" class="form-control" id="year" name="year" placeholder="año" value="{{session('filtro_year')}}" style="width: 80px;" required>
                          </div>
                      </div>
 
@@ -226,89 +226,131 @@
              });
 
              $("#continuarBtn").click(function() {
-                 var empresa = $("#empresa").val();
-                 var mes = $("#mes").val();
-                 var year = $("#year").val();
-                 _token: '{{ csrf_token() }}'
-                 // Cambiar el texto del botón al inicio de la solicitud
-                 $("#continuarBtn").text('Cargando...');
-                 // Realizar una solicitud AJAX al controlador de Laravel
-                 $.ajax({
-                     type: 'POST',
-                     url: '{{ url('/procesar') }}',
-                     data: {
-                         empresa: empresa,
-                         mes: mes,
-                         year: year,
-                         _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
-                     },
-                     success: function(response) {
-                         $('.error-message').remove();
-                         // Manejar la respuesta del servidor, si es necesario
-                         //console.log('Respuesta del servidor:', response);
-                         // Cambiar el background de #float
-                         $("#float").css("background", "#FFFFFF"); // Nuevo color de fondo
-                         $("#float font").css("color", "#000000");
-                         $("#float label").css("color", "#000000");
-                         // Cambiar la imagen dentro de #float
-                         $("#float img").attr("src", "{{ asset('assets/img/Boton1off.png') }}"); // Nueva imagen
-                         $("#paso2").css("background", "#0275D8"); // Nuevo color de fondo
+                 event.preventDefault();  // Evitar que el formulario se envíe automáticamente
 
-                         // Cambiar la imagen dentro de #float
-                         $("#paso2 img").attr("src", "{{ asset('assets/img/Boton2.png') }}"); // Nueva imagen
-                         $("#tableEmpleados").css("color", "#FFFFFF"); // Nuevo color de fondo
+                 // Limpiar errores previos
+                 $('.error-message').remove();
 
-                         $("#btnCancelar").show();
-                         $("#btnOtroPeridodo").show();
-                         $("#btnEditarEmpleados").show();
-                         $("#btnContinuar2").show();
+                 // Validar los campos usando la validación HTML5
+                 var formIsValid = true;
+
+                 // Validación del campo 'empresa'
+                 var empresa = $("#empresa")[0];
+                 if (!empresa.checkValidity()) {
+                     formIsValid = false;
+                     // Mostrar borde rojo y permitir que el navegador muestre el mensaje
+                     $("#empresa").addClass('is-invalid');
+                     empresa.reportValidity(); // Esto hace que el navegador muestre el mensaje de error
+                 } else {
+                     $("#empresa").removeClass('is-invalid');
+                 }
+
+                 // Validación del campo 'mes'
+                 var mes = $("#mes")[0];
+                 if (!mes.checkValidity()) {
+                     formIsValid = false;
+                     $("#mes").addClass('is-invalid');
+                     mes.reportValidity(); // Mostrar el mensaje de error del navegador
+                 } else {
+                     $("#mes").removeClass('is-invalid');
+                 }
+
+                 // Validación del campo 'year'
+                 var year = $("#year")[0];
+                 if (!year.checkValidity()) {
+                     formIsValid = false;
+                     $("#year").addClass('is-invalid');
+                     year.reportValidity(); // Mostrar el mensaje de error del navegador
+                 } else {
+                     $("#year").removeClass('is-invalid');
+                 }
+
+                 // Si todos los campos son válidos, enviar la solicitud AJAX
+                 if (formIsValid) {
+                     var empresa = $("#empresa").val();
+                     var mes = $("#mes").val();
+                     var year = $("#year").val();
+                     _token: '{{ csrf_token() }}'
+                     // Cambiar el texto del botón al inicio de la solicitud
+                     $("#continuarBtn").text('Cargando...');
+                     // Realizar una solicitud AJAX al controlador de Laravel
+                     $.ajax({
+                         type: 'POST',
+                         url: '{{ url('/procesar') }}',
+                         data: {
+                             empresa: empresa,
+                             mes: mes,
+                             year: year,
+                             _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
+                         },
+                         success: function (response) {
+                             $('.error-message').remove();
+                             // Manejar la respuesta del servidor, si es necesario
+                             //console.log('Respuesta del servidor:', response);
+                             // Cambiar el background de #float
+                             $("#float").css("background", "#FFFFFF"); // Nuevo color de fondo
+                             $("#float font").css("color", "#000000");
+                             $("#float label").css("color", "#000000");
+                             // Cambiar la imagen dentro de #float
+                             $("#float img").attr("src", "{{ asset('assets/img/Boton1off.png') }}"); // Nueva imagen
+                             $("#paso2").css("background", "#0275D8"); // Nuevo color de fondo
+
+                             // Cambiar la imagen dentro de #float
+                             $("#paso2 img").attr("src", "{{ asset('assets/img/Boton2.png') }}"); // Nueva imagen
+                             $("#tableEmpleados").css("color", "#FFFFFF"); // Nuevo color de fondo
+
+                             $("#btnCancelar").show();
+                             $("#btnOtroPeridodo").show();
+                             $("#btnEditarEmpleados").show();
+                             $("#btnContinuar2").show();
 
 
-                         // Actualizar la tabla con la respuesta HTML
-                         $("#ListaEmpleadosActual").html(response.tabla);
-                         $("#txtFOriginal").val(formatDate(response.original));
-                         $("#txtFVencimiento").val(formatDate(response.vencimiento));
-                         $("#txtIntereses").val(response.intereses);
-                         $("#spanIntereses").html(response.intereses);
-                         $("#txtTotal").val(response.total);
-                         $("#spanTotal").html(response.total);
-                         // Limpiar mensajes de error anteriores
-                         $('#errorContainer').html('');
-                         $("#paso2").css("display","flex");
-                         $("#continuarBtn").hide();
-                         // Ocultar el botón
-                         //$(this).hide();
-                     },
-                     error: function(error) {
-                         // Limpiar errores anteriores
-                         $('.error-message').remove();
+                             // Actualizar la tabla con la respuesta HTML
+                             $("#ListaEmpleadosActual").html(response.tabla);
+                             $("#txtFOriginal").val(formatDate(response.original));
+                             $("#txtFVencimiento").val(formatDate(response.vencimiento));
+                             $("#txtIntereses").val(response.intereses);
+                             $("#spanIntereses").html(response.intereses);
+                             $("#txtTotal").val(response.total);
+                             $("#spanTotal").html(response.total);
+                             // Limpiar mensajes de error anteriores
+                             $('#errorContainer').html('');
+                             $("#paso2").css("display", "flex");
+                             $("#continuarBtn").hide();
+                             // Ocultar el botón
+                             //$(this).hide();
+                         },
+                         error: function (error) {
+                             // Limpiar errores anteriores
+                             $('.error-message').remove();
 
-                         if (error.responseJSON && error.responseJSON.errors) {
-                             var errors = error.responseJSON.errors;
+                             if (error.responseJSON && error.responseJSON.errors) {
+                                 var errors = error.responseJSON.errors;
 
-                             $.each(errors, function(field, messages) {
-                                 // messages es un array, pueden ser varios errores para un mismo campo
-                                 var message = messages[0]; // tomamos solo el primer error
+                                 $.each(errors, function (field, messages) {
+                                     // messages es un array, pueden ser varios errores para un mismo campo
+                                     var message = messages[0]; // tomamos solo el primer error
 
-                                 if (field === 'empresa') {
-                                     $('#empresa').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
-                                 } else if (field === 'mes') {
-                                     $('#mes').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
-                                 } else if (field === 'year') {
-                                     $('#year').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
-                                 }
-                             });
-                         } else {
-                             $('#errorContainer').html('Error. Intente nuevamente más tarde');
-                             //console.log('Error en la solicitud AJAX:', error);
+                                     /*if (field === 'empresa') {
+                                         $('#empresa').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
+                                     } else if (field === 'mes') {
+                                         $('#mes').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
+                                     } else if (field === 'year') {
+                                         $('#year').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
+                                     }*/
+                                 });
+                             } else {
+                                 $('#errorContainer').html('Error. Intente nuevamente más tarde');
+                                 //console.log('Error en la solicitud AJAX:', error);
+                             }
+                         },
+                         complete: function () {
+                             // Restaurar el texto del botón al finalizar la solicitud
+                             $("#continuarBtn").text('Aceptar');
+
                          }
-                     },
-                     complete: function() {
-                         // Restaurar el texto del botón al finalizar la solicitud
-                         $("#continuarBtn").text('Aceptar');
-
-                     }
-                 });
+                     });
+                 }
              });
 
              // Configurar el calendario en español
