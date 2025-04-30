@@ -104,7 +104,8 @@ class DDJJController extends Controller
             // Verificar si la consulta tiene resultados
             if (!empty($result['result'])) {
                 $error = "Alguno de los empleados tiene el importe para la base de la cuota de afiliación menor al permitido, por favor verifique";
-                return response()->json(['errors' => $error], 422);
+                //return response()->json(['errors' => $error], 422);
+                return response()->json(['errors' => ['debajo_minimo' => [$error]]], 422);
             }
         }
 

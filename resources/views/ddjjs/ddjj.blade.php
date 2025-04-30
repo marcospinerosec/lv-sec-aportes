@@ -329,8 +329,16 @@
 
                                  $.each(errors, function (field, messages) {
                                      // messages es un array, pueden ser varios errores para un mismo campo
-                                     var message = messages[0]; // tomamos solo el primer error
-
+                                     messages.forEach(function(message) {
+                                         if (field === 'debajo_minimo') {
+                                             if (confirm(message + "\n¿Desea modificar los empleados?")) {
+                                                 // Redirigir a la URL de edición
+                                                 window.location.href = "{{ route('empleados.index') }}?empresa=" + encodeURIComponent(empresa);;
+                                             }
+                                         } else {
+                                             jalert(message); // O el alert que uses normalmente
+                                         }
+                                     });
                                      /*if (field === 'empresa') {
                                          $('#empresa').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
                                      } else if (field === 'mes') {
