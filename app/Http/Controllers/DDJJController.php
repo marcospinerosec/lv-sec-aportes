@@ -591,7 +591,7 @@ class DDJJController extends Controller
 </tbody></table>';
         // ... (Agrega el contenido de la tabla aquí)
         //$tablaHtml .= '</table>';
-        Log::info('Vencimiento pasado: ' .date_format($venc, 'Y-m-d') , []);
+        //Log::info('Vencimiento pasado: ' .date_format($venc, 'Y-m-d') , []);
         // Devolver la tabla HTML como respuesta
         return response()->json(['tabla' => $tablaHtml, 'original' => date_format($vencini, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.'),'existeDeclaracion' => $existeDeclaracion]);
     }

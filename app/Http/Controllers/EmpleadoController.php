@@ -46,6 +46,16 @@ class EmpleadoController extends Controller
 
             $empleados = json_decode($response->getBody(), true);
         }
+        if(($request->query('empresa'))&&($request->query('mes'))&&($request->query('year'))) {
+            $empresa_id = $request->query('empresa');
+            $mes = $request->query('mes');
+            $year = $request->query('year');
+            $response = $client->get(\Constants\Constants::API_URL.'/importe-minimo-por-empresa/' . $empresa_id.'/'.$mes.'/'.$year);
+
+            $minimo = json_decode($response->getBody(), true);
+            log::info(print_r($minimo, true));
+
+        }
         //dd($empleados);
         //return view('home',compact('empresas'));
 

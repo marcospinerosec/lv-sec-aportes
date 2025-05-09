@@ -380,10 +380,12 @@
              $("#btnEditarEmpleados").click(function() {
                  // Obtener el valor del parámetro empresa (puedes cambiar esto según tus necesidades)
                  var empresa = $("#empresa").val();
+                 var mes = $("#mes").val();
+                 var year = $("#year").val();
 
                  if(empresa){
                      // Construir la URL con el parámetro empresa
-                     var nuevaURL = "{{ route('empleados.index') }}?empresa=" + encodeURIComponent(empresa);
+                     var nuevaURL = "{{ route('empleados.index') }}?empresa=" + encodeURIComponent(empresa)+"&mes=" + encodeURIComponent(mes)+"&year=" + encodeURIComponent(year);
 
                      // Redirigir a la nueva URL
                      window.location.href = nuevaURL;
