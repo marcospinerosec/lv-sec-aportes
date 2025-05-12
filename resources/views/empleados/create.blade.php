@@ -73,29 +73,6 @@
                             </div>
 
                         </div>
-
-                        <div class="row">
-                            <div class="col-md-5">
-                                <div class="form-group">
-                                    <label for="importeArt100">Rem.Art.100</label>
-                                    <input type="number" required maxlength="200" name="importeArt100" id="importeArt100" value="{{old('importeArt100')}}" class="form-control" placeholder="Rem.Art.100">
-                                </div>
-                            </div>
-                            <div class="col-md-7">
-                                <div class="form-group">
-                                    <label for="novedades">Novedades</label>
-                                    <select class="form-control js-example-basic-single" id="novedades" name="novedades" onchange="cambiarNovedad()">
-                                        <option value=""/>Seleccionar...</option>
-                                        @foreach($tiposNovedades as $novedad)
-                                            <option value="{{$novedad['IdTipoNovedad']}}" {{ (old('novedades')) ? 'selected' : '' }}>
-                                                {{$novedad['Novedad']}}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
-
-                        </div>
                         <div class="row">
                             <div class="col-md-10">
                                 <div class="form-group">
@@ -114,17 +91,50 @@
                         </div>
                         <div class="row">
                             <div class="col-md-5">
+                                <div class="form-group">
+                                    <label for="importeArt100">Rem.Art.100</label>
+                                    <input type="text" required maxlength="200" name="importeArt100" id="importeArt100" value="{{old('importeArt100')}}" class="form-control" placeholder="Rem.Art.100">
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-7">
+                                <div class="form-group" id="divCuota">
+                                    <label for="importeCuotaAfil">Rem.Cuota Afil.</label>
+                                    <input type="text"  maxlength="200" name="importeCuotaAfil" id="importeCuotaAfil" value="{{old('importeCuotaAfil')}}" class="form-control" placeholder="Rem.Art.100">
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <label for="novedades">Novedades</label>
+                                    <select class="form-control js-example-basic-single" id="novedades" name="novedades" onchange="cambiarNovedad()">
+                                        <option value=""/>Seleccionar...</option>
+                                        @foreach($tiposNovedades as $novedad)
+                                            <option value="{{$novedad['IdTipoNovedad']}}" {{ (old('novedades')) ? 'selected' : '' }}>
+                                                {{$novedad['Novedad']}}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-5">
                                 <div class="form-group" id="divEgreso">
                                     <label for="egreso">Egreso</label>
                                     <input type="text" maxlength="200" name="egreso" id="egreso" value="{{old('egreso')}}" class="form-control" placeholder="Egreso">
                                 </div>
                             </div>
-                            <div class="col-md-7">
-                                <div class="form-group" id="divCuota">
-                                    <label for="importeCuotaAfil">Rem.Cuota Afil.</label>
-                                    <input type="number"  maxlength="200" name="importeCuotaAfil" id="importeCuotaAfil" value="{{old('importeCuotaAfil')}}" class="form-control" placeholder="Rem.Art.100">
-                                </div>
-                            </div>
+
 
                         </div>
                     </div>

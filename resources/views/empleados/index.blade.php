@@ -53,6 +53,12 @@
             <a class="btn btn-secondary" style="float: left;" href="{{ url('/ddjjs/ddjj') }}">
                 <i class="fa fa-arrow-left"></i> Volver
             </a>
+            @if($minimo)
+                <div style="float: right; font-weight: bold; padding-top: 6px;">
+                    Importe mínimo ${{number_format($minimo, 2, ',', '.') }}
+                </div>
+            @endif
+
         </div>
         <br><br>
         <div class="box-body responsive-table">
@@ -80,7 +86,31 @@
                         <tbody>
             @foreach($empleados as $empleado)
 
-                <tr>
+
+                <tr
+                    @php
+                        $year = session('filtro_year');
+                        $mes = session('filtro_mes');
+                        $anioMesIngreso = '';
+                        if (!empty($empleado['FechaIngreso'])) {
+                            $anioMesIngreso = date('Y', strtotime($empleado['FechaIngreso'])) * 100 + date('n', strtotime($empleado['FechaIngreso']));
+                        }
+                        $anioMesActual = $year * 100 + $mes;
+                    @endphp
+
+                    @if(
+                        $empleado['Afiliado'] == 1 &&
+                        $empleado['ImporteCuotaAfil'] < $minimo &&
+
+                        (!$empleado['Novedad']) &&
+                        ($anioMesIngreso != $anioMesActual)
+                    )
+                        style="background-color: #f8d7da;"
+                    data-toggle="tooltip"
+                    data-placement="top"
+                    title="El importe de la cuota afiliado es menor al mínimo (${{$minimo}})"
+                    @endif
+                >
 
                     <td>{{$empleado['Cuil']}}</td>
                     <td>{{$empleado['Nombre']}}</td>
@@ -147,8 +177,13 @@
                     "sSortDescending": ": Activar para ordenar la columna de manera descendente"
                 }
             };
-            $('#tEmpleados').DataTable({
+            var table = $('#tEmpleados').DataTable({
                 "language": spanishTranslation
+            });
+            $('[data-toggle="tooltip"]').tooltip();
+
+            table.on('draw', function() {
+                $('[data-toggle="tooltip"]').tooltip();
             });
         });
         function confirmDel(url){
@@ -158,6 +193,9 @@
             else
                 return false ;
         }
+
+
+
 
     </script>
 @endsection

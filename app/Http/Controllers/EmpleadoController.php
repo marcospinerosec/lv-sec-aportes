@@ -32,7 +32,8 @@ class EmpleadoController extends Controller
     public function index(Request $request)
     {
 
-
+        $mes=($request->session()->get('filtro_mes'))?$request->session()->get('filtro_mes'):null;
+        $year=($request->session()->get('filtro_year'))?$request->session()->get('filtro_year'):null;
         $client = new Client();
 
         $response = $client->get(\Constants\Constants::API_URL.'/empresa-usuario/' . auth()->user()->IdUsuario);
@@ -46,20 +47,19 @@ class EmpleadoController extends Controller
 
             $empleados = json_decode($response->getBody(), true);
         }
-        if(($request->query('empresa'))&&($request->query('mes'))&&($request->query('year'))) {
+        if(($request->query('empresa'))&&($mes)&&($year)) {
             $empresa_id = $request->query('empresa');
-            $mes = $request->query('mes');
-            $year = $request->query('year');
+
             $response = $client->get(\Constants\Constants::API_URL.'/importe-minimo-por-empresa/' . $empresa_id.'/'.$mes.'/'.$year);
 
             $minimo = json_decode($response->getBody(), true);
-            log::info(print_r($minimo, true));
+            //log::info(print_r($minimo, true));
 
         }
         //dd($empleados);
         //return view('home',compact('empresas'));
 
-        return view('empleados.index', ['empresas' => $result['result'],'empleados' => $empleados['result']]);
+        return view('empleados.index', ['empresas' => $result['result'],'empleados' => $empleados['result'],'minimo' => $minimo['result'][0]['ImporteMinimo']]);
 
     }
 
@@ -250,7 +250,7 @@ class EmpleadoController extends Controller
 
 
 
-        $arrayValidation = [ 'cuil'=>'required','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100'=>'required','categoria'=>'required'];
+        $arrayValidation = [ 'cuil'=>'required','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100' => 'required|numeric|min:0','categoria'=>'required'];
 
         if ($idNovedad){
             $arrayValidation['egreso']='required|date';
@@ -259,7 +259,7 @@ class EmpleadoController extends Controller
             $egreso=null;
         }
         if ($afiliado==1){
-            $arrayValidation['importeCuotaAfil']='required';
+            $arrayValidation['importeCuotaAfil']='required|numeric|min:0';
         }
 
         $this->validate($request,$arrayValidation);
@@ -374,7 +374,7 @@ class EmpleadoController extends Controller
 
 
 
-        $arrayValidation = [ 'cuil'=>'required','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100'=>'required','categoria'=>'required'];
+        $arrayValidation = [ 'cuil'=>'required','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100'=>'required|numeric|min:0','categoria'=>'required'];
 
         if ($idNovedad){
             $arrayValidation['egreso']='required|date';
@@ -383,7 +383,7 @@ class EmpleadoController extends Controller
             $egreso=null;
         }
         if ($afiliado==1){
-            $arrayValidation['importeCuotaAfil']='required';
+            $arrayValidation['importeCuotaAfil']='required|numeric|min:0';
         }
 
         $this->validate($request,$arrayValidation);

@@ -93,12 +93,17 @@
                      <div style=" float: left;  position: relative;     height: auto;">
                          <img src="{{ asset('assets/img//Boton3.png')}}" >
                      </div>
-                     <div id="divFechas" style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
-                         <font style="color: #ffffff; font-size: 1.25rem; font-family: Arial;"> Vencimiento original: </font> <input type="text" style="width:150px" id="txtFOriginal" name="txtFOriginal" disabled>
-                         <br>
-                         <br>
-                         <font style="color: #ffffff; font-size: 1.25rem; font-family: Arial;"> Fecha estimada de pago: </font> <input type="text" style="width:150px" id="txtFVencimiento" name="txtFVencimiento">
+                     <div id="divFechas" style="padding-top: 11px; padding-left: 10px; margin-left: 30px; position: relative; float: left; height: auto;">
+                         <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                             <font style="color: #ffffff; font-size: 1.25rem; font-family: Arial; margin-right: 50px;">Vencimiento original:</font>
+                             <input class="form-control" type="text" style="width:150px" id="txtFOriginal" name="txtFOriginal" disabled>
+                         </div>
+                         <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                             <font style="color: #ffffff; font-size: 1.25rem; font-family: Arial; margin-right: 10px;">Fecha estimada de pago:</font>
+                             <input class="form-control" type="text" style="width:150px" id="txtFVencimiento" name="txtFVencimiento">
+                         </div>
                      </div>
+
 
                      <div style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
 
@@ -172,6 +177,8 @@
 
      <script>
          $(document).ready(function() {
+
+
              function formatDate(dateString) {
                  // Asegurarse de que la fecha sea en formato 'yyyy-mm-dd' sin hora
                  let date = new Date(dateString + 'T00:00:00'); // Añadir una hora para evitar que el tiempo cambie la fecha
@@ -225,7 +232,7 @@
                  $("#continuarVencimiento").show();
              });
 
-             $("#continuarBtn").click(function() {
+             $("#continuarBtn").click(function(event) {
                  event.preventDefault();  // Evitar que el formulario se envíe automáticamente
 
                  // Limpiar errores previos
@@ -380,12 +387,11 @@
              $("#btnEditarEmpleados").click(function() {
                  // Obtener el valor del parámetro empresa (puedes cambiar esto según tus necesidades)
                  var empresa = $("#empresa").val();
-                 var mes = $("#mes").val();
-                 var year = $("#year").val();
+
 
                  if(empresa){
                      // Construir la URL con el parámetro empresa
-                     var nuevaURL = "{{ route('empleados.index') }}?empresa=" + encodeURIComponent(empresa)+"&mes=" + encodeURIComponent(mes)+"&year=" + encodeURIComponent(year);
+                     var nuevaURL = "{{ route('empleados.index') }}?empresa=" + encodeURIComponent(empresa);
 
                      // Redirigir a la nueva URL
                      window.location.href = nuevaURL;
@@ -609,7 +615,7 @@
              $("#BtVerListaEmpleados").click(function() {
                  alert("Mostrar lista de empleados");
              });
-             $("#continuarBtn").trigger("click");
+             $("#continuarBtn").click();
          });
 
      </script>

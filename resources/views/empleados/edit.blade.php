@@ -53,7 +53,7 @@
                             <div class="col-md-5">
                                 <div class="form-group">
                                     <label for="ingreso">Ingreso</label>
-                                    <input type="text" required maxlength="200" name="ingreso" id="ingreso" value="{{old('ingreso',($empleado[0]['FechaIngreso'])?date('Y-m-d', strtotime($empleado[0]['FechaIngreso'])):'')}}" class="form-control" placeholder="Ingreso">
+                                    <input type="text" required maxlength="200" name="ingreso" id="ingreso" value="{{old('ingreso',($empleado[0]['FechaIngreso'])?date('d/m/Y', strtotime($empleado[0]['FechaIngreso'])):'')}}" class="form-control" placeholder="Ingreso">
                                 </div>
                             </div>
                             <div class="col-md-7">
@@ -75,28 +75,7 @@
 
                         </div>
 
-                        <div class="row">
-                            <div class="col-md-5">
-                                <div class="form-group">
-                                    <label for="importeArt100">Rem.Art.100</label>
-                                    <input type="number" required maxlength="200" name="importeArt100" id="importeArt100" value="{{old('importeArt100',$empleado[0]['ImporteArt100'])}}" class="form-control" placeholder="Rem.Art.100">
-                                </div>
-                            </div>
-                            <div class="col-md-7">
-                                <div class="form-group">
-                                    <label for="novedades">Novedades</label>
-                                    <select class="form-control js-example-basic-single" id="novedades" name="novedades" onchange="cambiarNovedad()">
-                                        <option value=""/>Seleccionar...</option>
-                                        @foreach($tiposNovedades as $novedad)
-                                            <option value="{{$novedad['IdTipoNovedad']}}" {{ (old('novedades', $empleado[0]['IdTipoNovedad']) == $novedad['IdTipoNovedad']) ? 'selected' : '' }}>
-                                                {{$novedad['Novedad']}}
-                                            </option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                            </div>
 
-                        </div>
                         <div class="row">
                             <div class="col-md-10">
                                 <div class="form-group">
@@ -113,21 +92,54 @@
                             </div>
 
                         </div>
+
                         <div class="row">
-                            <div class="col-md-5">
-                                <div class="form-group" id="divEgreso">
-                                    <label for="egreso">Egreso</label>
-                                    <input type="text" maxlength="200" name="egreso" id="egreso" value="{{old('egreso',($empleado[0]['FechaEgreso'])?date('Y-m-d', strtotime($empleado[0]['FechaEgreso'])):'')}}" class="form-control" placeholder="Egreso">
+                            <div class="col-md-7">
+                                <div class="form-group">
+                                    <label for="importeArt100">Rem.Art.100</label>
+                                    <input type="text" required maxlength="200" name="importeArt100" id="importeArt100" value="{{old('importeArt100',$empleado[0]['ImporteArt100'])}}" class="form-control" placeholder="Rem.Art.100">
                                 </div>
                             </div>
+
+
+                        </div>
+                        <div class="row">
+
                             <div class="col-md-7">
                                 <div class="form-group" id="divCuota">
                                     <label for="importeCuotaAfil">Rem.Cuota Afil.</label>
-                                    <input type="number" maxlength="200" name="importeCuotaAfil" id="importeCuotaAfil" value="{{old('importeCuotaAfil',$empleado[0]['ImporteCuotaAfil'])}}" class="form-control" placeholder="Rem.Art.100">
+                                    <input type="text" maxlength="200" name="importeCuotaAfil" id="importeCuotaAfil" value="{{old('importeCuotaAfil',$empleado[0]['ImporteCuotaAfil'])}}" class="form-control" placeholder="Rem.Art.100">
                                 </div>
                             </div>
 
                         </div>
+                    </div>
+                    <div class="row">
+
+                        <div class="col-md-7">
+                            <div class="form-group">
+                                <label for="novedades">Novedades</label>
+                                <select class="form-control js-example-basic-single" id="novedades" name="novedades" onchange="cambiarNovedad()">
+                                    <option value=""/>Seleccionar...</option>
+                                    @foreach($tiposNovedades as $novedad)
+                                        <option value="{{$novedad['IdTipoNovedad']}}" {{ (old('novedades', $empleado[0]['IdTipoNovedad']) == $novedad['IdTipoNovedad']) ? 'selected' : '' }}>
+                                            {{$novedad['Novedad']}}
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <div class="form-group" id="divEgreso">
+                                <label for="egreso">Egreso</label>
+                                <input type="text" maxlength="200" name="egreso" id="egreso" value="{{old('egreso',($empleado[0]['FechaEgreso'])?date('d/m/Y', strtotime($empleado[0]['FechaEgreso'])):'')}}" class="form-control" placeholder="Egreso">
+                            </div>
+                        </div>
+
+
                     </div>
 
                     <div class="box-footer">
@@ -144,13 +156,13 @@
             $('.js-example-basic-single').select2();
             // Configura el selector de fecha en el campo txtFVencimiento
             $("#ingreso").datepicker({
-                dateFormat: 'yy-mm-dd', // Formato de fecha deseado
+                dateFormat: 'dd/mm/yy', // Formato de fecha deseado
                 showButtonPanel: true,
                 changeMonth: true,
                 changeYear: true,
             });
             $("#egreso").datepicker({
-                dateFormat: 'yy-mm-dd', // Formato de fecha deseado
+                dateFormat: 'dd/mm/yy', // Formato de fecha deseado
                 showButtonPanel: true,
                 changeMonth: true,
                 changeYear: true,
