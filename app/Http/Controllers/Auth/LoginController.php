@@ -62,7 +62,7 @@ class LoginController extends Controller
     }
 
 
-    protected function attemptLogin(Request $request)
+    protected function attemptLogin_new(Request $request)
     {
         $credentials = [
             'username' => $request->input($this->username()),
@@ -89,7 +89,7 @@ class LoginController extends Controller
 
 
 
-    protected function attemptLogin_old(Request $request)
+    protected function attemptLogin(Request $request)
     {
         $username = $request->input($this->username());
         $password = $request->input('password');
@@ -97,18 +97,18 @@ class LoginController extends Controller
         // Llama a tu procedimiento almacenado para validar las credenciales
         //$result = DB::select('CALL sp_ValidateUser(?, ?)', [$username, $password]);
 
-        /*$result=DB::select(DB::raw("exec ADM_EsUsuario :Param1, :Param2"),[
+        $result=DB::select(DB::raw("exec ADM_EsUsuario :Param1, :Param2"),[
             ':Param1' => $username,
             ':Param2' => $password,
-        ]);*/
+        ]);
 
-        $client = new Client();
+        /*$client = new Client();
 
 
 
         $response = $client->get(\Constants\Constants::API_URL.'/verifica-usuario/' . $username . '/' . $password);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
 
         //dd($result);
@@ -117,8 +117,8 @@ class LoginController extends Controller
             $firstResult = $result['result'][0];
 
             // Acceder a los datos
-            $idUsuario = $firstResult['IdUsuario'];
-            $usuarioNT = $firstResult['Nombre'];
+            $idUsuario = $firstResult->IdUsuario;
+            $usuarioNT = $firstResult->Nombre;
             $user = new User([
                 'IdUsuario' => $idUsuario,
                 'Nombre' => $usuarioNT,

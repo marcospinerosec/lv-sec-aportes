@@ -33,11 +33,11 @@
                          <div style="display: flex; align-items: center; gap: 10px;margin: 0 20px;">
                              <label for="mes" style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif;">Mes:</label>
 
-                             <input type="number" class="form-control" id="mes" name="mes" placeholder="mes" value="{{session('filtro_mes')}}" style="width: 80px;" required>
+                             <input type="text" class="form-control" id="mes" name="mes" placeholder="mes" value="{{session('filtro_mes')}}" style="width: 100px;" required>
                          </div>
                          <div style="display: flex; align-items: center; gap: 10px;">
                              <label for="year" style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif;">Año:</label>
-                             <input type="number" class="form-control" id="year" name="year" placeholder="año" value="{{session('filtro_year')}}" style="width: 80px;" required>
+                             <input type="text" class="form-control" id="year" name="year" placeholder="año" value="{{session('filtro_year')}}" style="width: 100px;" required>
                          </div>
                      </div>
 

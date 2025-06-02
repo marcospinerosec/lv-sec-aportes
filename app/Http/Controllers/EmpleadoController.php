@@ -223,7 +223,7 @@ class EmpleadoController extends Controller
 
 
         // Ensure that empty values are set to null
-        $empresa = empty(request('empresa')) ? null : request('empresa');
+
         $cuil = empty(request('cuil')) ? null : request('cuil');
         $hCuil = empty(request('hCuil')) ? null : request('hCuil');
         $nombre = empty(request('nombre')) ? null : request('nombre');
@@ -286,16 +286,40 @@ class EmpleadoController extends Controller
 
 
         // Construye la URL directamente
-        $url = \Constants\Constants::API_URL . '/empleados-agregar/' . rawurlencode($empresa) . '/' . rawurlencode($cuil) . '/' . rawurlencode($nombre) . '/' . rawurlencode($idCategoria) . '/' . ($afiliado ? rawurlencode($afiliado) : '0') . '/' . rawurlencode($ingreso) . '/' . ($idNovedad !== null ? rawurlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? rawurlencode($egreso) : 'null') . '/' . rawurlencode($ia100) . '/' . ($ica !== null ? rawurlencode($ica) : 'null') . '/' . rawurlencode(auth()->user()->IdUsuario);
+        /*$url = \Constants\Constants::API_URL . '/empleados-agregar/' . rawurlencode($empresa) . '/' . rawurlencode($cuil) . '/' . rawurlencode($nombre) . '/' . rawurlencode($idCategoria) . '/' . ($afiliado ? rawurlencode($afiliado) : '0') . '/' . rawurlencode($ingreso) . '/' . ($idNovedad !== null ? rawurlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? rawurlencode($egreso) : 'null') . '/' . rawurlencode($ia100) . '/' . ($ica !== null ? rawurlencode($ica) : 'null') . '/' . rawurlencode(auth()->user()->IdUsuario);
 
 
-        Log::debug('URL: '.$url);
+        Log::debug('URL: '.$url);*/
 
-// Rest of your code...
 
-        //Log::debug('url: '.$url);
+        // Datos a enviar en el cuerpo de la solicitud PUT
+        $data = [
+            'idEmpresa' => $empresa,
+            'cuil' => $cuil,
+            'nombre' => $nombre,
+            'idCategoria' => $idCategoria,
+            'afiliado' => $afiliado,
+            'ingreso' => $ingreso,
+            'idNovedad' => $idNovedad !== null ? $idNovedad : 'null',
+            'egreso' => $egreso !== null ? $egreso : 'null',
+            'ia100' => $ia100,
+            'ica' => $ica,
+            'idUsuario' => auth()->user()->IdUsuario
+        ];
+
+// Construye la URL directamente sin los parámetros
+        $url = \Constants\Constants::API_URL . '/empleados-agregar';
+
+        //Log::debug('URL: ' . $url);
+
+// Realiza la solicitud PUT enviando el cuerpo de la solicitud como JSON
+        $response = $client->put($url, [
+            'json' => $data // Usamos 'json' para enviar los datos en el cuerpo de la solicitud
+        ]);
+
+
 // Realiza la solicitud PUT
-        $response = $client->put($url);
+        //$response = $client->put($url);
 
         $result = json_decode($response->getBody(), true);
 
@@ -411,12 +435,39 @@ class EmpleadoController extends Controller
 
         // Construye la URL directamente
 
-        $url = \Constants\Constants::API_URL . '/empleados-actualizar/' . rawurlencode($idEmpleado) . '/' . rawurlencode($cuil) . '/' . rawurlencode($this->convertirMayusculasEspeciales($nombre)) . '/' . rawurlencode($idCategoria) . '/' . ($afiliado ? rawurlencode($afiliado) : '0') . '/' . rawurlencode($ingreso) . '/' . ($idNovedad !== null ? rawurlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? rawurlencode($egreso) : 'null') . '/' . rawurlencode($ia100) . '/' . ($ica !== null ? rawurlencode($ica) : 'null') . '/' . rawurlencode(auth()->user()->IdUsuario);
+        /*$url = \Constants\Constants::API_URL . '/empleados-actualizar/' . rawurlencode($idEmpleado) . '/' . rawurlencode($cuil) . '/' . rawurlencode($this->convertirMayusculasEspeciales($nombre)) . '/' . rawurlencode($idCategoria) . '/' . ($afiliado ? rawurlencode($afiliado) : '0') . '/' . rawurlencode($ingreso) . '/' . ($idNovedad !== null ? rawurlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? rawurlencode($egreso) : 'null') . '/' . rawurlencode($ia100) . '/' . ($ica !== null ? rawurlencode($ica) : 'null') . '/' . rawurlencode(auth()->user()->IdUsuario);
 
         $headers = [
             'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8',
         ];
-        $response = $client->put($url, ['headers' => $headers]);
+        $response = $client->put($url, ['headers' => $headers]);*/
+
+        Log::debug('Codificación antes de convertir: ' . mb_detect_encoding($nombre));
+
+        if ($nombre && !mb_check_encoding($nombre, 'UTF-8')) {
+            $nombre = utf8_encode($nombre);  // Codificar a UTF-8
+        }
+
+        Log::debug('Nombre después de la conversión: ' . $nombre);
+
+        $response = $client->put(\Constants\Constants::API_URL . '/empleados-actualizar/' . $idEmpleado, [
+            'form_params' => [
+                'cuil' => $cuil,
+                'nombre' => $this->convertirMayusculasEspeciales($nombre),
+                'idCategoria' => $idCategoria,
+                'afiliado' => $afiliado ?? 0,
+                'ingreso' => $ingreso,
+                'idNovedad' => $idNovedad ?? 'null',
+                'egreso' => $egreso ?? 'null',
+                'ia100' => $ia100,
+                'ica' => $ica ?? 'null',
+                'idUsuario' => auth()->user()->IdUsuario
+            ],
+            'headers' => [
+                'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8',
+            ]
+        ]);
+
 
 
         $result = json_decode($response->getBody(), true);

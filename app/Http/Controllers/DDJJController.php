@@ -725,7 +725,24 @@ class DDJJController extends Controller
 
         $numero++;
 
-        $response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj/' . $empresa . '/' . $mes . '/' . $year . '/0/' . $numero . '/' . $intereses . '/' . $venc . '/' . $vencimientoOriginal . '/0/' . auth()->user()->IdUsuario);
+        /*$response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj/' . $empresa . '/' . $mes . '/' . $year . '/0/' . $numero . '/' . $intereses . '/' . $venc . '/' . $vencimientoOriginal . '/0/' . auth()->user()->IdUsuario);*/
+
+        $data = [
+            'empresa' => $empresa,
+            'mes' => $mes,
+            'year' => $year,
+            'intereses' => 0,
+            'numero' => $numero,
+            'interesesPFT' => $intereses,
+            'vencimiento' => $venc,
+            'vencimientoOriginal' => $vencimientoOriginal,
+            'mp' => 0,  // Si no se usa, puedes dejarlo en 0 o eliminarlo
+            'idUsuario' => auth()->user()->IdUsuario
+        ];
+
+        $response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj', [
+            'json' => $data
+        ]);
 
         $result = json_decode($response->getBody(), true);
 
