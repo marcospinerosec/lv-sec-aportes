@@ -25,8 +25,8 @@
                          <select class="form-control" id="empresa" name="empresa" style="width:300px;" required>
                              <option value=""/>Seleccionar...</option>
                              @foreach($empresas as $empresa)
-                                 <option value="{{$empresa['IdEmpresa']}}" {{ session('filtro_empresa') == $empresa['IdEmpresa'] ? 'selected' : '' }}>
-                                     {{$empresa['Codigo']}} - {{$empresa['NombreReal']}}
+                                 <option value="{{$empresa->IdEmpresa}}" {{ session('filtro_empresa') == $empresa->IdEmpresa ? 'selected' : '' }}>
+                                     {{$empresa->Codigo}} - {{$empresa->NombreReal}}
                                  </option>
                              @endforeach
                          </select>

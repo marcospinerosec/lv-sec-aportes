@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
 use DB;
 use Illuminate\Support\Facades\Log;
@@ -30,24 +31,24 @@ class DDJJController extends Controller
      */
     public function index()
     {
-        /*$empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
+        $empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
             ':Param1' => auth()->user()->IdUsuario,
         ]);
-        //dd($empresas);*/
+        //dd($empresas);
 
 
 
-        $client = new Client();
+        /*$client = new Client();
 
         $response = $client->get(\Constants\Constants::API_URL.'/empresa-usuario/' . auth()->user()->IdUsuario);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
 
 
         //return view('home',compact('empresas'));
 
-        return view('ddjjs.ddjj', ['empresas' => $result['result']]);
+        return view('ddjjs.ddjj', ['empresas' => $empresas]);
     }
 
     public function procesar(Request $request)
@@ -83,47 +84,47 @@ class DDJJController extends Controller
 
 
 
-        $client = new Client();
+        //$client = new Client();
         // Realizar el procesamiento necesario aquí
 
         if (intval($year) * 100 + intval($mes) >= 201911) {
-            /*$verifica = DB::select(DB::raw("exec DDJJ_VerificaEmpleadosPorDebajoMinimo :Param1, :Param2, :Param3"), [
+            $verifica = DB::select(DB::raw("exec DDJJ_VerificaEmpleadosPorDebajoMinimo :Param1, :Param2, :Param3"), [
                 ':Param1' => $empresa,
                 ':Param2' => $mes,
                 ':Param3' => $year,
-            ]);*/
+            ]);
 
 
 
-            $response = $client->get(\Constants\Constants::API_URL.'/verifica-empleado-debajo-minimo/' . $empresa.'/'.$mes.'/'.$year);
+            /*$response = $client->get(\Constants\Constants::API_URL.'/verifica-empleado-debajo-minimo/' . $empresa.'/'.$mes.'/'.$year);
 
-            $result = json_decode($response->getBody(), true);
+            $result = json_decode($response->getBody(), true);*/
 
-            //dd($result);
+            //dd($verifica);
 
             // Verificar si la consulta tiene resultados
-            if (!empty($result['result'])) {
+            if (!empty($verifica)) {
                 $error = "Alguno de los empleados tiene el importe para la base de la cuota de afiliación menor al permitido, por favor verifique";
                 //return response()->json(['errors' => $error], 422);
                 return response()->json(['errors' => ['debajo_minimo' => [$error]]], 422);
             }
         }
 
-        /*$rsEmpresa=DB::select(DB::raw("exec DDJJ_EmpresaPorId :Param1"),[
+        $rsEmpresa=DB::select(DB::raw("exec DDJJ_EmpresaPorId :Param1"),[
             ':Param1' => $empresa,
-        ]);*/
+        ]);
 
-        $response = $client->get(\Constants\Constants::API_URL.'/empresa/' . $empresa);
+        /*$response = $client->get(\Constants\Constants::API_URL.'/empresa/' . $empresa);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
-        //dd($result);
+        //dd($rsEmpresa);
 
         // Verificar si se obtuvieron resultados
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
+        if (!empty($rsEmpresa)) {
+            $firstResult = $rsEmpresa[0];
             // Obtener el CUIT de la empresa desde los resultados
-            $cuit = trim($firstResult['Cuit']);
+            $cuit = trim($firstResult->Cuit);
 
             // Calcular el dígito verificador del CUIT
             if (strlen($cuit) === 13) {
@@ -157,16 +158,22 @@ class DDJJController extends Controller
             ':Param3' => $dv,
         ]);*/
 
-        $response = $client->get(\Constants\Constants::API_URL.'/vencimiento-traer/' . $mes.'/'.$year.'/'.$dv);
+        /*$response = $client->get(\Constants\Constants::API_URL.'/vencimiento-traer/' . $mes.'/'.$year.'/'.$dv);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
+
+        $results=DB::select(DB::raw("exec DDJJ_VencimientoTraer :Param1, :Param2, :Param3"),[
+            ':Param1' => $mes,
+            ':Param2' => $year,
+            ':Param3' => $dv,
+        ]);
 
         //dd($result);
 
 // Comprobar si $vencimiento no está vacío
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $fechavencimiento = $firstResult['Vencimiento'];
+        if (!empty($result)) {
+            $firstResult = $result[0];
+            $fechavencimiento = $firstResult->Vencimiento;
         } else {
             // CALCULA VENCIMIENTOS
             $fecha1o = date_create("$anio-$mes2-7");
@@ -184,14 +191,17 @@ class DDJJController extends Controller
                 ]);*/
                 //dd($dia);
 
-                $response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha1String);
+                /*$response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha1String);
 
-                $result = json_decode($response->getBody(), true);
+                $result = json_decode($response->getBody(), true);*/
+                $results=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+                    ':Param1' => $fecha1String,
+                ]);
 
                 //dd($result);
 
 
-                if (empty($result['result'])) {
+                if (empty($results)) {
                     $nohabilini = false;
                 } else {
                     $fecha1->modify('+1 day');
@@ -211,14 +221,16 @@ class DDJJController extends Controller
                 //Log::info('Fecha2: ' . $fecha2, []);
                 //Log::info('String2: ' . $fecha2String, []);
                 // Tu lógica para validar si la fecha es hábil
-                $response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha2String);
+                /*$response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha2String);
 
-                $result = json_decode($response->getBody(), true);
-
+                $result = json_decode($response->getBody(), true);*/
+                $results=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+                    ':Param1' => $fecha2String,
+                ]);
                 //dd($result);
 
 
-                if (empty($result['result'])) {
+                if (empty($results)) {
                     $nohabilini = false;
                 } else {
                     $fecha2->modify('+1 day');
@@ -238,14 +250,18 @@ class DDJJController extends Controller
                 //Log::info('Fecha3: ' . $fecha3, []);
                 //Log::info('String3: ' . $fecha3String, []);
                 // Tu lógica para validar si la fecha es hábil
-                $response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha3String);
+                /*$response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha3String);
 
-                $result = json_decode($response->getBody(), true);
+                $result = json_decode($response->getBody(), true);*/
+
+                $results=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+                    ':Param1' => $fecha3String,
+                ]);
 
                 //dd($result);
 
 
-                if (empty($result['result'])) {
+                if (empty($results)) {
                     $nohabilini = false;
                 } else {
 
@@ -268,14 +284,18 @@ class DDJJController extends Controller
                 //Log::info('Fecha4: ' . $fecha4, []);
                 //Log::info('String4: ' . $fecha4String, []);
                 // Tu lógica para validar si la fecha es hábil
-                $response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha4String);
+                /*$response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha4String);
 
-                $result = json_decode($response->getBody(), true);
+                $result = json_decode($response->getBody(), true);*/
+
+                $results=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+                    ':Param1' => $fecha4String,
+                ]);
 
                 //dd($result);
 
 
-                if (empty($result['result'])) {
+                if (empty($results)) {
                     $nohabilini = false;
                 } else {
                     $fecha4->modify('+1 day');
@@ -296,14 +316,18 @@ class DDJJController extends Controller
                 //Log::info('Fecha5: ' . $fecha5, []);
                 //Log::info('String5: ' . $fecha5String, []);
                 // Tu lógica para validar si la fecha es hábil
-                $response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha5String);
+                /*$response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $fecha5String);
 
-                $result = json_decode($response->getBody(), true);
+                $result = json_decode($response->getBody(), true);*/
+
+                $results=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+                    ':Param1' => $fecha5String,
+                ]);
 
                 //dd($result);
 
 
-                if (empty($result['result'])) {
+                if (empty($results)) {
                     $nohabilini = false;
                 } else {
                     $fecha5->modify('+1 day');
@@ -342,18 +366,18 @@ class DDJJController extends Controller
 
         while ($nohabilini) {
 
-            /*$dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+            $dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
                 ':Param1' => $vencinicial,
-            ]);*/
+            ]);
 
-            $response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $vencinicial);
+            /*$response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $vencinicial);
 
-            $result = json_decode($response->getBody(), true);
+            $result = json_decode($response->getBody(), true);*/
 
             //dd($result);
 
 
-            if (empty($result['result'])) {
+            if (empty($dia)) {
                 $nohabilini = false;
             } else {
                 $vencinicial->modify('+1 day');
@@ -370,18 +394,18 @@ class DDJJController extends Controller
             $nohabil = true;
             while ($nohabil) {
                 //$fechaVencString = date_format($venc, 'Y-m-d');
-                /*$dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
+                $dia=DB::select(DB::raw("exec DDJJ_ValidaDia :Param1"),[
                     ':Param1' => $venc,
-                ]);*/
+                ]);
 
-                $response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $venc);
+                /*$response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $venc);
 
-                $result = json_decode($response->getBody(), true);
+                $result = json_decode($response->getBody(), true);*/
 
                 //dd($result);
 
 
-                if (empty($result['result'])) {
+                if (empty($dia)) {
                     $nohabil = false;
                 } else {
                     $venc = strtotime('+1 day', $venc);
@@ -399,64 +423,64 @@ class DDJJController extends Controller
 
 
 
-        /*$rsTotales2 = DB::select(DB::raw("exec DDJJ_BoletaPagoImpresion :Param1, :Param2, :Param3"), [
+        $rsTotales2 = DB::select(DB::raw("exec DDJJ_BoletaPagoImpresion :Param1, :Param2, :Param3"), [
             ':Param1' => $empresa,
             ':Param2' => $mes,
             ':Param3' => $year,
-        ]);*/
+        ]);
 
-        $response = $client->get(\Constants\Constants::API_URL.'/boleta-pago-impresion/' . $empresa.'/'. $mes.'/'.$year);
+        /*$response = $client->get(\Constants\Constants::API_URL.'/boleta-pago-impresion/' . $empresa.'/'. $mes.'/'.$year);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
         //dd($result);
 
 
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $cantArt100 = $firstResult['CantArt100'];
-            $cantAfi = $firstResult['CantAfi'];
-            $importeArt100 = $firstResult['ImporteArt100'];
-            $importeArt100Total = $firstResult['ImporteArt100Total'];
-            $importeCuotaAfi = $firstResult['ImporteCuotaAfi'];
-            $importeCuotaAfiTotal = $firstResult['ImporteCuotaAfiTotal'];
+        if (!empty($rsTotales2)) {
+            $firstResult = $rsTotales2[0];
+            $cantArt100 = $firstResult->CantArt100;
+            $cantAfi = $firstResult->CantAfi;
+            $importeArt100 = $firstResult->ImporteArt100;
+            $importeArt100Total = $firstResult->ImporteArt100Total;
+            $importeCuotaAfi = $firstResult->ImporteCuotaAfi;
+            $importeCuotaAfiTotal = $firstResult->ImporteCuotaAfiTotal;
 
             $tot = doubleval($importeArt100) + doubleval($importeCuotaAfi);
             $tot2 = doubleval($importeArt100Total) + doubleval($importeCuotaAfiTotal);
         }
 
-        /*$rsNumero = DB::select(DB::raw("exec DDJJ_NumeroMensual :Param1, :Param2, :Param3"), [
+        $rsNumero = DB::select(DB::raw("exec DDJJ_NumeroMensual :Param1, :Param2, :Param3"), [
             ':Param1' => $empresa,
             ':Param2' => $mes,
             ':Param3' => $year,
-        ]);*/
+        ]);
 
-        $response = $client->get(\Constants\Constants::API_URL.'/numero-mensual/' . $empresa.'/'. $mes.'/'.$year);
+        /*$response = $client->get(\Constants\Constants::API_URL.'/numero-mensual/' . $empresa.'/'. $mes.'/'.$year);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
         //dd($result);
 
 
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $existeDeclaracion = $firstResult['Numero'];
+        if (!empty($rsNumero)) {
+            $firstResult = $rsNumero[0];
+            $existeDeclaracion = $firstResult->Numero;
         }
 
-        /*$rsPorcentaje = DB::select(DB::raw("exec DDJJ_PorcentajeInteresTraer"), [
+        $rsPorcentaje = DB::select(DB::raw("exec DDJJ_PorcentajeInteresTraer"), [
 
-        ]);*/
+        ]);
 
-        $response = $client->get(\Constants\Constants::API_URL.'/porcentaje-interes-traer');
+        /*$response = $client->get(\Constants\Constants::API_URL.'/porcentaje-interes-traer');
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
         //dd($result);
 
 
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $porcentaje = $firstResult['Porcentaje'];
+        if (!empty($rsPorcentaje)) {
+            $firstResult = $rsPorcentaje[0];
+            $porcentaje = $firstResult->Porcentaje;
         }
 
 
@@ -630,27 +654,33 @@ class DDJJController extends Controller
         $intereses = $request->input('intereses');
         $vencimientoOriginal = $request->input('vencOri');
 
-        $client = new Client();
+        /*$client = new Client();
 
         $response = $client->get(\Constants\Constants::API_URL . '/verifica-boleta/' . $empresa . '/' . $mes . '/' . $year);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
+
+        $results = DB::select(DB::raw("exec DDJJ_BoletaPagoImpresion :Param1, :Param2, :Param3"), [
+            ':Param1' => $empresa,
+            ':Param2' => $mes,
+            ':Param3' => $year,
+        ]);
 
         //dd($result);
 
 
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $carti100 = $firstResult['CantArt100'];
+        if (!empty($results)) {
+            $firstResult = $results[0];
+            $carti100 = $firstResult->CantArt100;
             //Log::info('CantArt100: ' . $carti100, []);
             $cart100 = str_pad(strval($carti100), 4, "0", STR_PAD_LEFT);
-            $iarti100 = $firstResult['ImporteArt100'];
+            $iarti100 = $firstResult->ImporteArt100;
             //Log::info('ImporteArt100: ' . $iarti100, []);
             $iart100 = str_pad(strval($iarti100), 8, "0", STR_PAD_LEFT);
-            $cafil = $firstResult['CantAfi'];
+            $cafil = $firstResult->CantAfi;
             //Log::info('CantAfi: ' . $cafil, []);
             $cafi = str_pad(strval($cafil), 4, "0", STR_PAD_LEFT);
-            $iafil = $firstResult['ImporteCuotaAfi'];
+            $iafil = $firstResult->ImporteCuotaAfi;
             //Log::info('ImporteCuotaAfi: ' . $iafil, []);
             $iafi = str_pad(strval($iafil), 8, "0", STR_PAD_LEFT);
 
@@ -687,19 +717,23 @@ class DDJJController extends Controller
             $firstResult = $result['result'][0];
         }*/
 
-        $response = $client->get(\Constants\Constants::API_URL . '/empresa/' . $empresa);
+        /*$response = $client->get(\Constants\Constants::API_URL . '/empresa/' . $empresa);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
         //dd($result);
 
-        // Verificar si se obtuvieron resultados
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $produccion = ($firstResult['Codigo'] == 4189) ? 0 : 1;
-            $empresaCodigo = strval($firstResult['Codigo']);
+        $results=DB::select(DB::raw("exec DDJJ_EmpresaPorId :Param1"),[
+            ':Param1' => $empresa,
+        ]);
 
-            $empresaNombre = strval($firstResult['NombreReal']);
+        // Verificar si se obtuvieron resultados
+        if (!empty($results)) {
+            $firstResult = $results[0];
+            $produccion = ($firstResult->Codigo == 4189) ? 0 : 1;
+            $empresaCodigo = strval($firstResult->Codigo);
+
+            $empresaNombre = strval($firstResult->NombreReal);
 
             $empresaCodigo = str_pad(strval($empresaCodigo), 5, "0", STR_PAD_LEFT);
 
@@ -708,17 +742,22 @@ class DDJJController extends Controller
             $nombre = $empresaCodigo . substr(strval($year), 2, 2) . $mes;
         }
 
-        $response = $client->get(\Constants\Constants::API_URL . '/numero-mensual/' . $empresa . '/' . $mes . '/' . $year);
+        /*$response = $client->get(\Constants\Constants::API_URL . '/numero-mensual/' . $empresa . '/' . $mes . '/' . $year);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
         //dd($result);
+        $results = DB::select(DB::raw("exec DDJJ_NumeroMensual :Param1, :Param2, :Param3"), [
+            ':Param1' => $empresa,
+            ':Param2' => $mes,
+            ':Param3' => $year,
+        ]);
 
         $numero = 0;
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $numeroActual = $firstResult['Numero'];
-            $numero = $firstResult['Numero'];
+        if (!empty($results)) {
+            $firstResult = $results[0];
+            $numeroActual = $firstResult->Numero;
+            $numero = $firstResult->Numero;
         }
 
         $mes = str_pad($mes, 2, "0", STR_PAD_LEFT);
@@ -740,19 +779,89 @@ class DDJJController extends Controller
             'idUsuario' => auth()->user()->IdUsuario
         ];
 
-        $response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj', [
+        /*$response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj', [
             'json' => $data
         ]);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
-        $response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj-comprobante/' . $empresa . '/' . $mes . '/' . $year . '/' . $numero);
+        $vencimiento = date('Y-m-d', strtotime($venc));
+        $vencimientoOriginal = date('Y-m-d', strtotime($vencimientoOriginal));
+        $empresa = intval($empresa);
+        $mes = intval($mes);
+        $year = intval($year);
+        $numero = intval($numero);
 
-        $result = json_decode($response->getBody(), true);
+        $idUsuario = intval(auth()->user()->IdUsuario);
+        $error='';
 
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $nroComprobante = $firstResult['NroComprobante'];
+        try {
+            DB::enableQueryLog();
+
+
+            DB::statement("exec DDJJ_GuardarDDJJ ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", [
+                $empresa,
+                $mes,
+                $year,
+                0,
+                $numero,
+                $intereses,
+                $vencimiento,
+                $vencimientoOriginal,
+                null,
+                $idUsuario
+            ]);
+
+            // Tu lógica de actualización aquí
+
+            //return response()->json(['message' => 'Datos actualizados con éxito']);
+        } catch (QueryException $e) {
+            // Aquí manejas la excepción
+            $errorMessage = $e->getMessage();
+            $errorCode = $e->getCode();
+
+            // Obtén los parámetros utilizados en la llamada al procedimiento almacenado
+            $parametros = [
+                'empresa' => $empresa,
+                'mes' => $mes,
+                'year' => $year,
+                'intereses' => 0,
+                'numero' => $numero,
+                'interesesPFT' => $intereses,
+                'vencimiento' => $vencimiento,
+                'vencimientoOriginal' => $vencimientoOriginal,
+                'mp' => null,
+                'idUsuario' => $idUsuario,
+            ];
+
+            // Log de la excepción o cualquier otro manejo que necesites
+
+
+
+            //Log::debug('SQL Queries: '.json_encode(DB::getQueryLog()));
+
+            // Devuelve una respuesta indicando que ha ocurrido un error
+            //return response()->json(['error' => 'Ha ocurrido un error al procesar la solicitud'], 500);
+            $error='Ha ocurrido un error al procesar la solicitud';
+        }
+
+
+
+        /*$response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj-comprobante/' . $empresa . '/' . $mes . '/' . $year . '/' . $numero);
+
+        $result = json_decode($response->getBody(), true);*/
+
+        $results = DB::select(DB::raw("exec DDJJ_GuardarDDJJTraerComprobante :Param1, :Param2, :Param3, :Param4"), [
+            ':Param1' => $empresa,
+            ':Param2' => $mes,
+            ':Param3' => $year,
+            ':Param4' => $numero
+
+        ]);
+
+        if (!empty($results)) {
+            $firstResult = $results[0];
+            $nroComprobante = $firstResult->NroComprobante;
 
 
             $nroComprobante = str_pad($nroComprobante, 10, "0", STR_PAD_LEFT);
@@ -787,15 +896,19 @@ class DDJJController extends Controller
 
         $proceso = $mes . "-" . $year;
 
-        $response = $client->get(\Constants\Constants::API_URL . '/central-pagos/' . $produccion);
+        /*$response = $client->get(\Constants\Constants::API_URL . '/central-pagos/' . $produccion);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
         //dd($result);
 
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $token = $firstResult['Token'];
+        $results = DB::select(DB::raw("exec ADM_CentralPagosDatosTraer :Param1"), [
+            ':Param1' => $produccion,
+        ]);
+
+        if (!empty($results)) {
+            $firstResult = $results[0];
+            $token = $firstResult->Token;
             Log::info('Token: ' . $token, []);
         }
 
@@ -938,23 +1051,31 @@ class DDJJController extends Controller
     {
 
 
-        $client = new Client();
+        /*$client = new Client();
 
         $response = $client->get(\Constants\Constants::API_URL.'/empresa-usuario/' . auth()->user()->IdUsuario);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
-        $empleados['result']=array();
+        $empresa=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
+            ':Param1' => auth()->user()->IdUsuario,
+        ]);
+
+        $empleados=array();
         if($request->query('empresa')) {
             $empresa_id = $request->query('empresa');
-            $response = $client->get(\Constants\Constants::API_URL.'/empleados-por-empresa-sin-novedades/' . $empresa_id);
+            /*$response = $client->get(\Constants\Constants::API_URL.'/empleados-por-empresa-sin-novedades/' . $empresa_id);
 
-            $empleados = json_decode($response->getBody(), true);
+            $empleados = json_decode($response->getBody(), true);*/
+
+            $empleados=DB::select(DB::raw("exec DDJJ_EmpleadosPorEmpresaSinNovedades :Param1"),[
+                ':Param1' => $empresa_id,
+            ]);
         }
         //dd($empleados);
         //return view('home',compact('empresas'));
 
-        return view('ddjjs.anteriores', ['empresas' => $result['result'],'empleados' => $empleados['result']]);
+        return view('ddjjs.anteriores', ['empresas' => $empresa,'empleados' => $empleados]);
 
     }
 
@@ -980,35 +1101,41 @@ class DDJJController extends Controller
         $empresa = $request->input('empresa');
         $year = $request->input('year');
 
-        $client = new Client();
+        /*$client = new Client();
         $response = $client->get(\Constants\Constants::API_URL.'/ddjj-historial/' . $empresa. '/' . $year);
 
-        $anteriores = json_decode($response->getBody(), true);
+        $anteriores = json_decode($response->getBody(), true);*/
+
+        $anteriores=DB::select(DB::raw("exec DDJJ_ConsultaHistorialTotales :Param1,:Param2"),[
+            ':Param1' => $idEmpresa,
+            ':Param2' => $year,
+        ]);
+
         //dd($anteriores);
         // Formatear los datos en un array asociativo
         $datosTabla = [];
-        foreach ($anteriores['result'] as $ddjj) {
+        foreach ($anteriores as $ddjj) {
 
 
             $datosTabla[] = [
-                'mes' => $ddjj['Mes'],
-                'envio' => $ddjj['NumeroEnvio'],
-                'generada' => ($ddjj['FechaGenerada'])?date('d/m/Y', strtotime($ddjj['FechaGenerada'])):'',
-                'CantArt100' => $ddjj['CantArt100'],
-                'ImporteArt100' => number_format($ddjj['ImporteArt100'], 2, ',', '.'),
-                'CantAfi' => $ddjj['CantAfi'],
-                'ImporteCuotaAfi' => number_format($ddjj['ImporteCuotaAfi'], 2, ',', '.'),
-                'Intereses' => number_format($ddjj['Intereses'], 2, ',', '.'),
-                'InteresesPagoFueraTermino' => number_format($ddjj['InteresesPagoFueraTermino'], 2, ',', '.'),
-                'total' => number_format($ddjj['ImporteArt100']+$ddjj['ImporteCuotaAfi']+$ddjj['Intereses']+$ddjj['InteresesPagoFueraTermino'], 2, ',', '.'),
-                'vencimientos' => $ddjj['Vencimientos']
-                    ? $ddjj['Vencimientos'] . '<br><br><br>' .
-                    ($ddjj['FechaVencimiento']
-                        ? date('d/m/Y', strtotime($ddjj['FechaVencimiento']))
+                'mes' => $ddjj->Mes,
+                'envio' => $ddjj->NumeroEnvio,
+                'generada' => ($ddjj->FechaGenerada)?date('d/m/Y', strtotime($ddjj->FechaGenerada)):'',
+                'CantArt100' => $ddjj->CantArt100,
+                'ImporteArt100' => number_format($ddjj->ImporteArt100, 2, ',', '.'),
+                'CantAfi' => $ddjj->CantAfi,
+                'ImporteCuotaAfi' => number_format($ddjj->ImporteCuotaAfi, 2, ',', '.'),
+                'Intereses' => number_format($ddjj->Intereses, 2, ',', '.'),
+                'InteresesPagoFueraTermino' => number_format($ddjj->InteresesPagoFueraTermino, 2, ',', '.'),
+                'total' => number_format($ddjj->ImporteArt100+$ddjj->ImporteCuotaAfi+$ddjj->Intereses+$ddjj->InteresesPagoFueraTermino, 2, ',', '.'),
+                'vencimientos' => $ddjj->Vencimientos
+                    ? $ddjj->Vencimientos . '<br><br><br>' .
+                    ($ddjj->FechaVencimiento
+                        ? date('d/m/Y', strtotime($ddjj->FechaVencimiento))
                         : ''
                     )
-                    : ($ddjj['FechaVencimiento']
-                        ? date('d/m/Y', strtotime($ddjj['FechaVencimiento']))
+                    : ($ddjj->FechaVencimiento
+                        ? date('d/m/Y', strtotime($ddjj->FechaVencimiento))
                         : ''
                     ),
 

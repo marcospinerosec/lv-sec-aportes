@@ -15,8 +15,8 @@
                 <select class="form-control" id="empresa" name="empresa" onchange="this.form.submit()" style="width:300px;">
                     <option value=""/>Seleccionar...</option>
                     @foreach($empresas as $empresa)
-                        <option value="{{$empresa['IdEmpresa']}}" @if(isset($_GET['empresa']) && $empresa['IdEmpresa']==$_GET['empresa']) selected="selected" @endif>
-                            {{$empresa['Codigo']}} - {{$empresa['NombreReal']}}
+                        <option value="{{$empresa->IdEmpresa}}" @if(isset($_GET['empresa']) && $empresa->IdEmpresa==$_GET['empresa']) selected="selected" @endif>
+                            {{$empresa->Codigo}} - {{$empresa->NombreReal}}
                         </option>
 
                     @endforeach
@@ -55,6 +55,7 @@
             </a>
             @if($minimo)
                 <div style="float: right; font-weight: bold; padding-top: 6px;">
+
                     Importe mínimo ${{number_format($minimo, 2, ',', '.') }}
                 </div>
             @endif
@@ -92,17 +93,17 @@
                         $year = session('filtro_year');
                         $mes = session('filtro_mes');
                         $anioMesIngreso = '';
-                        if (!empty($empleado['FechaIngreso'])) {
-                            $anioMesIngreso = date('Y', strtotime($empleado['FechaIngreso'])) * 100 + date('n', strtotime($empleado['FechaIngreso']));
+                        if (!empty($empleado->FechaIngreso)) {
+                            $anioMesIngreso = date('Y', strtotime($empleado->FechaIngreso)) * 100 + date('n', strtotime($empleado->FechaIngreso));
                         }
                         $anioMesActual = $year * 100 + $mes;
                     @endphp
 
                     @if(
-                        $empleado['Afiliado'] == 1 &&
-                        $empleado['ImporteCuotaAfil'] < $minimo &&
+                        $empleado->Afiliado == 1 &&
+                        $empleado->ImporteCuotaAfil < $minimo &&
 
-                        (!$empleado['Novedad']) &&
+                        (!$empleado->Novedad) &&
                         ($anioMesIngreso != $anioMesActual)
                     )
                         style="background-color: #f8d7da;"
@@ -112,29 +113,29 @@
                     @endif
                 >
 
-                    <td>{{$empleado['Cuil']}}</td>
-                    <td>{{$empleado['Nombre']}}</td>
-                    <td>{{$empleado['Categoria']}}</td>
+                    <td>{{$empleado->Cuil}}</td>
+                    <td>{{$empleado->Nombre}}</td>
+                    <td>{{$empleado->Categoria}}</td>
 
 
 
-                    <td>{{($empleado['Afiliado'])?'SI':'NO'}}</td>
-                    <td>{{($empleado['FechaIngreso'])?date('d/m/Y', strtotime($empleado['FechaIngreso'])):''}}</td>
+                    <td>{{($empleado->Afiliado)?'SI':'NO'}}</td>
+                    <td>{{($empleado->FechaIngreso)?date('d/m/Y', strtotime($empleado->FechaIngreso)):''}}</td>
 
-                    <td>{{$empleado['Novedad']}}</td>
-                    <td>{{($empleado['FechaEgreso'])?date('d/m/Y', strtotime($empleado['FechaEgreso'])):''}}</td>
-                    <td>{{ number_format($empleado['ImporteArt100'], 2, ',', '.') }}</td>
-                    <td>{{ number_format($empleado['ImporteCuotaAfil'], 2, ',', '.') }}</td>
+                    <td>{{$empleado->Novedad}}</td>
+                    <td>{{($empleado->FechaEgreso)?date('d/m/Y', strtotime($empleado->FechaEgreso)):''}}</td>
+                    <td>{{ number_format($empleado->ImporteArt100, 2, ',', '.') }}</td>
+                    <td>{{ number_format($empleado->ImporteCuotaAfil, 2, ',', '.') }}</td>
 
                     <td>
 
-                        <!--<form role="form" action = "{{ url('/empleados/eliminar')}}/{{ $empleado['IdEmpleado']}}" method="post"  enctype="multipart/form-data">-->
+                        <!--<form role="form" action = "{{ url('/empleados/eliminar')}}/{{ $empleado->IdEmpleado}}" method="post"  enctype="multipart/form-data">-->
                             {{method_field('DELETE')}}
                             {{ csrf_field() }}
 
-                            <!--<a class="btn btn-sm btn-default"  href="{{ url('/empleados/detalle')}}/{{ $empleado['IdEmpleado']}}"><i class="fa fa fa-eye"></i></a>-->
-                            <a class="btn btn-sm btn-default" href="{{ url('/empleados/edit')}}/{{ $empleado['IdEmpleado']}}"><i class="fa fa-edit"></i></a>
-                            <a class="btn btn-sm btn-default" href="{{ url('/empleados/eliminar')}}/{{ $_GET['empresa']}}"><i class="fa fa-trash"></i></a>
+                            <!--<a class="btn btn-sm btn-default"  href="{{ url('/empleados/detalle')}}/{{ $empleado->IdEmpleado}}"><i class="fa fa fa-eye"></i></a>-->
+                            <a class="btn btn-sm btn-default" href="{{ url('/empleados/edit')}}/{{ $empleado->IdEmpleado}}"><i class="fa fa-edit"></i></a>
+                            <a class="btn btn-sm btn-default" href="{{ url('/empleados/eliminar')}}/{{ $_GET['empresa']    }}"><i class="fa fa-trash"></i></a>
                             <!--<button onclick='if(confirmDel() == false){return false;}' class="btn btn-sm btn-default" type="submit"><i class="fa fa-trash"></i></button>-->
                         </form>
 

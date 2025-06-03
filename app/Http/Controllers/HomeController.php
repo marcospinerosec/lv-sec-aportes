@@ -37,24 +37,24 @@ class HomeController extends Controller
         // Depura para ver si el método se está llamando
         //Log::info('HomeController index method called');
 
-        /*$empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
+        $empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
             ':Param1' => auth()->user()->IdUsuario,
         ]);
-        //dd($empresas);*/
+        //dd($empresas);
 
         //dd($this->getMiddleware());
 
-        $client = new Client();
+        /*$client = new Client();
 
         $response = $client->get(self::API_URL.'/empresa-usuario/' . auth()->user()->IdUsuario);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
 
 
         //return view('home',compact('empresas'));
 
-        return view('home', ['empresas' => $result['result']]);
+        return view('home', ['empresas' => $empresas]);
     }
 
 

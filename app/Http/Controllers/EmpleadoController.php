@@ -34,32 +34,49 @@ class EmpleadoController extends Controller
 
         $mes=($request->session()->get('filtro_mes'))?$request->session()->get('filtro_mes'):null;
         $year=($request->session()->get('filtro_year'))?$request->session()->get('filtro_year'):null;
-        $client = new Client();
+
+        $empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
+            ':Param1' => auth()->user()->IdUsuario,
+        ]);
+        /*$client = new Client();
 
         $response = $client->get(\Constants\Constants::API_URL.'/empresa-usuario/' . auth()->user()->IdUsuario);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
-        $empleados['result']=array();
+        $empleados=array();
         if($request->query('empresa')) {
             $empresa_id = $request->query('empresa');
-            $response = $client->get(\Constants\Constants::API_URL.'/empleados-por-empresa-sin-novedades/' . $empresa_id);
+            /*$response = $client->get(\Constants\Constants::API_URL.'/empleados-por-empresa-sin-novedades/' . $empresa_id);
 
-            $empleados = json_decode($response->getBody(), true);
+            $empleados = json_decode($response->getBody(), true);*/
+            $empleados=DB::select(DB::raw("exec DDJJ_EmpleadosPorEmpresaSinNovedades :Param1"),[
+                ':Param1' => $empresa_id,
+            ]);
         }
+        //dd($empleados);
         if(($request->query('empresa'))&&($mes)&&($year)) {
             $empresa_id = $request->query('empresa');
 
-            $response = $client->get(\Constants\Constants::API_URL.'/importe-minimo-por-empresa/' . $empresa_id.'/'.$mes.'/'.$year);
+            /*$response = $client->get(\Constants\Constants::API_URL.'/importe-minimo-por-empresa/' . $empresa_id.'/'.$mes.'/'.$year);
 
-            $minimo = json_decode($response->getBody(), true);
+            $minimo = json_decode($response->getBody(), true);*/
+
+
+
+            $minimo = DB::select(DB::raw("exec DDJJ_ImporteMinimoPorEmpresa :Param1, :Param2, :Param3"), [
+                ':Param1' => $empresa_id,
+                ':Param2' => $mes,
+                ':Param3' => $year,
+            ]);
+
             //log::info(print_r($minimo, true));
 
         }
         //dd($empleados);
         //return view('home',compact('empresas'));
 
-        return view('empleados.index', ['empresas' => $result['result'],'empleados' => $empleados['result'],'minimo' => $minimo['result'][0]['ImporteMinimo']]);
+        return view('empleados.index', ['empresas' => $empresas,'empleados' => $empleados,'minimo' => $minimo[0]->ImporteMinimo]);
 
     }
 
@@ -133,24 +150,35 @@ class EmpleadoController extends Controller
      */
     public function edit($id)
     {
-        $client = new Client();
+        /*$client = new Client();
 
         $response = $client->get(\Constants\Constants::API_URL.'/empleado/' . $id);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
 
-        $response = $client->get(\Constants\Constants::API_URL.'/categorias/');
+        $empleado=DB::select(DB::raw("exec DDJJ_EmpleadosTraerPorId :Param1"),[
+            ':Param1' => $id,
+        ]);
 
-        $categorias = json_decode($response->getBody(), true);
+        /*$response = $client->get(\Constants\Constants::API_URL.'/categorias/');
 
-        $response = $client->get(\Constants\Constants::API_URL.'/tipos-novedades/');
+        $categorias = json_decode($response->getBody(), true);*/
 
-        $tiposNovedades = json_decode($response->getBody(), true);
+         $categorias = DB::select(DB::raw("exec DDJJ_CategoriasTraer"), [
 
+        ]);
+
+        /*$response = $client->get(\Constants\Constants::API_URL.'/tipos-novedades/');
+
+        $tiposNovedades = json_decode($response->getBody(), true);*/
+
+        $tiposNovedades = DB::select(DB::raw("exec DDJJ_TiposNovedadesTraer"), [
+
+        ]);
         //$exceptuadas['result']=array();
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $empresa=$firstResult['IdEmpresa'];
+        if (!empty($empleado)) {
+            $firstResult = $empleado[0];
+            $empresa=$firstResult->IdEmpresa;
             /*$response = $client->get(\Constants\Constants::API_URL . '/empresas-exceptuadas-validacion-minimo-traer-por-empresa/' .$empresa );
 
             $exceptuadas = json_decode($response->getBody(), true);*/
@@ -163,7 +191,7 @@ class EmpleadoController extends Controller
         //dd($result['result']);
 
 
-        return view('empleados.edit', ['empleado' => $result['result'],'categorias' => $categorias['result'],'tiposNovedades' => $tiposNovedades['result'],'empresa'=>$empresa]);
+        return view('empleados.edit', ['empleado' => $empleado,'categorias' => $categorias,'tiposNovedades' => $tiposNovedades,'empresa'=>$empresa]);
     }
 
 
@@ -450,7 +478,7 @@ class EmpleadoController extends Controller
 
         Log::debug('Nombre después de la conversión: ' . $nombre);
 
-        $response = $client->put(\Constants\Constants::API_URL . '/empleados-actualizar/' . $idEmpleado, [
+        /*$response = $client->put(\Constants\Constants::API_URL . '/empleados-actualizar/' . $idEmpleado, [
             'form_params' => [
                 'cuil' => $cuil,
                 'nombre' => $this->convertirMayusculasEspeciales($nombre),
@@ -470,11 +498,79 @@ class EmpleadoController extends Controller
 
 
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
+
+        $ingreso = ($ingreso=='null')?null:date('Y-m-d', strtotime($ingreso));
+        $egreso = ($egreso=='null')?null:date('Y-m-d', strtotime($egreso));
+        $idEmpleado = intval($idEmpleado);
+        $idCategoria = intval($idCategoria);
+        $idNovedad = ($idNovedad=='null')?null:intval($idNovedad);
+        $ia100 = floatval($ia100);
+        $ica = floatval($ica);
+        $afiliado = intval($afiliado);
+
+        $idUsuario = intval(auth()->user()->IdUsuario);
 
 
 
-        if (isset($result['message'])){
+        $error='';
+
+        try {
+            DB::enableQueryLog();
+
+
+            DB::statement("exec DDJJ_EmpleadosActualizar ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", [
+                $idEmpleado,
+                $cuil,
+                strtoupper(urldecode(utf8_decode($nombre))),
+                $idCategoria,
+                $afiliado,
+                $ingreso,
+                $idNovedad,
+                $egreso,
+                $ia100,
+                $ica,
+                $idUsuario
+            ]);
+
+            // Tu lógica de actualización aquí
+
+            //return response()->json(['message' => 'Datos actualizados con éxito']);
+
+        } catch (QueryException $e) {
+            // Aquí manejas la excepción
+            $errorMessage = $e->getMessage();
+            $errorCode = $e->getCode();
+
+            // Obtén los parámetros utilizados en la llamada al procedimiento almacenado
+            /*$parametros = [
+                'empleado' => $idEmpleado,
+                'cuil' => $cuil,
+                'nombre' => $nombre,
+                'categoria' => $idCategoria,
+                'afiliado' => $afiliado,
+                'ingreso' => $ingreso,
+                'novedad' => $idNovedad,
+                'egreso' => $egreso,
+                'ia100' => $ia100,
+                'ica' => $ica,
+                'idUsuario' => $idUsuario,
+            ];
+
+            // Log de la excepción o cualquier otro manejo que necesites
+
+            \Log::error("Error al ejecutar el procedimiento almacenado en " . now() . ": $errorMessage (Code: $errorCode). Parámetros: " . print_r($parametros, true));
+
+            Log::debug('SQL Queries: '.json_encode(DB::getQueryLog()));*/
+
+            // Devuelve una respuesta indicando que ha ocurrido un error
+            //return response()->json(['error' => 'Ha ocurrido un error al procesar la solicitud'], 500);
+            $error= 'Ha ocurrido un error al procesar la solicitud';
+        }
+
+
+
+        if (!$error){
 
 
 
@@ -486,10 +582,10 @@ class EmpleadoController extends Controller
                 $respuestaMSJ .='<br>Al informar la baja del AFILIADO, debe acompañar la solicitud firmada por el mismo al email beneficios@seclaplata.org.ar  o al whatsapp 2216809844 / Art 11 del Estatuto Social. Art 4 Ley 23551.';
             }
         }
-        if (isset($result['error'])){
+        if ($error){
 
             $respuestaID='error';
-            $respuestaMSJ=$result['error'];
+            $respuestaMSJ=$error;
         }
 
 
@@ -524,15 +620,19 @@ class EmpleadoController extends Controller
 
     public function formatoArchivo()
     {
-        $client = new Client();
+        /*$client = new Client();
 
 
 
         $response = $client->get(\Constants\Constants::API_URL.'/categorias/');
 
-        $categorias = json_decode($response->getBody(), true);
+        $categorias = json_decode($response->getBody(), true);*/
 
-        $html = view('empleados/importarpdf', ['categorias' => $categorias['result']])->render();
+        $categorias = DB::select(DB::raw("exec DDJJ_CategoriasTraer"), [
+
+        ]);
+
+        $html = view('empleados/importarpdf', ['categorias' => $categorias])->render();
         $pdf = PDF::loadHtml($html);
 
         return $pdf->download('formato_archivo.pdf');
@@ -684,7 +784,7 @@ class EmpleadoController extends Controller
 
         try {
             // Preparar el cliente HTTP
-            $client = new Client();
+            /*$client = new Client();
             $url = \Constants\Constants::API_URL . '/importar-empleados';
 
             // Configurar los headers
@@ -716,13 +816,53 @@ class EmpleadoController extends Controller
             ]);
 
             // Manejar la respuesta
-            $result = json_decode($response->getBody(), true);
+            $result = json_decode($response->getBody(), true);*/
 
-            if (isset($result['success']) && $result['success']) {
+            $request->validate([
+                'file' => 'required|file|mimes:csv,txt',
+                'idEmpresa' => 'required|integer',
+                'idUsuario' => 'required|integer',
+            ]);
+
+            // Retrieve the file and parameters
+            $file = $request->file('file');
+            $idEmpresa = $request->input('idEmpresa');
+            $idUsuario = $request->input('idUsuario');
+
+            // Definir la ruta de destino donde se guardará el archivo
+            $destinationPath = public_path('files');
+
+            // Asegurarse de que el directorio 'files' exista
+            if (!file_exists($destinationPath)) {
+                mkdir($destinationPath, 0777, true);
+            }
+
+            // Mover el archivo al directorio 'files' con un nombre único
+            $fileName = time() . '_' . $file->getClientOriginalName();
+            $filePath = $destinationPath . '/' . $fileName;
+            $file->move($destinationPath, $fileName);
+
+            $error='';
+            try {
+
+                // Call the stored procedure with the line data
+                $result = DB::statement('exec DDJJ_EmpleadosImportarArchivo ?, ?, ?', [$filePath,$idEmpresa, $idUsuario]);
+
+
+                //return response()->json(['success' => true, 'message' => 'Archivo guardado y enviado para procesamiento.']);
+
+            } catch (\Exception $e) {
+                Log::error('Error al procesar el archivo: ' . $e->getMessage());
+                //return response()->json(['error' => 'Error al procesar el archivo en el SP.'], 500);
+                $error = 'Error al procesar el archivo en el SP.';
+            }
+
+
+            if (!$error) {
 
                 return redirect()->route('empleados.index', ['empresa' => $empresa])->with('success', 'Importación exitosa.');
             } else {
-                $errorMessage = isset($result['error']) ? $result['error'] : 'Error desconocido.';
+                $errorMessage = isset($error) ? $error : 'Error desconocido.';
                 return redirect()->route('empleados.index', ['empresa' => $empresa])->with(['error' => $errorMessage]);
             }
         } catch (\Exception $e) {

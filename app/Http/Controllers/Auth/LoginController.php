@@ -113,8 +113,8 @@ class LoginController extends Controller
 
         //dd($result);
 
-        if (!empty($result['result']) && is_array($result['result']) && count($result['result']) > 0) {
-            $firstResult = $result['result'][0];
+        if (!empty($result) && is_array($result) && count($result) > 0) {
+            $firstResult = $result[0];
 
             // Acceder a los datos
             $idUsuario = $firstResult->IdUsuario;
