@@ -82,3 +82,5 @@ Route::get('/check-auth', function () {
         return 'User is not authenticated';
     }
 });
+
+Route::get('/ddjj-preview/{codigo}', [App\Http\Controllers\DDJJController::class, 'previewCodigoBarras']);

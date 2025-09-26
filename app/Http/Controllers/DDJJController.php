@@ -694,6 +694,9 @@ class DDJJController extends Controller
             // Convertir la cadena a un valor decimal
             $intereses = floatval($intereses);
 
+
+
+
             $total = number_format($iarti100 + $iafi + $intereses, 2, '.', '');
 
             $tot = strval(number_format(floatval($total) * 100, 0, '.', ''));
@@ -894,6 +897,7 @@ class DDJJController extends Controller
 
         $empresaStr = $empresaCodigo . ' - ' . $empresaNombre;
 
+
         $proceso = $mes . "-" . $year;
 
         /*$response = $client->get(\Constants\Constants::API_URL . '/central-pagos/' . $produccion);
@@ -968,19 +972,22 @@ class DDJJController extends Controller
         );
 
 
-        $url = "https://core.sandbox.simp2.com/api/v1/debt";
+        /*$url = "https://core.sandbox.simp2.com/api/v1/debt";
 
         $client = new Client(self::getHttpHeaders());
 
         $response = $client->post($url, [
 
             'body' => json_encode($body),
-        ]);
+        ]);*/
 
         //Log::info('paso', []);
         //var_dump($response);
 
-        return self::generarCodigoBarras($barras);
+
+
+
+        return self::generarCodigoBarras($barras,$empresaCodigo, $empresaNombre,$mes, $year, $cart100, $iart100, $cafil, $iafil, $intereses, $venc, $vencimientoOriginal, $nroComprobante);
 
 
         //return response()->json([]);
@@ -998,7 +1005,7 @@ class DDJJController extends Controller
         return $headers;
     }
 
-    public function generarCodigoBarras($codigo)
+    public function generarCodigoBarras($codigo,$empresaCodigo, $empresaNombre,$mes, $year, $cart100, $iart100, $cafil, $iafil, $interesesFPT, $venc, $vencimientoOriginal, $nroComprobante)
     {
         //Log::info('entra', []);
         // Generar el código de barras
@@ -1007,12 +1014,39 @@ class DDJJController extends Controller
 
         // El segundo parámetro indica el tipo de código de barras (puedes cambiarlo según tus necesidades)
         $barcodeData = $barcode->getBarcodeHTML($codigo, 'C39');
+
+        $clink = (string) $codigo;
+
+        if (strlen($clink) >= 9) {
+            $clink = substr($clink, 0, 9);
+        } else {
+            $clink = str_pad($clink, 9, '0', STR_PAD_LEFT);
+        }
+
         //Log::info('entra: '.$barcodeData, []);
         // Crear un array con los datos que quieras incluir en el PDF
         $data = [
             'codigo' => $codigo,
             'barcode' => $barcodeData,
+            'empresaCodigo' => $empresaCodigo,
+            'empresaNombre' => $empresaNombre,
+            'mes' => $mes,
+            'year' => $year,
+            'cart100' => $cart100,
+            'iart100' => $iart100,
+            'cafil' => $cafil,
+            'iafil' => $iafil,
+            'Intereses' => 0,
+            'InteresesFPT' => $interesesFPT,
+            'venc' => $venc,
+            'vencori' => $vencimientoOriginal,
+            'nrocomprobante' => $nroComprobante,
+            'barras' => $codigo,
+            'codigoLink' => $clink,
+
         ];
+
+        //return view('ddjjs.ddjjpdf', $data);
 
         // Renderizar la vista del PDF
        $pdf = \PDF::loadView('ddjjs/ddjjpdf', $data);
@@ -1041,6 +1075,43 @@ class DDJJController extends Controller
         ]);
 
     }
+
+
+    public function previewCodigoBarras($codigo)
+    {
+        $barcode = new DNS1D();
+        $barcode->setStorPath(storage_path('app/barcodes'));
+        $barcodeData = $barcode->getBarcodeHTML($codigo, 'C39');
+
+        // mismo cálculo de clink
+        $clink = (strlen($codigo) >= 9)
+            ? substr($codigo, 0, 9)
+            : str_pad($codigo, 9, '0', STR_PAD_LEFT);
+
+        // ⚡️ Datos fake de prueba para poder ver el HTML
+        $data = [
+            'codigo' => $codigo,
+            'barcode' => $barcodeData,
+            'empresaCodigo' => '123',
+            'empresaNombre' => 'Empresa de Ejemplo S.A.',
+            'mes' => 'Septiembre',
+            'year' => 2025,
+            'cart100' => 1000.50,
+            'iart100' => 50.25,
+            'cafil' => 200,
+            'iafil' => 20.15,
+            'Intereses' => 0,
+            'InteresesFPT' => 12.34,
+            'venc' => '30/09/2025',
+            'vencori' => '15/09/2025',
+            'nrocomprobante' => 'ABC-001',
+            'barras' => $codigo,
+            'codigoLink' => $clink,
+        ];
+
+        return view('ddjjs.ddjjpdf', $data);
+    }
+
 
     /**
      * Display a listing of the resource.

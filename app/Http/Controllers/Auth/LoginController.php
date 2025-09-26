@@ -91,6 +91,7 @@ class LoginController extends Controller
 
     protected function attemptLogin(Request $request)
     {
+        //dd(config('database.default'));
         $username = $request->input($this->username());
         $password = $request->input('password');
 

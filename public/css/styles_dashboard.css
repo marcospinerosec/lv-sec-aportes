@@ -11292,3 +11292,10 @@ body {
     height: 100%;
     right: 10px;
 }
+
+select.form-control {
+    -webkit-appearance: menulist;
+    -moz-appearance: menulist;
+    appearance: menulist;
+    background: #fff; /* asegurarse de que la flecha no quede tapada */
+}
