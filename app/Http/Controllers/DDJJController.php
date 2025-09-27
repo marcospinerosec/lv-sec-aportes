@@ -9,10 +9,10 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
 use Milon\Barcode\DNS1D;
-
+use App\Traits\SanitizesInput;
 class DDJJController extends Controller
 {
-
+    use SanitizesInput;
 
     /**
      * Create a new controller instance.
@@ -55,12 +55,12 @@ class DDJJController extends Controller
     {
 
         // Obtener los datos del formulario
-        $empresa = $request->input('empresa');
-        $request->session()->put('filtro_empresa', $request->input('empresa'));
-        $mes = $request->input('mes');
-        $request->session()->put('filtro_mes', $request->input('mes'));
-        $year = $request->input('year');
-        $request->session()->put('filtro_year', $request->input('year'));
+        $empresa = $this->sanitizeInput($request->input('empresa'));
+        $request->session()->put('filtro_empresa', $empresa);
+        $mes = $this->sanitizeInput($request->input('mes'));
+        $request->session()->put('filtro_mes', $mes);
+        $year = $this->sanitizeInput($request->input('year'));
+        $request->session()->put('filtro_year', $year);
 
         $validator = Validator::make($request->all(), [
             'empresa' => 'required',
@@ -352,7 +352,7 @@ class DDJJController extends Controller
             }
         }
         Log::info('Vencimiento: ' . $request->input('venc').' venc: '.$fechavencimiento, []);
-        $venc = ($request->input('venc'))?$request->input('venc'):$fechavencimiento;
+        $venc = ($request->input('venc'))?$this->sanitizeInput($request->input('venc')):$fechavencimiento;
 
         Log::info('Vencimiento final: ' .$venc , []);
 
@@ -647,12 +647,12 @@ class DDJJController extends Controller
 
 
         // Obtener los datos del formulario
-        $empresa = $request->input('empresa');
-        $mes = $request->input('mes');
-        $year = $request->input('year');
-        $venc = $request->input('venc');
-        $intereses = $request->input('intereses');
-        $vencimientoOriginal = $request->input('vencOri');
+        $empresa = $this->sanitizeInput($request->input('empresa'));
+        $mes = $this->sanitizeInput($request->input('mes'));
+        $year = $this->sanitizeInput($request->input('year'));
+        $venc = $this->sanitizeInput($request->input('venc'));
+        $intereses = $this->sanitizeInput($request->input('intereses'));
+        $vencimientoOriginal = $this->sanitizeInput($request->input('vencOri'));
 
         /*$client = new Client();
 
@@ -987,7 +987,7 @@ class DDJJController extends Controller
 
 
 
-        return self::generarCodigoBarras($barras,$empresaCodigo, $empresaNombre,$mes, $year, $cart100, $iart100, $cafil, $iafil, $intereses, $venc, $vencimientoOriginal, $nroComprobante);
+        return self::generarCodigoBarras($barras,$empresaCodigo, $empresaNombre,$mes, $year, $carti100, $iart100, $cafil, $iafil, $intereses, $venc, $vencimientoOriginal, $nroComprobante);
 
 
         //return response()->json([]);
@@ -1178,7 +1178,7 @@ class DDJJController extends Controller
         $anteriores = json_decode($response->getBody(), true);*/
 
         $anteriores=DB::select(DB::raw("exec DDJJ_ConsultaHistorialTotales :Param1,:Param2"),[
-            ':Param1' => $idEmpresa,
+            ':Param1' => $empresa,
             ':Param2' => $year,
         ]);
 

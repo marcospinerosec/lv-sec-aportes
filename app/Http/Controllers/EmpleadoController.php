@@ -11,9 +11,11 @@ use DB;
 use GuzzleHttp\Client;
 use Carbon\Carbon;
 use PDF;
+use App\Traits\SanitizesInput;
 
 class EmpleadoController extends Controller
 {
+    use SanitizesInput;
     /**
      * Create a new controller instance.
      *
@@ -252,18 +254,18 @@ class EmpleadoController extends Controller
 
         // Ensure that empty values are set to null
 
-        $cuil = empty(request('cuil')) ? null : request('cuil');
-        $hCuil = empty(request('hCuil')) ? null : request('hCuil');
-        $nombre = empty(request('nombre')) ? null : request('nombre');
-        $idCategoria = empty(request('categoria')) ? null : request('categoria');
-        $afiliado = empty(request('afiliado')) ? null : request('afiliado');
-        $hAfiliado = empty(request('hAfiliado')) ? null : request('hAfiliado');
-        $ingreso = empty(request('ingreso')) ? null : request('ingreso');
-        $idNovedad = empty(request('novedades')) ? null : request('novedades');
-        $egreso = empty(request('egreso')) ? null : request('egreso');
-        $ia100 = empty(request('importeArt100')) ? null : request('importeArt100');
-        $ica = empty(request('importeCuotaAfil')) ? null : request('importeCuotaAfil');
-        $empresa = empty(request('empresa')) ? null : request('empresa');
+        $cuil = empty(request('cuil')) ? null : $this->sanitizeInput(request('cuil'));
+        $hCuil = empty(request('hCuil')) ? null : $this->sanitizeInput(request('hCuil'));
+        $nombre = empty(request('nombre')) ? null : $this->sanitizeInput(request('nombre'));
+        $idCategoria = empty(request('categoria')) ? null : $this->sanitizeInput(request('categoria'));
+        $afiliado = empty(request('afiliado')) ? null : $this->sanitizeInput(request('afiliado'));
+        $hAfiliado = empty(request('hAfiliado')) ? null : $this->sanitizeInput(request('hAfiliado'));
+        $ingreso = empty(request('ingreso')) ? null : $this->sanitizeInput(request('ingreso'));
+        $idNovedad = empty(request('novedades')) ? null : $this->sanitizeInput(request('novedades'));
+        $egreso = empty(request('egreso')) ? null : $this->sanitizeInput(request('egreso'));
+        $ia100 = empty(request('importeArt100')) ? null : $this->sanitizeInput(request('importeArt100'));
+        $ica = empty(request('importeCuotaAfil')) ? null : $this->sanitizeInput(request('importeCuotaAfil'));
+        $empresa = empty(request('empresa')) ? null : $this->sanitizeInput(request('empresa'));
 
         /*Log::debug('cuil: '.$cuil);
         Log::debug('nombre: '.$nombre);
@@ -400,18 +402,18 @@ class EmpleadoController extends Controller
 
         $idEmpleado=$id;
         // Ensure that empty values are set to null
-        $cuil = empty(request('cuil')) ? null : request('cuil');
-        $hCuil = empty(request('hCuil')) ? null : request('hCuil');
-        $nombre = empty(request('nombre')) ? null : request('nombre');
-        $idCategoria = empty(request('categoria')) ? null : request('categoria');
-        $afiliado = empty(request('afiliado')) ? null : request('afiliado');
-        $hAfiliado = empty(request('hAfiliado')) ? null : request('hAfiliado');
-        $ingreso = empty(request('ingreso')) ? null : request('ingreso');
-        $idNovedad = empty(request('novedades')) ? null : request('novedades');
-        $egreso = empty(request('egreso')) ? null : request('egreso');
-        $ia100 = empty(request('importeArt100')) ? null : request('importeArt100');
-        $ica = empty(request('importeCuotaAfil')) ? null : request('importeCuotaAfil');
-        $empresa = empty(request('empresa')) ? null : request('empresa');
+        $cuil = empty(request('cuil')) ? null : $this->sanitizeInput(request('cuil'));
+        $hCuil = empty(request('hCuil')) ? null : $this->sanitizeInput(request('hCuil'));
+        $nombre = empty(request('nombre')) ? null : $this->sanitizeInput(request('nombre'));
+        $idCategoria = empty(request('categoria')) ? null : $this->sanitizeInput(request('categoria'));
+        $afiliado = empty(request('afiliado')) ? null : $this->sanitizeInput(request('afiliado'));
+        $hAfiliado = empty(request('hAfiliado')) ? null : $this->sanitizeInput(request('hAfiliado'));
+        $ingreso = empty(request('ingreso')) ? null : $this->sanitizeInput(request('ingreso'));
+        $idNovedad = empty(request('novedades')) ? null : $this->sanitizeInput(request('novedades'));
+        $egreso = empty(request('egreso')) ? null : $this->sanitizeInput(request('egreso'));
+        $ia100 = empty(request('importeArt100')) ? null : $this->sanitizeInput(request('importeArt100'));
+        $ica = empty(request('importeCuotaAfil')) ? null : $this->sanitizeInput(request('importeCuotaAfil'));
+        $empresa = empty(request('empresa')) ? null : $this->sanitizeInput(request('empresa'));
 
         /*Log::debug('cuil: '.$cuil);
         Log::debug('nombre: '.$nombre);
@@ -753,7 +755,7 @@ class EmpleadoController extends Controller
     {
         set_time_limit(0);
 
-        $empresa = empty(request('empresa')) ? null : request('empresa');
+        $empresa = empty(request('empresa')) ? null : $this->sanitizeInput(request('empresa'));
         $idUsuario = auth()->user()->IdUsuario; // Suponiendo que el usuario está autenticado y se obtiene el ID del usuario
 
         $file = $request->file('archivo');
@@ -826,8 +828,8 @@ class EmpleadoController extends Controller
 
             // Retrieve the file and parameters
             $file = $request->file('file');
-            $idEmpresa = $request->input('idEmpresa');
-            $idUsuario = $request->input('idUsuario');
+            $idEmpresa = $this->sanitizeInput($request->input('idEmpresa'));
+            $idUsuario = $this->sanitizeInput($request->input('idUsuario'));
 
             // Definir la ruta de destino donde se guardará el archivo
             $destinationPath = public_path('files');
