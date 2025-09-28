@@ -2,11 +2,11 @@
 
 @section('content')
 
-    <div style="float: left; margin-right: 20px; border-color: #999999; margin-top: 20px;">
+    <div style="float: left; border-color: #999999; margin: 0 2%;">
         <div class="box box-primary">
-            <p class="titulocuarentena" style="margin-right: 20px;" >
+            <h1 class="mt-4">
                 Importar empleados
-            </p>
+            </h1>
             <!-- if validation in the controller fails, show the errors -->
             @if ($errors->any())
                 <div class="alert alert-danger">

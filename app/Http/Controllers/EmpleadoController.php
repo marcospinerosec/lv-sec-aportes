@@ -781,6 +781,7 @@ class EmpleadoController extends Controller
 
         $this->validate($request, [
             'archivo' => 'required|file|mimes:csv,txt|max:2048', // 2048KB = 2MB
+            'empresa'   => 'required|integer',
         ]);
 
 
@@ -820,16 +821,13 @@ class EmpleadoController extends Controller
             // Manejar la respuesta
             $result = json_decode($response->getBody(), true);*/
 
-            $request->validate([
+            /*$request->validate([
                 'file' => 'required|file|mimes:csv,txt',
                 'idEmpresa' => 'required|integer',
                 'idUsuario' => 'required|integer',
-            ]);
+            ]);*/
 
             // Retrieve the file and parameters
-            $file = $request->file('file');
-            $idEmpresa = $this->sanitizeInput($request->input('idEmpresa'));
-            $idUsuario = $this->sanitizeInput($request->input('idUsuario'));
 
             // Definir la ruta de destino donde se guardará el archivo
             $destinationPath = public_path('files');
@@ -848,7 +846,7 @@ class EmpleadoController extends Controller
             try {
 
                 // Call the stored procedure with the line data
-                $result = DB::statement('exec DDJJ_EmpleadosImportarArchivo ?, ?, ?', [$filePath,$idEmpresa, $idUsuario]);
+                $result = DB::statement('exec DDJJ_EmpleadosImportarArchivo ?, ?, ?', [$filePath,$empresa, $idUsuario]);
 
 
                 //return response()->json(['success' => true, 'message' => 'Archivo guardado y enviado para procesamiento.']);

@@ -177,7 +177,12 @@
 
      <script>
          $(document).ready(function() {
-
+            // 🔒 Handler global para sesión expirada
+             $(document).ajaxError(function(event, jqxhr, settings, thrownError) {
+                 if (jqxhr.status === 401 || jqxhr.status === 419) {
+                     window.location.href = "{{ route('login') }}";
+                 }
+             });
 
              function formatDate(dateString) {
                  // Asegurarse de que la fecha sea en formato 'yyyy-mm-dd' sin hora

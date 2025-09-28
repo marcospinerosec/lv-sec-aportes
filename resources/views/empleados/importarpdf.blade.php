@@ -65,7 +65,7 @@
 </head>
 <body>
 <div class="header">
-    <div class="logo"><img src="{{ url('images/logosec.PNG') }}"></div>
+    <div class="logo"><img src="{{ url('assets/img/logosec.PNG') }}"></div>
     <div class="titulo">Sindicato de Empleados de Comercio La Plata</div>
     <div class="columnas">
         <div class="column">
@@ -106,7 +106,7 @@
 <div>
 
     @foreach ($categorias as $categoria)
-        <p>{{ $categoria['Descripcion'] }}</p>
+        <p>{{ $categoria->Descripcion }}</p>
     @endforeach
 </div>
 </body>

@@ -56,7 +56,15 @@ Route::group(['middleware' => 'auth'], function () {
     Route::put('/empleados/procesar', [App\Http\Controllers\EmpleadoController::class, 'procesar']);
 
     Route::get('/empleados/formatoArchivo', [App\Http\Controllers\EmpleadoController::class, 'formatoArchivo'])->name('empleados.formato');
+    Route::get('/ddjj/{file}', function ($file) {
+        $path = storage_path("app/ddjj/{$file}");
 
+        if (!file_exists($path)) {
+            abort(404, 'El archivo no existe.');
+        }
+
+        return Response::file($path);
+    });
 });
 
 Route::get('/empresa', function () {
