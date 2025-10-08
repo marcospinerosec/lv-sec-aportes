@@ -23,23 +23,53 @@
                      <div style="display: flex; align-items: center; padding-top: 11px; padding-left: 10px; margin-left: 30px;">
                          <font style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif; margin-right: 10px;">Empresa:</font>
                          <select class="form-control" id="empresa" name="empresa" style="width:300px;" required>
-                             <option value=""/>Seleccionar...</option>
+                             <option value="">Seleccionar...</option>
                              @foreach($empresas as $empresa)
-                                 <option value="{{$empresa->IdEmpresa}}" {{ session('filtro_empresa') == $empresa->IdEmpresa ? 'selected' : '' }}>
-                                     {{$empresa->Codigo}} - {{$empresa->NombreReal}}
+                                 <option value="{{ $empresa->IdEmpresa }}" {{ session('filtro_empresa') == $empresa->IdEmpresa ? 'selected' : '' }}>
+                                     {{ $empresa->Codigo }} - {{ $empresa->NombreReal }}
                                  </option>
                              @endforeach
                          </select>
-                         <div style="display: flex; align-items: center; gap: 10px;margin: 0 20px;">
-                             <label for="mes" style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif;">Mes:</label>
 
-                             <input type="text" class="form-control" id="mes" name="mes" placeholder="mes" value="{{session('filtro_mes')}}" style="width: 100px;" required>
+                         {{-- Select Mes --}}
+                         <div style="display: flex; align-items: center; gap: 10px; margin: 0 20px;">
+                             <label for="mes" style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif;">Mes:</label>
+                             <select class="form-control" id="mes" name="mes" style="width: 120px;" required>
+                                 <option value="">Seleccionar...</option>
+                                 @php
+                                     $meses = [
+                                         1 => 'Enero', 2 => 'Febrero', 3 => 'Marzo',
+                                         4 => 'Abril', 5 => 'Mayo', 6 => 'Junio',
+                                         7 => 'Julio', 8 => 'Agosto', 9 => 'Septiembre',
+                                         10 => 'Octubre', 11 => 'Noviembre', 12 => 'Diciembre'
+                                     ];
+                                     $mesActual = session('filtro_mes') ?? now()->month;
+                                 @endphp
+                                 @foreach($meses as $num => $nombre)
+                                     <option value="{{ $num }}" {{ $mesActual == $num ? 'selected' : '' }}>
+                                         {{ $nombre }}
+                                     </option>
+                                 @endforeach
+                             </select>
                          </div>
+
+                         {{-- Select Año --}}
                          <div style="display: flex; align-items: center; gap: 10px;">
                              <label for="year" style="color: #ffffff; font-size: 1.25rem; font-family: sans-serif;">Año:</label>
-                             <input type="text" class="form-control" id="year" name="year" placeholder="año" value="{{session('filtro_year')}}" style="width: 100px;" required>
+                             <select class="form-control" id="year" name="year" style="width: 120px;" required>
+                                 <option value="">Seleccionar...</option>
+                                 @php
+                                     $yearActual = session('filtro_year') ?? now()->year;
+                                 @endphp
+                                 @for ($y = now()->year; $y >= 2010; $y--)
+                                     <option value="{{ $y }}" {{ $yearActual == $y ? 'selected' : '' }}>
+                                         {{ $y }}
+                                     </option>
+                                 @endfor
+                             </select>
                          </div>
                      </div>
+
 
                      <div style=" padding-top: 16px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
                          <button class="btn btn-secondary" id="continuarBtn">

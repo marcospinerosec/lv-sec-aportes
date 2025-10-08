@@ -80,8 +80,8 @@
                                     <select required class="form-control js-example-basic-single" id="categoria" name="categoria">
                                         <option value=""/>Seleccionar...</option>
                                         @foreach($categorias as $categoria)
-                                            <option value="{{$categoria['IdCategoria']}}" {{ (old('categoria')) ? 'selected' : '' }}>
-                                                {{$categoria['Descripcion']}}
+                                            <option value="{{$categoria->IdCategoria}}" {{ (old('categoria')) ? 'selected' : '' }}>
+                                                {{$categoria->Descripcion}}
                                             </option>
                                         @endforeach
                                     </select>
@@ -117,8 +117,8 @@
                                     <select class="form-control js-example-basic-single" id="novedades" name="novedades" onchange="cambiarNovedad()">
                                         <option value=""/>Seleccionar...</option>
                                         @foreach($tiposNovedades as $novedad)
-                                            <option value="{{$novedad['IdTipoNovedad']}}" {{ (old('novedades')) ? 'selected' : '' }}>
-                                                {{$novedad['Novedad']}}
+                                            <option value="{{$novedad->IdTipoNovedad}}" {{ (old('novedades')) ? 'selected' : '' }}>
+                                                {{$novedad->Novedad}}
                                             </option>
                                         @endforeach
                                     </select>
@@ -148,8 +148,11 @@
             </div>
         </div>
     </div>
+    <!-- Inputmask -->
+    <script src="{{ asset('bower_components/inputmask/dist/min/jquery.inputmask.bundle.min.js') }}"></script>
     <script>
         $(document).ready(function() {
+            $('#cuil').inputmask('99-99999999-9', { placeholder: 'XX-XXXXXXXX-X' });
             $('.js-example-basic-single').select2();
             // Configura el selector de fecha en el campo txtFVencimiento
             $("#ingreso").datepicker({

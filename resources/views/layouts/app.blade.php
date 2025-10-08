@@ -112,12 +112,12 @@
                     </div>
 
                     <div class="sb-sidenav-menu-heading">    </div>
-                    <a class="nav-link" href="tables.html">
-                        <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                        DATOS DE USUARIO
-                    </a>
+                        <a class="nav-link {{ $current_path === 'users/edit' ? 'active' : '' }}" href="{{ url('/users/edit') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                            DATOS DE USUARIO
+                        </a>
 
-                </div>
+                    </div>
             </div>
 
 

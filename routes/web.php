@@ -65,6 +65,12 @@ Route::group(['middleware' => 'auth'], function () {
 
         return Response::file($path);
     });
+
+    Route::get('/users/edit', [App\Http\Controllers\UserController::class, 'edit'])->name('users.editar');
+    Route::put('/users/editar', [App\Http\Controllers\UserController::class, 'update']);
+    Route::post('/users/cambiar-clave', [App\Http\Controllers\UserController::class, 'cambiarClave'])
+        ->name('users.cambiar-clave');
+
 });
 
 Route::get('/empresa', function () {

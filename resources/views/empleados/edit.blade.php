@@ -151,8 +151,10 @@
             </div>
     </div>
     </div>
+    <script src="{{ asset('bower_components/inputmask/dist/min/jquery.inputmask.bundle.min.js') }}"></script>
     <script>
         $(document).ready(function() {
+            $('#cuil').inputmask('99-99999999-9', { placeholder: 'XX-XXXXXXXX-X' });
             $('.js-example-basic-single').select2();
             // Configura el selector de fecha en el campo txtFVencimiento
             $("#ingreso").datepicker({

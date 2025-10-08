@@ -55,6 +55,13 @@ class EmpleadoController extends Controller
             $empleados=DB::select(DB::raw("exec DDJJ_EmpleadosPorEmpresaSinNovedades :Param1"),[
                 ':Param1' => $empresa_id,
             ]);
+
+            $empleados = array_map(function($empleado) {
+                $empleado->Nombre = utf8_encode($empleado->Nombre);
+                $empleado->Categoria = utf8_encode($empleado->Categoria);
+                return $empleado;
+            }, $empleados);
+
         }
         //dd($empleados);
         if(($request->query('empresa'))&&($mes)&&($year)) {
@@ -99,17 +106,25 @@ class EmpleadoController extends Controller
         // Obtiene el valor del parámetro desde la solicitud
         $empresa = $request->input('empresa');
 
-        $client = new Client();
+        /*$client = new Client();
 
 
 
         $response = $client->get(\Constants\Constants::API_URL.'/categorias/');
 
-        $categorias = json_decode($response->getBody(), true);
+        $categorias = json_decode($response->getBody(), true);*/
 
-        $response = $client->get(\Constants\Constants::API_URL.'/tipos-novedades/');
+        $categorias = DB::select(DB::raw("exec DDJJ_CategoriasTraer"), [
 
-        $tiposNovedades = json_decode($response->getBody(), true);
+        ]);
+
+        /*$response = $client->get(\Constants\Constants::API_URL.'/tipos-novedades/');
+
+        $tiposNovedades = json_decode($response->getBody(), true);*/
+
+        $tiposNovedades = DB::select(DB::raw("exec DDJJ_TiposNovedadesTraer"), [
+
+        ]);
 
         /*$exceptuadas['result']=array();
         if (!empty($result['result'])) {
@@ -127,7 +142,7 @@ class EmpleadoController extends Controller
         //dd($result['result']);
 
 
-        return view('empleados.create', ['categorias' => $categorias['result'],'tiposNovedades' => $tiposNovedades['result'],'empresa'=>$empresa]);
+        return view('empleados.create', ['categorias' => $categorias,'tiposNovedades' => $tiposNovedades,'empresa'=>$empresa]);
     }
 
 
@@ -280,7 +295,7 @@ class EmpleadoController extends Controller
 
 
 
-        $arrayValidation = [ 'cuil'=>'required','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100' => 'required|numeric|min:0','categoria'=>'required'];
+        $arrayValidation = [ 'cuil'=>'required|regex:/^\d{2}-\d{8}-\d{1}$/','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100' => 'required|numeric|min:0','categoria'=>'required'];
 
         if ($idNovedad){
             $arrayValidation['egreso']='required|date';
@@ -299,17 +314,24 @@ class EmpleadoController extends Controller
             return redirect()->back()->withInput()->withErrors(['cuil' => 'El CUIL no es válido.']); // Adjust the error message as needed
         }
 
-        $client = new Client();
+        /*$client = new Client();
 
             //Log::debug('CUILs distintos');
             $response = $client->get(\Constants\Constants::API_URL . '/empleados-traer-por-cuil/'.$cuil.'/' .$empresa );
 
             $result = json_decode($response->getBody(), true);
             //Log::debug(print_r($result));
-            if (!empty($result['result'])) {
-                //Log::debug('CUILs distinto');
-                return redirect()->back()->withInput()->withErrors(['cuil' => 'El nuevo cuil ya existe en la empresa, por favor verifique']); // Adjust the error message as needed
-            }
+            if (!empty($result['result'])) {*/
+
+        $results=DB::select(DB::raw("exec DDJJ_EmpleadosTraerPorCuil :Param1,:Param2"),[
+            ':Param1' => $cuil,
+            ':Param2' => $empresa,
+        ]);
+
+        if (!empty($results)) {
+            //Log::debug('CUILs distinto');
+            return redirect()->back()->withInput()->withErrors(['cuil' => 'El nuevo cuil ya existe en la empresa, por favor verifique']); // Adjust the error message as needed
+        }
 
 
 
@@ -323,7 +345,7 @@ class EmpleadoController extends Controller
 
 
         // Datos a enviar en el cuerpo de la solicitud PUT
-        $data = [
+        /*$data = [
             'idEmpresa' => $empresa,
             'cuil' => $cuil,
             'nombre' => $nombre,
@@ -351,11 +373,77 @@ class EmpleadoController extends Controller
 // Realiza la solicitud PUT
         //$response = $client->put($url);
 
-        $result = json_decode($response->getBody(), true);
+        $result = json_decode($response->getBody(), true);*/
+
+        $error='';
+
+        try {
+            DB::enableQueryLog();
+
+            $ingreso = (!$ingreso)?null:date('Y-m-d', strtotime($ingreso));
+            $egreso = (!$egreso)?null:date('Y-m-d', strtotime($egreso));
+
+            $idNovedad = (!$idNovedad)?null:intval($idNovedad);
+
+
+            $idUsuario = intval(auth()->user()->IdUsuario);
+
+
+            DB::statement("exec DDJJ_EmpleadosAgregar ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", [
+                $empresa,
+                $cuil,
+                strtoupper(urldecode(utf8_decode($nombre))),
+                $idCategoria,
+                $afiliado,
+                $ingreso,
+                $idNovedad,
+                $egreso,
+                $ia100,
+                $ica,
+                $idUsuario
+            ]);
+
+            //dd($results);
+
+
+            // Tu lógica de actualización aquí
+
+            //return response()->json(['message' => 'Datos actualizados con éxito']);
+
+        } catch (QueryException $e) {
+            // Aquí manejas la excepción
+            $errorMessage = $e->getMessage();
+            $errorCode = $e->getCode();
+
+            // Obtén los parámetros utilizados en la llamada al procedimiento almacenado
+            /*$parametros = [
+                'empleado' => $idEmpleado,
+                'cuil' => $cuil,
+                'nombre' => $nombre,
+                'categoria' => $idCategoria,
+                'afiliado' => $afiliado,
+                'ingreso' => $ingreso,
+                'novedad' => $idNovedad,
+                'egreso' => $egreso,
+                'ia100' => $ia100,
+                'ica' => $ica,
+                'idUsuario' => $idUsuario,
+            ];
+
+            // Log de la excepción o cualquier otro manejo que necesites
+
+            \Log::error("Error al ejecutar el procedimiento almacenado en " . now() . ": $errorMessage (Code: $errorCode). Parámetros: " . print_r($parametros, true));
+
+            Log::debug('SQL Queries: '.json_encode(DB::getQueryLog()));*/
+
+            // Devuelve una respuesta indicando que ha ocurrido un error
+            //return response()->json(['error' => 'Ha ocurrido un error al procesar la solicitud'], 500);
+            $error= 'Ha ocurrido un error al procesar la solicitud '.$errorMessage;
+        }
 
 
 
-        if (isset($result['message'])){
+        if (!$error){
 
 
 
@@ -365,10 +453,10 @@ class EmpleadoController extends Controller
 
 
         }
-        if (isset($result['error'])){
+        else{
 
             $respuestaID='error';
-            $respuestaMSJ=$result['error'];
+            $respuestaMSJ=$error;
         }
 
 
@@ -428,7 +516,7 @@ class EmpleadoController extends Controller
 
 
 
-        $arrayValidation = [ 'cuil'=>'required','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100'=>'required|numeric|min:0','categoria'=>'required'];
+        $arrayValidation = [ 'cuil'=>'required|regex:/^\d{2}-\d{8}-\d{1}$/','nombre'=>'required', 'ingreso'=>'required|date','afiliado'=>'required','importeArt100'=>'required|numeric|min:0','categoria'=>'required'];
 
         if ($idNovedad){
             $arrayValidation['egreso']='required|date';
@@ -447,14 +535,20 @@ class EmpleadoController extends Controller
             return redirect()->back()->withInput()->withErrors(['cuil' => 'El CUIL no es válido.']); // Adjust the error message as needed
         }
 
-        $client = new Client();
+        //$client = new Client();
         if($cuil!=$hCuil){
             //Log::debug('CUILs distintos');
-            $response = $client->get(\Constants\Constants::API_URL . '/empleados-traer-por-cuil/'.$cuil.'/' .$empresa );
+            /*$response = $client->get(\Constants\Constants::API_URL . '/empleados-traer-por-cuil/'.$cuil.'/' .$empresa );
 
-            $result = json_decode($response->getBody(), true);
+            $result = json_decode($response->getBody(), true);*/
             //Log::debug(print_r($result));
-            if (!empty($result['result'])) {
+
+            $results=DB::select(DB::raw("exec DDJJ_EmpleadosTraerPorCuil :Param1,:Param2"),[
+                ':Param1' => $cuil,
+                ':Param2' => $empresa,
+            ]);
+
+            if (!empty($results)) {
                 //Log::debug('CUILs distinto');
                 return redirect()->back()->withInput()->withErrors(['cuil' => 'El nuevo cuil ya existe en la empresa, por favor verifique']); // Adjust the error message as needed
             }
@@ -502,11 +596,11 @@ class EmpleadoController extends Controller
 
         $result = json_decode($response->getBody(), true);*/
 
-        $ingreso = ($ingreso=='null')?null:date('Y-m-d', strtotime($ingreso));
-        $egreso = ($egreso=='null')?null:date('Y-m-d', strtotime($egreso));
+        $ingreso = (!$ingreso)?null:date('Y-m-d', strtotime($ingreso));
+        $egreso = (!$egreso)?null:date('Y-m-d', strtotime($egreso));
         $idEmpleado = intval($idEmpleado);
         $idCategoria = intval($idCategoria);
-        $idNovedad = ($idNovedad=='null')?null:intval($idNovedad);
+        $idNovedad = (!$idNovedad)?null:intval($idNovedad);
         $ia100 = floatval($ia100);
         $ica = floatval($ica);
         $afiliado = intval($afiliado);
