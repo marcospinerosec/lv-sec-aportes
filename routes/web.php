@@ -37,8 +37,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/ddjjs/listar', [App\Http\Controllers\DDJJController::class, 'listar']);
     Route::post('/procesar', [App\Http\Controllers\DDJJController::class, 'procesar']);
     Route::post('/generar', [App\Http\Controllers\DDJJController::class, 'generar']);
+    Route::get('/ddjjs/ver/{empresa}/{anio}/{mes}/{envio}', [App\Http\Controllers\DDJJController::class, 'ver']);
 
-     Route::get('/empleados/index', [App\Http\Controllers\EmpleadoController::class, 'index'])->name('empleados.index');
+
+    Route::get('/empleados/index', [App\Http\Controllers\EmpleadoController::class, 'index'])->name('empleados.index');
     //agregar account
     Route::get('/empleados/create', [App\Http\Controllers\EmpleadoController::class, 'create'])->name('empleados.nuevo');
     Route::put('/empleados/save', [App\Http\Controllers\EmpleadoController::class, 'save']);

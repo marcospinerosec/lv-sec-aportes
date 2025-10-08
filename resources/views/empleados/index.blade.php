@@ -136,8 +136,8 @@
                             <!--<a class="btn btn-sm btn-default"  href="{{ url('/empleados/detalle')}}/{{ $empleado->IdEmpleado}}"><i class="fa fa fa-eye"></i></a>-->
                             <a class="btn btn-sm btn-default" href="{{ url('/empleados/edit')}}/{{ $empleado->IdEmpleado}}"><i class="fa fa-edit"></i></a>
                             <a class="btn btn-sm btn-default" href="{{ url('/empleados/eliminar')}}/{{ $_GET['empresa']    }}"><i class="fa fa-trash"></i></a>
-                            <!--<button onclick='if(confirmDel() == false){return false;}' class="btn btn-sm btn-default" type="submit"><i class="fa fa-trash"></i></button>-->
-                        </form>
+                            <!--<button onclick='if(confirmDel() == false){return false;}' class="btn btn-sm btn-default" type="submit"><i class="fa fa-trash"></i></button>
+                        </form>-->
 
                     </td>
                 </tr>

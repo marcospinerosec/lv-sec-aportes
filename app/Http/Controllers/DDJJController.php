@@ -34,22 +34,81 @@ class DDJJController extends Controller
         $empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
             ':Param1' => auth()->user()->IdUsuario,
         ]);
-        //dd($empresas);
-
-
-
-        /*$client = new Client();
-
-        $response = $client->get(\Constants\Constants::API_URL.'/empresa-usuario/' . auth()->user()->IdUsuario);
-
-        $result = json_decode($response->getBody(), true);*/
-
-
-
-        //return view('home',compact('empresas'));
 
         return view('ddjjs.ddjj', ['empresas' => $empresas]);
     }
+
+    /**
+     * Show the application dashboard.
+     *
+     * @return \Illuminate\Contracts\Support\Renderable
+     */
+    /**
+     * Display a listing of the resource.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function anteriores(Request $request)
+    {
+
+
+        $year=($request->query('year'))?$request->query('year'):null;
+
+        $empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
+            ':Param1' => auth()->user()->IdUsuario,
+        ]);
+
+
+        $anteriores=array();
+        if($request->query('empresa')) {
+            $empresa = $request->query('empresa');
+
+            $anteriores=DB::select(DB::raw("exec DDJJ_ConsultaHistorialTotales :Param1,:Param2"),[
+                ':Param1' => $empresa,
+                ':Param2' => $year,
+            ]);
+            foreach ($anteriores as &$a) {
+                $a->anterioresAnt = DB::select(
+                    DB::raw("EXEC DDJJ_ConsultaHistorialTotalesVencAnteriores :Param1,:Param2,:Param3,:Param4"),[
+                    ':Param1' => $empresa,
+                    ':Param2' => $year,
+                    ':Param3' => $a->Mes,
+                    ':Param4' => $a->NumeroEnvio,
+                ]);
+
+            }
+
+        }
+
+
+        return view('ddjjs.anteriores', ['empresas' => $empresas,'anteriores' => $anteriores]);
+
+    }
+
+    public function ver($empresa, $anio, $mes, $envio)
+    {
+
+
+        $empleados = DB::select(DB::raw("EXEC DDJJ_ConsultaHistorial :Param1,:Param2,:Param3,:Param4"),[
+            ':Param1' => $empresa,
+            ':Param2' => $mes,
+            ':Param3' => $anio,
+            ':Param4' => $envio,
+        ]);
+
+        $ddjjTotales = DB::select(DB::raw("EXEC DDJJ_ConsultaHistorialTotalesDDJJ :Param1,:Param2,:Param3,:Param4"),[
+            ':Param1' => $empresa,
+            ':Param2' => $mes,
+            ':Param3' => $anio,
+            ':Param4' => $envio,
+        ]);
+
+
+
+        //dd($ddjjTotales);
+        return view('ddjjs.ver', compact('empleados','ddjjTotales', 'empresa', 'anio', 'mes', 'envio'));
+    }
+
 
     public function procesar(Request $request)
     {
@@ -1118,7 +1177,7 @@ class DDJJController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function anteriores(Request $request)
+    public function anteriores_old(Request $request)
     {
 
 
