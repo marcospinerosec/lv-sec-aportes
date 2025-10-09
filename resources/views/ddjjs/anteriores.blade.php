@@ -134,102 +134,108 @@
                         </tr>
                         </thead>
                         <tbody>
-            @foreach($anteriores as $anterior)
+                        @foreach($anteriores as $anterior)
+                            <tr>
+                                <td>{{$anterior->Mes}}</td>
+                                <td>{{$anterior->NumeroEnvio}}</td>
+                                <td data-order="{{ $anterior->FechaGenerada ? date('Y-m-d H:i:s', strtotime($anterior->FechaGenerada)) : '' }}">
+                                    {{ $anterior->FechaGenerada ? date('d/m/Y H:i:s', strtotime($anterior->FechaGenerada)) : '' }}
+                                </td>
+                                <td>{{$anterior->CantArt100}}</td>
+                                <td>{{ number_format($anterior->ImporteArt100, 2, ',', '.') }}</td>
+                                <td>{{$anterior->CantAfi}}</td>
+                                <td>{{ number_format($anterior->ImporteCuotaAfi, 2, ',', '.') }}</td>
+                                <td>{{ number_format($anterior->Intereses, 2, ',', '.') }}</td>
+                                <td>{{ number_format($anterior->InteresesPagoFueraTermino, 2, ',', '.') }}</td>
+                                <td>{{ number_format($anterior->ImporteArt100+$anterior->ImporteCuotaAfi+$anterior->Intereses+$anterior->InteresesPagoFueraTermino, 2, ',', '.') }}</td>
+                                <td>
+                                    @if (!empty($anterior->anterioresAnt))
+                                        @foreach ($anterior->anterioresAnt as $ant)
+                                            <span data-order="{{ $ant->FechaVencimiento ? date('Y-m-d', strtotime($ant->FechaVencimiento)) : '' }}">
+                        {{ $ant->FechaVencimiento ? date('d/m/Y', strtotime($ant->FechaVencimiento)) : '' }}
+                    </span>
+                                            <br><br><br>
+                                        @endforeach
+                                    @endif
+                                    {{-- Fecha de vencimiento principal --}}
+                                    <span data-order="{{ $anterior->FechaVencimiento ? date('Y-m-d', strtotime($anterior->FechaVencimiento)) : '' }}">
+                {{ $anterior->FechaVencimiento ? date('d/m/Y', strtotime($anterior->FechaVencimiento)) : '' }}
+            </span>
+                                </td>
+                                <td>
+                                    {{-- Botones y acciones como los tenías antes --}}
+                                    @if ($anterior->NumeroEnvio != 0)
+                                        <button class="btn btn-sm btn-default" title="Ver DDJJ"
+                                                onclick="verDDJJ({{ $anterior->Mes }}, {{ $anterior->NumeroEnvio }})">
+                                            <i class="fa fa-eye"></i>
+                                        </button>
+                                    @else
+                                        &nbsp;
+                                    @endif
 
+                                    @if (!empty($anterior->anterioresAnt))
+                                        @foreach ($anterior->anterioresAnt as $ant)
+                                            <br>
+                                            <button class="btn btn-sm btn-default mt-1" title="Reimprimir boleta anterior"
+                                                    onclick="reimprimirBoleta(
+                                {{ $anterior->Mes }},
+                                {{ $anterior->NumeroEnvio }},
+                                {{ $anterior->NumeroEnvio == -1 ? 1 : 0 }},
+                                '{{ $anterior->AnioFG }}',
+                                '{{ $anterior->MesFG }}',
+                                '{{ $anterior->diaFG }}',
+                                '{{ $anterior->HoraFG }}',
+                                '{{ $anterior->MinutoFG }}',
+                                '{{ $anterior->SegundoFG }}',
+                                1
+                            )">
+                                                <i class="fa fa-print"></i>
+                                            </button>
+                                        @endforeach
+                                    @endif
 
-                <tr>
-
-                    <td>{{$anterior->Mes}}</td>
-                    <td>{{$anterior->NumeroEnvio}}</td>
-                    <td>{{($anterior->FechaGenerada)?date('d/m/Y', strtotime($anterior->FechaGenerada)):''}}</td>
-                    <td>{{$anterior->CantArt100}}</td>
-                    <td>{{ number_format($anterior->ImporteArt100, 2, ',', '.') }}</td>
-                    <td>{{$anterior->CantAfi}}</td>
-                    <td>{{ number_format($anterior->ImporteCuotaAfi, 2, ',', '.') }}</td>
-                    <td>{{ number_format($anterior->Intereses, 2, ',', '.') }}</td>
-                    <td>{{ number_format($anterior->InteresesPagoFueraTermino, 2, ',', '.') }}</td>
-                    <td>{{ number_format($anterior->ImporteArt100+$anterior->ImporteCuotaAfi+$anterior->Intereses+$anterior->InteresesPagoFueraTermino, 2, ',', '.') }}</td>
-                    <td> @if (!empty($anterior->anterioresAnt))
-                            @foreach ($anterior->anterioresAnt as $ant)
-                                {{ $ant->FechaVencimiento ? date('d/m/Y', strtotime($ant->FechaVencimiento)) : '' }}
-                                <br><br><br>
-                            @endforeach
-                        @endif
-
-                        {{-- Mostrar la fecha de vencimiento principal --}}
-                        {{ $anterior->FechaVencimiento ? date('d/m/Y', strtotime($anterior->FechaVencimiento)) : '' }}</td>
-
-
-
-
-                    <td >
-
-                        {{-- 🔍 Ver DDJJ --}}
-                        @if ($anterior->NumeroEnvio != 0)
-                            <button class="btn btn-sm btn-default" title="Ver DDJJ"
-                                    onclick="verDDJJ({{ $anterior->Mes }}, {{ $anterior->NumeroEnvio }})">
-                                <i class="fa fa-eye"></i>
-                            </button>
-                        @else
-                            &nbsp;
-                        @endif
-
-                        {{-- 🖨️ Reimprimir Boletas anteriores --}}
-                        @if (!empty($anterior->anterioresAnt))
-                            @foreach ($anterior->anterioresAnt as $ant)
-                                <br>
-                                <button class="btn btn-sm btn-default mt-1" title="Reimprimir boleta anterior"
-                                        onclick="reimprimirBoleta(
+                                    <button class="btn btn-sm btn-default mt-1" title="Reimprimir boleta actual"
+                                            onclick="reimprimirBoleta(
                         {{ $anterior->Mes }},
                         {{ $anterior->NumeroEnvio }},
-                        1
+                        {{ $anterior->NumeroEnvio == -1 ? 1 : 0 }},
+                        '{{ $anterior->AnioFG }}',
+                        '{{ $anterior->MesFG }}',
+                        '{{ $anterior->diaFG }}',
+                        '{{ $anterior->HoraFG }}',
+                        '{{ $anterior->MinutoFG }}',
+                        '{{ $anterior->SegundoFG }}',
+                        0
                     )">
-                                    <i class="fa fa-print"></i>
-                                </button>
-                            @endforeach
-                        @endif
+                                        <i class="fa fa-print"></i>
+                                    </button>
 
-                        {{-- 🖨️ Reimprimir Boleta actual --}}
-                        <button class="btn btn-sm btn-default mt-1" title="Reimprimir boleta actual"
-                                onclick="reimprimirBoleta(
-                {{ $anterior->Mes }},
-                {{ $anterior->NumeroEnvio }},
-                0
-            )">
-                            <i class="fa fa-print"></i>
-                        </button>
-
-                        {{-- 🧾 Generar nueva boleta --}}
-                        @if ($anterior->NumeroEnvio != -1 && strtotime($anterior->FechaGenerada) > strtotime('2017-10-20'))
-                            @php
-                                $tot = $anterior->ImporteArt100 + $anterior->ImporteCuotaAfi + $anterior->Intereses;
-                            @endphp
-                            <button class="btn btn-sm btn-default mt-1" title="Generar nueva boleta"
-                                    onclick="generarBoleta(
-                    {{ $anterior->Mes }},
-                    {{ $anterior->NumeroEnvio }},
-                    '{{ $anterior->AnioFG }}',
-                    '{{ $anterior->MesFG }}',
-                    '{{ $anterior->diaFG }}',
-                    '{{ $anterior->HoraFG }}',
-                    '{{ $anterior->MinutoFG }}',
-                    '{{ $anterior->SegundoFG }}',
-                    '{{ $anterior->FechaVencimientoOriginal }}',
-                    '{{ $anterior->FechaVencimiento }}',
-                    '{{ $tot }}'
-                )">
-                                <i class="fa fa-file-invoice-dollar"></i>
-                            </button>
-                        @endif
-
-                    </td>
-
-
-
-
-                </tr>
-            @endforeach
+                                    @if ($anterior->NumeroEnvio != -1 && strtotime($anterior->FechaGenerada) > strtotime('2017-10-20'))
+                                        @php
+                                            $tot = $anterior->ImporteArt100 + $anterior->ImporteCuotaAfi + $anterior->Intereses;
+                                        @endphp
+                                        <button class="btn btn-sm btn-default mt-1" title="Generar nueva boleta"
+                                                onclick="generarBoleta(
+                            {{ $anterior->Mes }},
+                            {{ $anterior->NumeroEnvio }},
+                            '{{ $anterior->AnioFG }}',
+                            '{{ $anterior->MesFG }}',
+                            '{{ $anterior->diaFG }}',
+                            '{{ $anterior->HoraFG }}',
+                            '{{ $anterior->MinutoFG }}',
+                            '{{ $anterior->SegundoFG }}',
+                            '{{ $anterior->FechaVencimientoOriginal }}',
+                            '{{ $anterior->FechaVencimiento }}',
+                            '{{ $tot }}'
+                        )">
+                                            <i class="fa fa-file-invoice-dollar"></i>
+                                        </button>
+                                    @endif
+                                </td>
+                            </tr>
+                        @endforeach
                         </tbody>
+
                     </table>
 
 
@@ -334,7 +340,7 @@
             $('#DDJJEmpleadosContent').html('');
         }
 
-        function reimprimirBoleta(mes, numeroEnvio, flag) {
+        function reimprimirBoleta(mes, nroEnvio, esVieja, anioFG = null, mesFG = null, diaFG = null, horaFG = null, minutoFG = null, segundoFG = null) {
             const idEmpresa = document.getElementById('empresa').value;
             const anio = document.getElementById('year').value;
 
@@ -343,11 +349,47 @@
                 return;
             }
 
-            // Podés adaptar esta URL según tu ruta Laravel
-            const url = `/reimprimir-boleta/${idEmpresa}/${anio}/${mes}/${numeroEnvio}/${flag}`;
+            const data = {
+                IdEmpresa: idEmpresa,
+                Mes: mes,
+                Anio: anio,
+                NroEnvio: nroEnvio,
+                EsVieja: esVieja,
+                AnioFG: anioFG,
+                MesFG: mesFG,
+                DiaFG: diaFG,
+                HoraFG: horaFG,
+                MinutoFG: minutoFG,
+                SegundoFG: segundoFG,
+                Vencimiento: new Date().toISOString().split('T')[0], // o la fecha correcta si la tenés
+            };
 
-            window.open(url, '_blank'); // abre en una nueva pestaña
+            fetch("{{ route('ddjjs.reimprimir') }}", {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+                .then(res => res.json())
+                .then(res => {
+                    if (res.success) {
+                        //alert(`✅ ${res.message}\nIntereses: ${res.intereses}\nTotal: ${res.total}`);
+                        if (res.pdf_url) {
+                            window.open(res.pdf_url, '_blank');
+                        } else {
+                            console.warn('No se generó el PDF.');
+                        }
+                    } else {
+                        alert(`⚠️ ${res.message}`);
+                    }
+                })
+                .catch(err => console.error(err));
         }
+
+
+
 
         function generarBoleta(mes, numeroEnvio, flag) {
             const idEmpresa = document.getElementById('empresa').value;

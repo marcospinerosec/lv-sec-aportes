@@ -3,7 +3,7 @@
 @section('content')
 
     <div style="float: left; border-color: #999999; margin: 0 2%;">
-        <div class="box box-primary">
+
             <h1 class="mt-4">
                 Importar empleados
             </h1>
@@ -17,7 +17,13 @@
                     </ul>
                 </div>
             @endif
-            <div class="row" style="border: 1px solid; padding: 10px;">
+        <div id="float" style="font-size:12px;
+	 	margin:20px;
+		padding:25px 25px 25px;
+		border:1px solid #666;
+		border-radius:10px;
+		box-shadow:0 0 10px #666;
+		background:#0275D8; display: flex;">
 
                 <form role="form" action="{{ url('/empleados/procesar')}}" method="post" enctype="multipart/form-data">
                     @csrf
@@ -55,13 +61,13 @@
                     </div>
 
                     <div class="box-footer">
-                        <button type="submit" class="btn btn-primary">Guardar</button>
-                        <a href="{{ route('empleados.index',  array('empresa' => $empresa))}}" class="btn btn-success">Volver</a>
+                        <button type="submit" class="btn btn-secondary">Guardar</button>
+                        <a href="{{ route('empleados.index',  array('empresa' => $empresa))}}" class="btn btn-secondary">Volver</a>
                     </div>
                 </form>
 
             </div>
-        </div>
+
     </div>
 
 @endsection

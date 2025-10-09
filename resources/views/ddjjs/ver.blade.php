@@ -21,30 +21,24 @@
                     </thead>
                     <tbody>
                     @foreach($empleados as $empleado)
-
-
-                        <tr
-
-                        >
-
-                            <td>{{$empleado->Cuil}}</td>
-                            <td>{{$empleado->Nombre}}</td>
-                            <td>{{$empleado->Categoria}}</td>
-
-
-
-                            <td>{{($empleado->Afiliado)?'SI':'NO'}}</td>
-                            <td>{{($empleado->FechaIngreso)?date('d/m/Y', strtotime($empleado->FechaIngreso)):''}}</td>
-
-                            <td>{{$empleado->Novedad}}</td>
-                            <td>{{($empleado->FechaEgreso)?date('d/m/Y', strtotime($empleado->FechaEgreso)):''}}</td>
+                        <tr>
+                            <td>{{ $empleado->Cuil }}</td>
+                            <td>{{ $empleado->Nombre }}</td>
+                            <td>{{ $empleado->Categoria }}</td>
+                            <td>{{ ($empleado->Afiliado) ? 'SI' : 'NO' }}</td>
+                            <td data-order="{{ $empleado->FechaIngreso ? date('Y-m-d', strtotime($empleado->FechaIngreso)) : '' }}">
+                                {{ $empleado->FechaIngreso ? date('d/m/Y', strtotime($empleado->FechaIngreso)) : '' }}
+                            </td>
+                            <td>{{ $empleado->Novedad }}</td>
+                            <td data-order="{{ $empleado->FechaEgreso ? date('Y-m-d', strtotime($empleado->FechaEgreso)) : '' }}">
+                                {{ $empleado->FechaEgreso ? date('d/m/Y', strtotime($empleado->FechaEgreso)) : '' }}
+                            </td>
                             <td>{{ number_format($empleado->ImporteArt100, 2, ',', '.') }}</td>
                             <td>{{ number_format($empleado->ImporteCuotaAfil, 2, ',', '.') }}</td>
-
-
                         </tr>
                     @endforeach
                     </tbody>
+
                     {{-- Totales --}}
                     <tfoot>
                     @if(!empty($ddjjTotales))

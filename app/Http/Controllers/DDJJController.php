@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use GuzzleHttp\Client;
 use Milon\Barcode\DNS1D;
 use App\Traits\SanitizesInput;
+use Carbon\Carbon;
 class DDJJController extends Controller
 {
     use SanitizesInput;
@@ -713,11 +714,7 @@ class DDJJController extends Controller
         $intereses = $this->sanitizeInput($request->input('intereses'));
         $vencimientoOriginal = $this->sanitizeInput($request->input('vencOri'));
 
-        /*$client = new Client();
 
-        $response = $client->get(\Constants\Constants::API_URL . '/verifica-boleta/' . $empresa . '/' . $mes . '/' . $year);
-
-        $result = json_decode($response->getBody(), true);*/
 
         $results = DB::select(DB::raw("exec DDJJ_BoletaPagoImpresion :Param1, :Param2, :Param3"), [
             ':Param1' => $empresa,
@@ -771,19 +768,7 @@ class DDJJController extends Controller
             return response()->json(['errors' => array('Valores incorrectos, por favor verifique')], 422);
         }
 
-        /*$response = $client->get(\Constants\Constants::API_URL.'/empleados-empresa-ddjj/' . $empresa.'/'. $mes.'/'.$year);
 
-        $result = json_decode($response->getBody(), true);
-
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-        }*/
-
-        /*$response = $client->get(\Constants\Constants::API_URL . '/empresa/' . $empresa);
-
-        $result = json_decode($response->getBody(), true);*/
-
-        //dd($result);
 
         $results=DB::select(DB::raw("exec DDJJ_EmpresaPorId :Param1"),[
             ':Param1' => $empresa,
@@ -1277,4 +1262,121 @@ class DDJJController extends Controller
         // Devolver los datos en formato JSON
         return response()->json($datosTabla);
     }
+
+    public function reimprimirBoleta(Request $request)
+    {
+        // 1️⃣ Validación de parámetros
+        $request->validate([
+            'IdEmpresa' => 'required|integer',
+            'Mes' => 'required|integer',
+            'Anio' => 'required|integer',
+            'NroEnvio' => 'required|integer',
+            'EsVieja' => 'required|boolean',
+            'AnioFG' => 'nullable|integer',
+            'MesFG' => 'nullable|integer',
+            'DiaFG' => 'nullable|integer',
+            'HoraFG' => 'nullable|integer',
+            'MinutoFG' => 'nullable|integer',
+            'SegundoFG' => 'nullable|integer',
+            'Vencimiento' => 'nullable|date_format:Y-m-d',
+        ]);
+
+        $params = [
+            (int)$request->IdEmpresa,
+            (int)$request->Mes,
+            (int)$request->Anio,
+            (int)$request->NroEnvio,
+            (int)($request->AnioFG ?? 0),
+            (int)($request->MesFG ?? 0),
+            (int)($request->DiaFG ?? 0),
+            (int)($request->HoraFG ?? 0),
+            (int)($request->MinutoFG ?? 0),
+            (int)($request->SegundoFG ?? 0),
+        ];
+
+        //\Log::info('ReimprimirBoleta params', $params);
+        //\Log::info('EsVieja', [$request->EsVieja]);
+
+        // 2️⃣ Traer datos según EsVieja
+        if (!$request->EsVieja) {
+            $rsEmpleados = DB::select('EXEC DDJJ_BoletaPagoReImpresion ?,?,?,?,?,?,?,?,?,?', $params);
+        } else {
+            $rsEmpleados = DB::select('EXEC DDJJ_BoletaPagoReImpresionAnteriores ?,?,?,?,?,?,?,?,?,?', $params);
+        }
+
+        if (empty($rsEmpleados)) {
+            return response()->json(['message' => 'No se encontraron datos para la boleta.'], 404);
+        }
+
+        // 3️⃣ Ajustes de intereses y vencimiento (igual que antes)
+        $empleado = $rsEmpleados[0];
+        $vencini = Carbon::parse($empleado->FechaVencimientoOriginal);
+        $venc = Carbon::parse($request->Vencimiento ?? $empleado->FechaVencimiento);
+
+        $dias2 = 0;
+        $vencinic = clone $vencini;
+        if ($vencini->between(Carbon::parse('2020-03-19'), Carbon::parse('2020-04-30'))) {
+            $vencinic = Carbon::parse('2020-04-30');
+        } elseif ($vencini->lt(Carbon::parse('2020-03-19'))) {
+            $venc2 = Carbon::parse('2020-03-19');
+            $dias2 = $vencini->diffInDays($venc2);
+            $vencinic = Carbon::parse('2020-04-30');
+        }
+
+        $dias = $vencinic->diffInDays($venc) + $dias2;
+        $tot = (float)$empleado->ImporteArt100 + (float)$empleado->ImporteCuotaAfi;
+        $porcentaje = (float)(DB::select('EXEC DDJJ_PorcentajeInteresTraer')[0]->Porcentaje ?? 0);
+        $intereses = ($tot * $porcentaje / 100) * $dias;
+
+        // 4️⃣ Actualizar vencimiento e intereses
+        //$params2 = array_merge($params, [$venc->toDateString(), (float)$intereses]);
+        $interesesSP = round($intereses, 2);
+        // Limitar a 2 decimales y al máximo permitido
+        $interesesSP = min(round($intereses, 2), 9999999.99);
+        $params2 = array_merge($params, [$venc->toDateString(), $interesesSP]);
+        \Log::info('BoletaPagoReImpresionCambiaVencimiento params', $params2);
+        DB::statement('EXEC DDJJ_BoletaPagoReImpresionCambiaVencimiento ?,?,?,?,?,?,?,?,?,?,?,?', $params2);
+
+
+
+        // 5️⃣ Generar código de barras
+        $empresa = str_pad((string)$empleado->Codigo, 5, '0', STR_PAD_LEFT);
+        $nroComprobante = str_pad((string)$empleado->NroComprobante ?? 0, 10, '0', STR_PAD_LEFT);
+        $vencCodigo = $venc->format('dmY');
+        $totStr = str_pad((string)intval(round(($tot + $intereses) * 100)), 9, '0', STR_PAD_LEFT);
+        $barras = "2861{$empresa}{$nroComprobante}1{$vencCodigo}{$totStr}";
+
+        // 6️⃣ Generar PDF
+        $pdfResponse = $this->generarCodigoBarras(
+            $barras,
+            $empresa,
+            $empleado->NombreReal ?? '',
+            $request->Mes,
+            $request->Anio,
+            $empleado->CantArt100 ?? 0,
+            $empleado->ImporteArt100 ?? 0,
+            $empleado->CantAfi ?? 0,
+            $empleado->ImporteCuotaAfi ?? 0,
+            $intereses,
+            $venc->format('Y-m-d'),
+            $empleado->FechaVencimientoOriginal ?? '',
+            $nroComprobante
+        );
+
+// Convertir JsonResponse a array para poder usarlo
+        $pdfData = $pdfResponse->getData(true);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Boleta recalculada correctamente.',
+            'intereses' => number_format($intereses, 2, ',', '.'),
+            'dias' => $dias,
+            'total' => number_format($tot + $intereses, 2, ',', '.'),
+            'pdf_url' => $pdfData['pdf_url'] ?? null
+        ]);
+
+    }
+
+
+
 }

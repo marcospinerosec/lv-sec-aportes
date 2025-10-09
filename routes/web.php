@@ -38,6 +38,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/procesar', [App\Http\Controllers\DDJJController::class, 'procesar']);
     Route::post('/generar', [App\Http\Controllers\DDJJController::class, 'generar']);
     Route::get('/ddjjs/ver/{empresa}/{anio}/{mes}/{envio}', [App\Http\Controllers\DDJJController::class, 'ver']);
+    Route::post('/ddjjs/reimprimir', [App\Http\Controllers\DDJJController::class, 'reimprimirBoleta'])->name('ddjjs.reimprimir');
 
 
     Route::get('/empleados/index', [App\Http\Controllers\EmpleadoController::class, 'index'])->name('empleados.index');
