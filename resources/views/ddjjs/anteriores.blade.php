@@ -304,7 +304,10 @@
         }
 
 
-        function verDDJJ(mes, envio) {
+
+
+
+        function reimprimirBoleta(mes, nroEnvio, esVieja, anioFG = null, mesFG = null, diaFG = null, horaFG = null, minutoFG = null, segundoFG = null, vencimiento = null) {
             const idEmpresa = document.getElementById('empresa').value;
             const anio = document.getElementById('year').value;
 
@@ -313,41 +316,7 @@
                 return;
             }
 
-            // Mostrar modal y fondo
-            $('#fondo').removeClass('d-none');
-            $('#DDJJEmpleados').removeClass('d-none');
-            $('#DDJJEmpleadosContent').html(`
-                            <div class="text-center py-5">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="sr-only">Cargando...</span>
-                                </div>
-                            </div>
-                        `);
-
-            // URL Laravel que devuelve la vista parcial con la DDJJ
-            const url = `{{ url('/ddjjs/ver') }}/${idEmpresa}/${anio}/${mes}/${envio}`;
-
-            // Cargar contenido dinámicamente en el modal
-            $('#DDJJEmpleadosContent').load(url, function(response, status) {
-                if (status === 'error') {
-                    $('#DDJJEmpleadosContent').html('<div class="alert alert-danger">Error al cargar la DDJJ.</div>');
-                }
-            });
-        }
-
-        function cerrarModal() {
-            $('#fondo, #DDJJEmpleados').addClass('d-none');
-            $('#DDJJEmpleadosContent').html('');
-        }
-
-        function reimprimirBoleta(mes, nroEnvio, esVieja, anioFG = null, mesFG = null, diaFG = null, horaFG = null, minutoFG = null, segundoFG = null) {
-            const idEmpresa = document.getElementById('empresa').value;
-            const anio = document.getElementById('year').value;
-
-            if (!idEmpresa || !anio) {
-                alert('Debe seleccionar una empresa y un año antes de continuar.');
-                return;
-            }
+            const venc = vencimiento || null; // Si no hay fecha, enviamos null
 
             const data = {
                 IdEmpresa: idEmpresa,
@@ -361,7 +330,7 @@
                 HoraFG: horaFG,
                 MinutoFG: minutoFG,
                 SegundoFG: segundoFG,
-                Vencimiento: new Date().toISOString().split('T')[0], // o la fecha correcta si la tenés
+                Vencimiento: venc, // ✅ null permitirá que PHP use la fecha original
             };
 
             fetch("{{ route('ddjjs.reimprimir') }}", {
@@ -375,12 +344,9 @@
                 .then(res => res.json())
                 .then(res => {
                     if (res.success) {
-                        //alert(`✅ ${res.message}\nIntereses: ${res.intereses}\nTotal: ${res.total}`);
-                        if (res.pdf_url) {
-                            window.open(res.pdf_url, '_blank');
-                        } else {
-                            console.warn('No se generó el PDF.');
-                        }
+                        alert(`✅ ${res.message}\nIntereses: ${res.intereses}\nTotal: ${res.total}`);
+                        if (res.pdf_url) window.open(res.pdf_url, '_blank');
+                        location.reload();
                     } else {
                         alert(`⚠️ ${res.message}`);
                     }
@@ -391,18 +357,117 @@
 
 
 
-        function generarBoleta(mes, numeroEnvio, flag) {
+
+        function generarBoleta(mes, nroEnvio, anioFG, mesFG, diaFG, horaFG, minutoFG, segundoFG, vencimientoOriginal, vencimientoAnterior, total) {
+            const anio = document.getElementById('year').value;
+
+            // Mostrar modal y fondo
+            $("#fondo").removeClass('d-none').show();
+
+            // Resetear estilos para la reimpresión
+            $("#DDJJEmpleados").css({
+                width: "600px",
+                height: "400px",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                position: "fixed",
+                background: "#fff",
+                border: "1px solid #87ceeb",
+                padding: "20px",
+                borderRadius: "8px",
+                overflow: "auto"
+            }).removeClass('d-none').show();
+
+            // Solo modificar contenido interno
+            const totalFormateado = new Intl.NumberFormat('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(total);
+            const vencOriginalFormateado = new Date(vencimientoOriginal).toLocaleDateString('es-AR');
+
+            const html = `
+        <table width="400px" cellpadding="0" cellspacing="0" border="0" align="center">
+            <tr><td><b>Consultas - Generación nueva boleta</b></td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td><b>Periodo: ${mes} - ${anio}</b></td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td><b>Importe Original: ${totalFormateado}</b></td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td><b>Vencimiento Original: ${vencOriginalFormateado}</b></td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr><td><b>Nuevo Vencimiento:</b>
+                <input type="date" id="txtVencimientoNuevo" style="width:150px" class="obligatorio" />
+            </td></tr>
+            <tr><td>&nbsp;</td></tr>
+            <tr align="center">
+                <td>
+                    <button id="BtGenerarBoleta" class="btn btn-secondary">Generar Boleta</button>
+                    &nbsp;
+                    <button id="BtCerrar" class="btn btn-secondary">Cancelar</button>
+                </td>
+            </tr>
+        </table>
+    `;
+
+            $("#DDJJEmpleadosContent").html(html);
+
+            $("#txtVencimientoNuevo").focus();
+
+            $("#BtCerrar").off("click").on("click", cerrarModal);
+            $("#BtGenerarBoleta").off("click").on("click", function () {
+                const vencNuevo = $("#txtVencimientoNuevo").val();
+                if (!vencNuevo) { alert("Debe ingresar un nuevo vencimiento."); return; }
+                reimprimirBoleta(mes, nroEnvio, false, anioFG, mesFG, diaFG, horaFG, minutoFG, segundoFG, vencNuevo);
+                cerrarModal();
+            });
+        }
+
+        function verDDJJ(mes, envio) {
             const idEmpresa = document.getElementById('empresa').value;
             const anio = document.getElementById('year').value;
 
-            if (!idEmpresa || !anio) {
-                alert('Debe seleccionar una empresa y un año antes de continuar.');
-                return;
-            }
+            if (!idEmpresa || !anio) { alert('Debe seleccionar una empresa y un año antes de continuar.'); return; }
 
-            const url = `/generar-boleta/${idEmpresa}/${anio}/${mes}/${numeroEnvio}/${flag}`;
-            window.open(url, '_blank');
+            // Resetear estilos para listado
+            $('#DDJJEmpleados').css({
+                width: '80%',
+                height: '80%',
+                top: '10%',
+                left: '10%',
+                transform: 'none',
+                position: 'fixed',
+                overflow: 'auto',
+                background: '#fff',
+                borderRadius: '8px',
+                padding: '1rem',
+                border: 'none'
+            }).removeClass('d-none').show();
+
+            $('#fondo').removeClass('d-none').show();
+
+            // Solo limpiar contenido interno
+            $('#DDJJEmpleadosContent').html(`
+        <div class="text-center py-5">
+            <div class="spinner-border text-primary" role="status">
+                <span class="sr-only">Cargando...</span>
+            </div>
+        </div>
+    `);
+
+            const url = "{{ url('/ddjjs/ver') }}/" + idEmpresa + "/" + anio + "/" + mes + "/" + envio;
+
+            $('#DDJJEmpleadosContent').load(url, function(response, status) {
+                if (status === 'error') {
+                    $('#DDJJEmpleadosContent').html('<div class="alert alert-danger">Error al cargar la DDJJ.</div>');
+                }
+            });
         }
+
+        function cerrarModal() {
+            $('#fondo, #DDJJEmpleados').addClass('d-none').hide();
+            $('#DDJJEmpleadosContent').html('');
+        }
+
+
+
 
     </script>
 @endsection

@@ -1265,7 +1265,6 @@ class DDJJController extends Controller
 
     public function reimprimirBoleta(Request $request)
     {
-        // 1️⃣ Validación de parámetros
         $request->validate([
             'IdEmpresa' => 'required|integer',
             'Mes' => 'required|integer',
@@ -1294,24 +1293,91 @@ class DDJJController extends Controller
             (int)($request->SegundoFG ?? 0),
         ];
 
-        //\Log::info('ReimprimirBoleta params', $params);
-        //\Log::info('EsVieja', [$request->EsVieja]);
-
-        // 2️⃣ Traer datos según EsVieja
-        if (!$request->EsVieja) {
-            $rsEmpleados = DB::select('EXEC DDJJ_BoletaPagoReImpresion ?,?,?,?,?,?,?,?,?,?', $params);
-        } else {
-            $rsEmpleados = DB::select('EXEC DDJJ_BoletaPagoReImpresionAnteriores ?,?,?,?,?,?,?,?,?,?', $params);
-        }
+        $rsEmpleados = !$request->EsVieja
+            ? DB::select('EXEC DDJJ_BoletaPagoReImpresion ?,?,?,?,?,?,?,?,?,?', $params)
+            : DB::select('EXEC DDJJ_BoletaPagoReImpresionAnteriores ?,?,?,?,?,?,?,?,?,?', $params);
 
         if (empty($rsEmpleados)) {
             return response()->json(['message' => 'No se encontraron datos para la boleta.'], 404);
         }
 
-        // 3️⃣ Ajustes de intereses y vencimiento (igual que antes)
         $empleado = $rsEmpleados[0];
-        $vencini = Carbon::parse($empleado->FechaVencimientoOriginal);
-        $venc = Carbon::parse($request->Vencimiento ?? $empleado->FechaVencimiento);
+
+        $fechaActual = Carbon::now();
+        $fechaOriginal = Carbon::parse($empleado->FechaVencimientoOriginal); // 🔹 necesario
+        $fechaUsuario = $request->Vencimiento
+            ? Carbon::parse($request->Vencimiento)
+            : Carbon::parse($empleado->FechaVencimiento); // toma la fecha de la boleta
+
+        /*\Log::info('Fecha actual:', ['fechaActual' => $fechaActual->toDateTimeString()]);
+        \Log::info('Fecha ingresada por usuario:', ['fechaUsuario' => $fechaUsuario->toDateTimeString()]);
+        \Log::info('Fecha original:', ['fechaOriginal' => $fechaOriginal->toDateTimeString()]);*/
+
+// 1️⃣ Boleta vencida según fecha ingresada por usuario
+        if ($fechaActual->gt($fechaUsuario)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Boleta de Pago vencida. Ingrese una nueva fecha de pago.'
+            ], 400);
+        }
+
+// 2️⃣ Fecha ingresada menor a la original
+        if ($fechaUsuario->lt($fechaOriginal)) {
+            // Llamada equivalente a DDJJ_ConsultasReimpresionBoletaPagoCambiaVencimiento
+            $consulta = DB::select('EXEC DDJJ_ConsultasReimpresionBoletaPagoCambiaVencimiento ?,?,?,?,?,?,?,?,?,?,?',
+                array_merge($params, [$fechaUsuario->toDateString()])
+            );
+
+            // 3️⃣ Validaciones tipo ASP
+            if (empty($consulta)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'El sistema no se encuentra disponible en este momento, por favor vuelva a intentarlo más tarde.'
+                ], 500);
+            }
+
+            // Supongamos que la SP devuelve hiOk como campo
+            $hiOk = $consulta[0]->hiOk ?? null;
+            if ($hiOk != 201) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Existen inconvenientes con un servicio externo al Sindicato requerido para este proceso. Por favor, espere unos minutos y vuelva a intentarlo.'
+                ], 500);
+            }
+
+            // Si todo OK, continuamos con la reimpresión
+            // Esto reemplaza ReimprimirBoletaParte2 + Cerrar + Consultar del ASP
+            // Solo calculamos intereses y generamos PDF abajo
+        }
+
+        // 🧾  Verificar boleta antes de generar PDF
+        $verificacion = DB::select('EXEC DDJJ_BoletaImpresionVerificaJson ?', [$empleado->NroComprobante ?? 0]);
+
+        // Log completo de la respuesta del SP
+        \Log::info('🧾 Resultado SP DDJJ_BoletaImpresionVerificaJson', [
+            'NroComprobante' => $empleado->NroComprobante ?? 'null',
+            'resultado' => $verificacion
+        ]);
+
+
+        $errorEnBoleta = false;
+        if (empty($verificacion)) {
+            $errorEnBoleta = true;
+        } elseif (isset($verificacion[0]->Desde) && trim($verificacion[0]->Desde) === 'Boleta-Error') {
+            $errorEnBoleta = true;
+        }
+
+        if ($errorEnBoleta) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió algún inconveniente cuando se generó la boleta, deberá volver a generarla.'
+            ], 500);
+        }
+
+
+        // 4️⃣ Ajustes de intereses y vencimiento (igual que antes)
+        $vencini = $fechaOriginal;
+        $venc = $fechaUsuario;
 
         $dias2 = 0;
         $vencinic = clone $vencini;
@@ -1328,25 +1394,18 @@ class DDJJController extends Controller
         $porcentaje = (float)(DB::select('EXEC DDJJ_PorcentajeInteresTraer')[0]->Porcentaje ?? 0);
         $intereses = ($tot * $porcentaje / 100) * $dias;
 
-        // 4️⃣ Actualizar vencimiento e intereses
-        //$params2 = array_merge($params, [$venc->toDateString(), (float)$intereses]);
-        $interesesSP = round($intereses, 2);
-        // Limitar a 2 decimales y al máximo permitido
+        // 5️⃣ Actualizar vencimiento e intereses
         $interesesSP = min(round($intereses, 2), 9999999.99);
         $params2 = array_merge($params, [$venc->toDateString(), $interesesSP]);
-        \Log::info('BoletaPagoReImpresionCambiaVencimiento params', $params2);
         DB::statement('EXEC DDJJ_BoletaPagoReImpresionCambiaVencimiento ?,?,?,?,?,?,?,?,?,?,?,?', $params2);
 
-
-
-        // 5️⃣ Generar código de barras
+        // 6️⃣ Generar código de barras y PDF
         $empresa = str_pad((string)$empleado->Codigo, 5, '0', STR_PAD_LEFT);
         $nroComprobante = str_pad((string)$empleado->NroComprobante ?? 0, 10, '0', STR_PAD_LEFT);
         $vencCodigo = $venc->format('dmY');
         $totStr = str_pad((string)intval(round(($tot + $intereses) * 100)), 9, '0', STR_PAD_LEFT);
         $barras = "2861{$empresa}{$nroComprobante}1{$vencCodigo}{$totStr}";
 
-        // 6️⃣ Generar PDF
         $pdfResponse = $this->generarCodigoBarras(
             $barras,
             $empresa,
@@ -1363,7 +1422,6 @@ class DDJJController extends Controller
             $nroComprobante
         );
 
-// Convertir JsonResponse a array para poder usarlo
         $pdfData = $pdfResponse->getData(true);
 
         return response()->json([
@@ -1374,8 +1432,8 @@ class DDJJController extends Controller
             'total' => number_format($tot + $intereses, 2, ',', '.'),
             'pdf_url' => $pdfData['pdf_url'] ?? null
         ]);
-
     }
+
 
 
 
