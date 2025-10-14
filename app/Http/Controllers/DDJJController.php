@@ -480,6 +480,200 @@ class DDJJController extends Controller
         } else {
             $ingresafecha = true;
         }
+        $rsUltimoPeriodo = DB::select(DB::raw("exec DDJJ_UltimoPeriodoPagoSEC :Param1"), [
+            ':Param1' => $empresa
+        ]);
+        $tablaHtmlAnterior = '';
+        //dd(trim($rsUltimoPeriodo[0]->Anio));
+        if (!empty($rsUltimoPeriodo)&&trim($rsUltimoPeriodo[0]->Anio)!="0") {
+            $tablaHtmlAnterior .= '<div style="width: 50%; padding: 0 2%;"><span style="font-size: 1.25rem"> Último Periodo Pago Registrado en el SEC</span>';
+
+
+            $firstResult = $rsUltimoPeriodo[0];
+            if ($firstResult->Mes) {
+                $mesAnterior = $firstResult->Mes;
+                $yearAnterior = $firstResult->Anio;
+                $cantArt100 = $firstResult->CantArt100;
+                $cantAfi = $firstResult->CantAfi;
+                $importeArt100 = $firstResult->ImporteArt100;
+                //$importeArt100Total = $firstResult->ImporteArt100Total;
+                $importeCuotaAfi = $firstResult->ImporteCuotaAfi;
+                $tot = $firstResult->Importe_Total;
+                //$importeCuotaAfiTotal = $firstResult->ImporteCuotaAfiTotal;
+
+                /*$tot = doubleval($importeArt100) + doubleval($importeCuotaAfi);
+                $tot2 = doubleval($importeArt100Total) + doubleval($importeCuotaAfiTotal);*/
+                $tablaHtmlAnterior .= '<br><span style="font-size: 1rem; font-weight: bold">Período '.$mesAnterior.'-'.$yearAnterior.'</span>
+                                    <table id="tablePeriodo" style="width: 100%; font-size: 20px;">
+                                    <tbody><tr>
+                                    <th>
+                                    &nbsp;
+                                    </th>
+                                    <th style="border: 1px solid black; text-align: center">
+                                    <b>Nro Aportantes</b>
+                                    </th>
+
+                                    <th style="border: 1px solid black; text-align: center">
+                                    <b>Importe</b>
+                                    </th>
+                                    </tr>
+                                    <tr>
+                                    <td style="border: 1px solid black">
+                                    <b>Artículo 100</b>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: right">';
+
+                $tablaHtmlAnterior .=$cantArt100;
+                $tablaHtmlAnterior .='
+                                    </td>
+
+                                    <td style="border: 1px solid black; text-align: right">';
+                $tablaHtmlAnterior .=number_format($importeArt100,2,',','.');
+                $tablaHtmlAnterior .='
+
+                                                </td>
+                                    </tr>
+                                    <tr>
+                                    <td style="border: 1px solid black">
+                                    <b>Afiliados</b>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: right">';
+
+                $tablaHtmlAnterior .=$cantAfi;
+                $tablaHtmlAnterior .='
+                                    </td>
+
+                                    <td style="border: 1px solid black; text-align: right">';
+                $tablaHtmlAnterior .=number_format($importeCuotaAfi,2,',','.');
+                $tablaHtmlAnterior .='
+
+                                                </td>
+                                    </tr>
+
+                                    <td style="border: 2px solid black; font-weight: bold" colspan="2">
+                                    <strong>Totales</strong>
+                                    </td>
+
+
+                                    <td style="border: 2px solid black; text-align: right; font-weight: bold">';
+                $tablaHtmlAnterior .='<strong>'.number_format($tot,2,',','.').'</strong>';
+                $tablaHtmlAnterior .='
+
+                                    </td>
+                                    </tr>
+
+                                    </tbody></table>';
+            }
+            else{
+                $tablaHtmlAnterior .= '<br><span style="font-size: 1rem; font-weight: bold">Sin Información Registrada en el SEC</span>';
+            }
+
+        }
+
+        $tablaHtmlAnterior .= '</div>';
+
+        $rsUltimaPresentada = DB::select(DB::raw("exec DDJJ_UltimaPresentadaSEC :Param1"), [
+            ':Param1' => $empresa
+        ]);
+        $tablaHtmlAnterior .= '<div style="width: 50%"><span style="font-size: 1.25rem">Última DDJJ Registrada en el SEC</span>';
+        if (!empty($rsUltimaPresentada)) {
+
+            $firstResult = $rsUltimaPresentada[0];
+            if ($firstResult->Mes) {
+                $mesAnterior = $firstResult->Mes;
+                $yearAnterior = $firstResult->Anio;
+                $cantArt100 = $firstResult->CantArt100;
+                $cantAfi = $firstResult->CantAfi;
+                $importeArt100 = $firstResult->ImporteArt100;
+                $importeArt100Total = $firstResult->ImporteArt100Total;
+                $importeCuotaAfi = $firstResult->ImporteCuotaAfi;
+                $importeCuotaAfiTotal = $firstResult->ImporteCuotaAfiTotal;
+
+                $tot = doubleval($importeArt100) + doubleval($importeCuotaAfi);
+                $tot2 = doubleval($importeArt100Total) + doubleval($importeCuotaAfiTotal);
+                $tablaHtmlAnterior .= '<br><span style="font-size: 1rem; font-weight: bold">Período '.$mesAnterior.'-'.$yearAnterior.'</span>
+                                    <table id="tableAnterior" style="width: 100%; font-size: 20px;">
+                                    <tbody><tr>
+                                    <th>
+                                    &nbsp;
+                                    </th>
+                                    <th style="border: 1px solid black; text-align: center">
+                                    <b>Nro Aportantes</b>
+                                    </th>
+                                    <th style="border: 1px solid black; text-align: center">
+                                    <b>Base para cálculo</b>
+                                    </th>
+                                    <th style="border: 1px solid black; text-align: center">
+                                    <b>Importe a pagar</b>
+                                    </th>
+                                    </tr>
+                                    <tr>
+                                    <td style="border: 1px solid black">
+                                    <b>Artículo 100</b>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: right">';
+
+                $tablaHtmlAnterior .=$cantArt100;
+                $tablaHtmlAnterior .='
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: right">';
+                $tablaHtmlAnterior .=number_format($importeArt100Total,2,',','.');
+                $tablaHtmlAnterior .='
+                                                </td>
+                                    <td style="border: 1px solid black; text-align: right">';
+                $tablaHtmlAnterior .=number_format($importeArt100,2,',','.');
+                $tablaHtmlAnterior .='
+
+                                                </td>
+                                    </tr>
+                                    <tr>
+                                    <td style="border: 1px solid black">
+                                    <b>Afiliados</b>
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: right">';
+
+                $tablaHtmlAnterior .=$cantAfi;
+                $tablaHtmlAnterior .='
+                                    </td>
+                                    <td style="border: 1px solid black; text-align: right">';
+                $tablaHtmlAnterior .=number_format($importeCuotaAfiTotal,2,',','.');
+                $tablaHtmlAnterior .='
+                                                </td>
+                                    <td style="border: 1px solid black; text-align: right">';
+                $tablaHtmlAnterior .=number_format($importeCuotaAfi,2,',','.');
+                $tablaHtmlAnterior .='
+
+                                                </td>
+                                    </tr>
+
+                                    <td style="border: 2px solid black; font-weight: bold" colspan="2">
+                                    <strong>Totales</strong>
+                                    </td>
+
+                                    <td style="border: 2px solid black;text-align: right; font-weight: bold">';
+                $tablaHtmlAnterior .='<strong>'.number_format($tot2,2,',','.').'</strong>';
+                $tablaHtmlAnterior .='
+                                    </td>
+                                    <td style="border: 2px solid black; text-align: right; font-weight: bold">';
+                $tablaHtmlAnterior .='<strong>'.number_format($tot,2,',','.').'</strong>';
+                $tablaHtmlAnterior .='
+
+                                    </td>
+                                    </tr>
+
+                                    </tbody></table>';
+            }
+            else{
+                $tablaHtmlAnterior .= '<br><span style="font-size: 1rem; font-weight: bold">Sin Información Registrada en el SEC</span>';
+            }
+
+        }
+        else{
+            $tablaHtmlAnterior .= '<br><span style="font-size: 1rem; font-weight: bold">Sin Información Registrada en el SEC</span>';
+        }
+
+        $tablaHtmlAnterior .= '</div>';
+
 
 
 
@@ -489,11 +683,7 @@ class DDJJController extends Controller
             ':Param3' => $year,
         ]);
 
-        /*$response = $client->get(\Constants\Constants::API_URL.'/boleta-pago-impresion/' . $empresa.'/'. $mes.'/'.$year);
 
-        $result = json_decode($response->getBody(), true);*/
-
-        //dd($result);
 
 
         if (!empty($rsTotales2)) {
@@ -515,11 +705,7 @@ class DDJJController extends Controller
             ':Param3' => $year,
         ]);
 
-        /*$response = $client->get(\Constants\Constants::API_URL.'/numero-mensual/' . $empresa.'/'. $mes.'/'.$year);
 
-        $result = json_decode($response->getBody(), true);*/
-
-        //dd($result);
 
 
         if (!empty($rsNumero)) {
@@ -531,11 +717,7 @@ class DDJJController extends Controller
 
         ]);
 
-        /*$response = $client->get(\Constants\Constants::API_URL.'/porcentaje-interes-traer');
 
-        $result = json_decode($response->getBody(), true);*/
-
-        //dd($result);
 
 
         if (!empty($rsPorcentaje)) {
@@ -677,7 +859,7 @@ class DDJJController extends Controller
         //$tablaHtml .= '</table>';
         //Log::info('Vencimiento pasado: ' .date_format($venc, 'Y-m-d') , []);
         // Devolver la tabla HTML como respuesta
-        return response()->json(['tabla' => $tablaHtml, 'original' => date_format($vencini, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.'),'existeDeclaracion' => $existeDeclaracion]);
+        return response()->json(['tabla' => $tablaHtml, 'tablaAnterior' => $tablaHtmlAnterior, 'original' => date_format($vencini, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.'),'existeDeclaracion' => $existeDeclaracion]);
     }
 
 
@@ -1351,10 +1533,10 @@ class DDJJController extends Controller
         }
 
         // 🧾  Verificar boleta antes de generar PDF
-        $verificacion = DB::select('EXEC DDJJ_BoletaImpresionVerificaJson ?', [$empleado->NroComprobante ?? 0]);
+        //$verificacion = DB::select('EXEC DDJJ_BoletaImpresionVerificaJson ?', [$empleado->NroComprobante ?? 0]);
 
         // Log completo de la respuesta del SP
-        \Log::info('🧾 Resultado SP DDJJ_BoletaImpresionVerificaJson', [
+        /*\Log::info('🧾 Resultado SP DDJJ_BoletaImpresionVerificaJson', [
             'NroComprobante' => $empleado->NroComprobante ?? 'null',
             'resultado' => $verificacion
         ]);
@@ -1372,7 +1554,7 @@ class DDJJController extends Controller
                 'success' => false,
                 'message' => 'Ocurrió algún inconveniente cuando se generó la boleta, deberá volver a generarla.'
             ], 500);
-        }
+        }*/
 
 
         // 4️⃣ Ajustes de intereses y vencimiento (igual que antes)

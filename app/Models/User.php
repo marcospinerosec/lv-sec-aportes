@@ -12,6 +12,10 @@ class User implements AuthenticatableContract
     public $IdUsuario;
     public $Nombre;
     public $Email;
+    public $EsAdministrador = false;
+    public $ImprimeSoloBoleta = false;
+    public $ImprimeSoloActa = false;
+    public $Empresa = 0;
 
     public function __construct(array $attributes = [])
     {
@@ -20,6 +24,7 @@ class User implements AuthenticatableContract
         }
     }
 
+    // Métodos del contrato de autenticación
     public function getAuthIdentifierName()
     {
         return 'IdUsuario';
@@ -32,7 +37,7 @@ class User implements AuthenticatableContract
 
     public function getAuthPassword()
     {
-        return ''; // No es necesario en este caso
+        return ''; // No es necesario
     }
 
     public function getRememberToken()
@@ -42,12 +47,32 @@ class User implements AuthenticatableContract
 
     public function setRememberToken($value)
     {
-        // No es necesario en este caso
+        // No es necesario
     }
 
     public function getRememberTokenName()
     {
         return '';
     }
-}
 
+    // ✅ Métodos de conveniencia para tu lógica
+    public function isAdmin()
+    {
+        return (bool) $this->EsAdministrador;
+    }
+
+    public function soloImprimeBoleta()
+    {
+        return (bool) $this->ImprimeSoloBoleta;
+    }
+
+    public function soloImprimeActa()
+    {
+        return (bool) $this->ImprimeSoloActa;
+    }
+
+    public function tieneEmpresa()
+    {
+        return (int) $this->Empresa > 0;
+    }
+}

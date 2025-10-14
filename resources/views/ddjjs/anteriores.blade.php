@@ -366,8 +366,8 @@
 
             // Resetear estilos para la reimpresión
             $("#DDJJEmpleados").css({
-                width: "600px",
-                height: "400px",
+                width: "800px",
+                height: "450px",
                 top: "50%",
                 left: "50%",
                 transform: "translate(-50%, -50%)",
@@ -384,28 +384,49 @@
             const vencOriginalFormateado = new Date(vencimientoOriginal).toLocaleDateString('es-AR');
 
             const html = `
-        <table width="400px" cellpadding="0" cellspacing="0" border="0" align="center">
-            <tr><td><b>Consultas - Generación nueva boleta</b></td></tr>
-            <tr><td>&nbsp;</td></tr>
-            <tr><td><b>Periodo: ${mes} - ${anio}</b></td></tr>
-            <tr><td>&nbsp;</td></tr>
-            <tr><td><b>Importe Original: ${totalFormateado}</b></td></tr>
-            <tr><td>&nbsp;</td></tr>
-            <tr><td><b>Vencimiento Original: ${vencOriginalFormateado}</b></td></tr>
-            <tr><td>&nbsp;</td></tr>
-            <tr><td><b>Nuevo Vencimiento:</b>
-                <input type="date" id="txtVencimientoNuevo" style="width:150px" class="obligatorio" />
-            </td></tr>
-            <tr><td>&nbsp;</td></tr>
-            <tr align="center">
-                <td>
-                    <button id="BtGenerarBoleta" class="btn btn-secondary">Generar Boleta</button>
-                    &nbsp;
-                    <button id="BtCerrar" class="btn btn-secondary">Cancelar</button>
-                </td>
-            </tr>
-        </table>
-    `;
+<div style="
+    font-size:12px;
+    margin:5px auto;
+    padding:5px;
+    border:1px solid #666;
+    border-radius:10px;
+    box-shadow:0 0 10px #666;
+    background:#0275D8;
+    width: 700px;
+    color: #fff;
+">
+    <h3 class="mb-3 text-center">Consultas - Generación nueva boleta</h3>
+
+    <form id="formGenerarBoleta" style="background: #0275D8; color: #fff; padding: 5px; border-radius: 8px;">
+        <div class="form-group mb-3" >
+            <label style="width: 300px;"><b>Periodo:</b></label>
+            <input type="text" class="form-control" readonly value="${mes} - ${anio}">
+        </div>
+
+        <div class="form-group mb-3">
+            <label style="width: 300px;"><b>Importe Original:</b></label>
+            <input type="text" class="form-control" readonly value="${totalFormateado}">
+        </div>
+
+        <div class="form-group mb-3">
+            <label style="width: 300px;"><b>Vencimiento Original:</b></label>
+            <input type="text" class="form-control" readonly value="${vencOriginalFormateado}">
+        </div>
+
+        <div class="form-group mb-3">
+            <label style="width: 300px;"><b>Nuevo Vencimiento:</b></label>
+            <input type="date" id="txtVencimientoNuevo" class="form-control obligatorio">
+        </div>
+
+        <div class="text-center mt-4">
+            <button id="BtGenerarBoleta" class="btn btn-secondary" type="button">Generar Boleta</button>
+            &nbsp;
+            <button id="BtCerrar" class="btn btn-secondary" type="button">Cancelar</button>
+        </div>
+    </form>
+</div>
+`;
+
 
             $("#DDJJEmpleadosContent").html(html);
 

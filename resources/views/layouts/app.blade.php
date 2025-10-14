@@ -38,6 +38,9 @@
 <body class="sb-nav-fixed">
 @php
     $current_path = request()->path();
+
+    $user = Auth::user();
+
 @endphp
 <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
     <!-- Navbar Brand-->
@@ -74,50 +77,56 @@
             <div class="sb-sidenav-menu">
                 <div class="nav">
                     <div class="sb-sidenav-menu-heading">    </div>
-                    <a class="nav-link {{ $current_path === 'ddjjs/ddjj' ? 'active' : '' }}" href="{{ url('/ddjjs/ddjj') }}">
-                        <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                        GENERACIÓN DDJJ
-                    </a>
+                    {{-- Solo administrador --}}
+                    @if ($user->isAdmin())
 
-                    <div class="sb-sidenav-menu-heading">    </div>
-                    <a class="nav-link" href="charts.html">
-                        <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                        BOLETA DE PAGO SIN DDJJ
-                    </a>
-                    <a class="nav-link" href="tables.html">
-                        <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                        BOLETA DE PAGO DE ACTAS
-                    </a>
-                    <a class="nav-link" href="tables.html">
-                        <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                        CARGA DE FORMULARIO 931
-                    </a>
-                    <a class="nav-link" href="tables.html">
-                        <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
-                        BOLETA DE PAGO DE ACTAS
-                    </a>
+                    @else
+                        <a class="nav-link {{ $current_path === 'ddjjs/ddjj' ? 'active' : '' }}" href="{{ url('/ddjjs/ddjj') }}">
+                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                            GENERACIÓN DDJJ
+                        </a>
+
+                        @if ($user->soloImprimeBoleta())
+                        <a class="nav-link" href="charts.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                            BOLETA DE PAGO SIN DDJJ
+                        </a>
+                        @endif
+                        @if ($user->soloImprimeActa())
+                        <a class="nav-link" href="tables.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                            BOLETA DE PAGO DE ACTAS
+                        </a>
+                        @endif
+                        <a class="nav-link" href="tables.html">
+                            <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                            CARGA DE FORMULARIO 931
+                        </a>
 
 
-                    <div class="sb-sidenav-menu-heading">    </div>
-                    <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
-                        <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
-                        CONSULTAS
-                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
-                    </a>
-                    <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
-                        <nav class="sb-sidenav-menu-nested nav">
-                            <a class="nav-link {{ $current_path === 'ddjjs/anteriores' ? 'active' : '' }}" href="{{ url('/ddjjs/anteriores') }}">PRESENTACIONES ANTERIORES</a>
 
-                        </nav>
-                    </div>
 
-                    <div class="sb-sidenav-menu-heading">    </div>
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                            <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                            CONSULTAS
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                        </a>
+                        <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav">
+                                <a class="nav-link {{ $current_path === 'ddjjs/anteriores' ? 'active' : '' }}" href="{{ url('/ddjjs/anteriores') }}">PRESENTACIONES ANTERIORES</a>
+
+                            </nav>
+                        </div>
+
+
                         <a class="nav-link {{ $current_path === 'users/edit' ? 'active' : '' }}" href="{{ url('/users/edit') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                             DATOS DE USUARIO
                         </a>
 
-                    </div>
+                </div>
+                    @endif
+
             </div>
 
 

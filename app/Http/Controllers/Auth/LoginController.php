@@ -91,50 +91,77 @@ class LoginController extends Controller
 
     protected function attemptLogin(Request $request)
     {
-        //dd(config('database.default'));
         $username = $request->input($this->username());
         $password = $request->input('password');
 
-        // Llama a tu procedimiento almacenado para validar las credenciales
-        //$result = DB::select('CALL sp_ValidateUser(?, ?)', [$username, $password]);
-
-        $result=DB::select(DB::raw("exec ADM_EsUsuario :Param1, :Param2"),[
+        // 1️⃣ Validar usuario principal
+        $result = DB::select(DB::raw("exec ADM_EsUsuario :Param1, :Param2"), [
             ':Param1' => $username,
             ':Param2' => $password,
         ]);
 
-        /*$client = new Client();
-
-
-
-        $response = $client->get(\Constants\Constants::API_URL.'/verifica-usuario/' . $username . '/' . $password);
-
-        $result = json_decode($response->getBody(), true);*/
-
-
-        //dd($result);
-
         if (!empty($result) && is_array($result) && count($result) > 0) {
             $firstResult = $result[0];
-
-            // Acceder a los datos
             $idUsuario = $firstResult->IdUsuario;
-            $usuarioNT = $firstResult->Nombre;
+            $nombre = $firstResult->Nombre;
+
+            // 2️⃣ Buscar si es administrador
+            $rsUsuariosAdm = DB::select(DB::raw("exec ADM_EsAdministrador :idUsuario"), [
+                ':idUsuario' => $idUsuario
+            ]);
+            //log::info(print_r($rsUsuariosAdm, true));
+            //dd($rsUsuariosAdm);
+            $esAdministrador = !empty($rsUsuariosAdm) == 1;
+            //log::info('Administrador : ' . $esAdministrador);
+            // 3️⃣ Buscar si solo imprime boletas
+            $rsUsuariosImprimeBoleta = DB::select(DB::raw("exec ADM_UsuarioImprimeSoloBoleta :idUsuario"), [
+                ':idUsuario' => $idUsuario
+            ]);
+            $imprimeSoloBoleta = !empty($rsUsuariosImprimeBoleta) == 1;
+            log::info('Boleta: ' . $imprimeSoloBoleta);
+            // 4️⃣ Actas (si necesitás usarlo más adelante)
+            $rsActa = DB::select(DB::raw("exec DDJJ_ActaBoletasTraerPorUsuario :idUsuario"), [
+                ':idUsuario' => $idUsuario
+            ]);
+            log::info(print_r($rsActa, true));
+            $imprimeSoloActa = !empty($rsActa) == 1;
+            log::info('Acta: ' . $imprimeSoloActa);
+            // 5️⃣ Empresas asociadas
+            $rsEmpresas = DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :idUsuario"), [
+                ':idUsuario' => $idUsuario
+            ]);
+
+            $empresa = 0;
+            if (!empty($rsEmpresas)) {
+                $empresa = $rsEmpresas[0]->IdEmpresa ?? 0;
+            }
+
+            // 6️⃣ Crear usuario Laravel con esos datos
             $user = new User([
                 'IdUsuario' => $idUsuario,
-                'Nombre' => $usuarioNT,
-                // Añadir otros campos según tus necesidades
+                'Nombre' => $nombre,
+                'EsAdministrador' => $esAdministrador,
+                'ImprimeSoloBoleta' => $imprimeSoloBoleta,
+                'ImprimeSoloActa' => $imprimeSoloActa,
+                'Empresa' => $empresa,
             ]);
-            //dd($user);
-            //dd($request->session()->all());
-            // Autenticar el usuario manualmente
+
+            // Guardar usuario en sesión
             auth()->login($user);
+
+            // También guardar flags en session(), si querés usarlos directamente en Blade
+            session([
+                'filtro_empresa' => $empresa,
+                'es_admin' => $esAdministrador,
+                'solo_boleta' => $imprimeSoloBoleta,
+            ]);
+
             return $this->sendLoginResponse($request);
         }
 
-        // Usuario no válido, lanzar una excepción de validación
         return $this->sendFailedLoginResponse($request);
     }
+
 
     protected function sendLoginResponse(Request $request)
     {
@@ -144,11 +171,12 @@ class LoginController extends Controller
         // Obtén el usuario autenticado
         $user = auth()->user();
 
-        // Almacena el usuario en la sesión usando múltiples claves
+        // Guardamos el usuario en sesión
         session([
-            /*'user_id' => $user->IdUsuario,
-            'user_name' => $user->Nombre,*/
             'user_' . $user->IdUsuario => $user,
+            'filtro_empresa' => $user->Empresa,
+            'es_admin' => $user->EsAdministrador,
+            'solo_boleta' => $user->ImprimeSoloBoleta,
         ]);
 
         //Log::info('Session data set', ['session' => session()->all()]);

@@ -16,7 +16,8 @@
 		border:1px solid #666;
 		border-radius:10px;
 		box-shadow:0 0 10px #666;
-		background:#0275D8; display: flex;">
+		background:#0275D8;">
+                     <div style="display: flex;">
                      <div style=" float: left;  position: relative;     height: auto;">
                          <img src="{{ asset('assets/img/Boton1.png')}} ">
                      </div>
@@ -75,6 +76,10 @@
                          <button class="btn btn-secondary" id="continuarBtn">
                              Aceptar
                          </button>
+                     </div>
+                     </div>
+                     <div id="divAnterior" style="margin-top: 20px; display: none">
+
                      </div>
                  </div>
                  <div id="paso2" style="font-size:12px;
@@ -231,6 +236,7 @@
                  $("#float").css("background", "#0275D8"); // Nuevo color de fondo
                  $("#float img").attr("src", "{{ asset('assets/img/Boton1.png') }}"); // Nueva imagen
                  $("#continuarBtn").show();
+                 $("#divAnterior").css("display", "none");
                  $("#paso2").css("display","none");
                  $("#paso3").css("display","none");
                  $("#paso4").css("display","none");
@@ -349,6 +355,8 @@
 
                              // Actualizar la tabla con la respuesta HTML
                              $("#ListaEmpleadosActual").html(response.tabla);
+                             $("#divAnterior").html(response.tablaAnterior);
+                             $("#divAnterior").css("display", "flex");
                              $("#txtFOriginal").val(formatDate(response.original));
                              $("#txtFVencimiento").val(formatDate(response.vencimiento));
                              $("#txtIntereses").val(response.intereses);
