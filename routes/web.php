@@ -74,6 +74,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/users/cambiar-clave', [App\Http\Controllers\UserController::class, 'cambiarClave'])
         ->name('users.cambiar-clave');
 
+    Route::get('/ddjjs/boleta', [App\Http\Controllers\DDJJController::class, 'boleta'])->name('ddjjs.boleta');
+    Route::post('/procesarBoleta', [App\Http\Controllers\DDJJController::class, 'procesarBoleta']);
+
 });
 
 Route::get('/empresa', function () {

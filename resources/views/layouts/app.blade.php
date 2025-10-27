@@ -87,7 +87,7 @@
                         </a>
 
                         @if ($user->soloImprimeBoleta())
-                        <a class="nav-link" href="charts.html">
+                            <a class="nav-link {{ $current_path === 'ddjjs/boleta' ? 'active' : '' }}" href="{{ url('/ddjjs/boleta') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                             BOLETA DE PAGO SIN DDJJ
                         </a>

@@ -117,6 +117,7 @@ class LoginController extends Controller
             $rsUsuariosImprimeBoleta = DB::select(DB::raw("exec ADM_UsuarioImprimeSoloBoleta :idUsuario"), [
                 ':idUsuario' => $idUsuario
             ]);
+            log::info(print_r($rsUsuariosImprimeBoleta, true));
             $imprimeSoloBoleta = !empty($rsUsuariosImprimeBoleta) == 1;
             log::info('Boleta: ' . $imprimeSoloBoleta);
             // 4️⃣ Actas (si necesitás usarlo más adelante)
