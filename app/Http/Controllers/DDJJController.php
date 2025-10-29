@@ -222,7 +222,7 @@ class DDJJController extends Controller
 
         $result = json_decode($response->getBody(), true);*/
 
-        $results=DB::select(DB::raw("exec DDJJ_VencimientoTraer :Param1, :Param2, :Param3"),[
+        $result=DB::select(DB::raw("exec DDJJ_VencimientoTraer :Param1, :Param2, :Param3"),[
             ':Param1' => $mes,
             ':Param2' => $year,
             ':Param3' => $dv,
@@ -1631,11 +1631,15 @@ class DDJJController extends Controller
 
         // Obtener los datos del formulario
         $empresa = $this->sanitizeInput($request->input('empresa'));
-        $request->session()->put('filtro_empresa', $empresa);
+        //$request->session()->put('filtro_empresa', $empresa);
         $mes = $this->sanitizeInput($request->input('mes'));
-        $request->session()->put('filtro_mes', $mes);
+        //$request->session()->put('filtro_mes', $mes);
         $year = $this->sanitizeInput($request->input('year'));
-        $request->session()->put('filtro_year', $year);
+        //$request->session()->put('filtro_year', $year);
+        $txtCantArt100 = $this->sanitizeInput($request->input('txtCantArt100'));
+        $txtImporteArt100 = $this->sanitizeInput($request->input('txtImporteArt100'));
+        $txtCantAfi = $this->sanitizeInput($request->input('txtCantAfi'));
+        $txtImporteAfi = $this->sanitizeInput($request->input('txtImporteAfi'));
 
         $validator = Validator::make($request->all(), [
             'empresa' => 'required',
@@ -1693,7 +1697,7 @@ class DDJJController extends Controller
 
 
 
-        $results=DB::select(DB::raw("exec DDJJ_VencimientoTraer :Param1, :Param2, :Param3"),[
+        $result=DB::select(DB::raw("exec DDJJ_VencimientoTraer :Param1, :Param2, :Param3"),[
             ':Param1' => $mes,
             ':Param2' => $year,
             ':Param3' => $dv,
@@ -1880,11 +1884,6 @@ class DDJJController extends Controller
                 ':Param1' => $vencinicial,
             ]);
 
-            /*$response = $client->get(\Constants\Constants::API_URL.'/valida-dia/' . $vencinicial);
-
-            $result = json_decode($response->getBody(), true);*/
-
-            //dd($result);
 
 
             if (empty($dia)) {
@@ -2143,7 +2142,10 @@ class DDJJController extends Controller
 
             $tot = doubleval($importeArt100) + doubleval($importeCuotaAfi);
             $tot2 = doubleval($importeArt100Total) + doubleval($importeCuotaAfiTotal);
-        }
+        }*/
+
+        $tot = doubleval($txtImporteArt100) + doubleval($txtImporteAfi);
+
 
         $rsNumero = DB::select(DB::raw("exec DDJJ_NumeroMensual :Param1, :Param2, :Param3"), [
             ':Param1' => $empresa,
@@ -2196,7 +2198,7 @@ class DDJJController extends Controller
 
         Log::info('Total: ' . $tot.' porcentaje: '.$porcentaje.' dias: '.$dias, []);
 
-        $intereses = (doubleval($tot) * doubleval($porcentaje) / 100) * doubleval($dias);*/
+        $intereses = (doubleval($tot) * doubleval($porcentaje) / 100) * doubleval($dias);
 
 
 
@@ -2208,7 +2210,7 @@ class DDJJController extends Controller
         <tr>
             <th>&nbsp;</th>
             <th style="border: 1px solid black; text-align: center"><b>Nro Aportantes</b></th>
-            <th style="border: 1px solid black; text-align: center"><b>Base para cálculo</b></th>
+
             <th style="border: 1px solid black; text-align: center"><b>Importe a pagar</b></th>
         </tr>
 
@@ -2217,22 +2219,16 @@ class DDJJController extends Controller
             <td style="border: 1px solid black"><b>Artículo 100</b></td>
             <td style="border: 1px solid black; text-align: right">
                 <input type="text" id="txtCantArt100" name="txtCantArt100"
-                    value=""
+                    value="'.$txtCantArt100.'"
                     size="8" maxlength="8" style="text-align:right" onblur="CambiaImporte();">
             </td>
-            <td style="border: 1px solid black; text-align: right">
-                <input type="text" id="txtBaseArt100" name="txtBaseArt100"
-                    value=""
-                    size="12" maxlength="12" style="text-align:right"
 
-                    onblur="this.value=formateaNumeroConComa(this.value, 12, 9, 2);CambiaImporte();">
-            </td>
             <td style="border: 1px solid black; text-align: right">
                 <input type="text" id="txtImporteArt100" name="txtImporteArt100"
-                    value=""
+                    value="'.$txtImporteArt100.'"
                     size="12" maxlength="12" style="text-align:right"
 
-                    onblur="this.value=formateaNumeroConComa(this.value, 12, 9, 2);CambiaImporte();">
+                    onblur="CambiaImporte();">
             </td>
         </tr>
 
@@ -2241,36 +2237,25 @@ class DDJJController extends Controller
             <td style="border: 1px solid black"><b>Afiliados</b></td>
             <td style="border: 1px solid black; text-align: right">
                 <input type="text" id="txtCantAfi" name="txtCantAfi"
-                    value=""
+                    value="'.$txtCantAfi.'"
                     size="8" maxlength="8" style="text-align:right"
-                    onkeypress="return SoloNumero(event.keyCode)"
+
                     onblur="CambiaImporte();">
             </td>
-            <td style="border: 1px solid black; text-align: right">
-                <input type="text" id="txtBaseAfi" name="txtBaseAfi"
-                    value=""
-                    size="12" maxlength="12" style="text-align:right"
 
-                    onblur="this.value=formateaNumeroConComa(this.value, 12, 9, 2);CambiaImporte();">
-            </td>
             <td style="border: 1px solid black; text-align: right">
                 <input type="text" id="txtImporteAfi" name="txtImporteAfi"
-                    value=""
+                    value="'.$txtImporteAfi.'"
                     size="12" maxlength="12" style="text-align:right"
 
-                    onblur="this.value=formateaNumeroConComa(this.value, 12, 9, 2);CambiaImporte();">
+                    onblur="CambiaImporte();">
             </td>
         </tr>
 
         <!-- Totales -->
         <tr>
             <td style="border: 2px solid black; font-weight: bold" colspan="2"><strong>Totales</strong></td>
-            <td style="border: 2px solid black; text-align: right; font-weight: bold">
-                <input type="text" id="txtTotalBase" name="txtTotalBase"
-                    value=""
-                    size="12" maxlength="12" readonly
-                    style="text-align:right; font-weight:bold;">
-            </td>
+
             <td style="border: 2px solid black; text-align: right; font-weight: bold">
                 <input type="text" id="txtTotalImporte" name="txtTotalImporte"
                     value=""
@@ -2285,7 +2270,7 @@ class DDJJController extends Controller
         //$tablaHtml .= '</table>';
         //Log::info('Vencimiento pasado: ' .date_format($venc, 'Y-m-d') , []);
         // Devolver la tabla HTML como respuesta
-        return response()->json(['tabla' => $tablaHtml, 'tablaAnterior' => $tablaHtmlAnterior, 'original' => date_format($vencini, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.'),'existeDeclaracion' => $existeDeclaracion]);
+        return response()->json(['tabla' => $tablaHtml, 'tablaAnterior' => $tablaHtmlAnterior, 'original' => date_format($vencini, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'), 'vencimiento' => date_format($venc, 'Y-m-d'),'intereses'=>number_format($intereses,2,',','.'),'total'=>number_format($tot+$intereses,2,',','.')]);
     }
 
 }

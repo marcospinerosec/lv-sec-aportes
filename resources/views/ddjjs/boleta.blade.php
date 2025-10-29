@@ -223,7 +223,11 @@
                  var partes = fechaStr.split("/");
                  return new Date(partes[2], partes[1] - 1, partes[0], 23, 59, 59); // Año, Mes (0-11), Día
              }
-             $("#btnOtroPeridodo").click(function() {
+             $("#btnCancelar").click(function() {
+                 $("#txtCantArt100").val('');
+                 $("#txtImporteArt100").val('');
+                 $("#txtCantAfi").val('');
+                 $("#txtImporteAfi").val('');
                  $("#float").css("background", "#0275D8"); // Nuevo color de fondo
                  $("#float img").attr("src", "{{ asset('assets/img/Boton1.png') }}"); // Nueva imagen
                  $("#continuarBtn").show();
@@ -234,15 +238,30 @@
                  $("#float font").css("color", "#FFFFFF");
                  $("#float label").css("color", "#FFFFFF");
              });
-             $("#btnCancelar").click(function() {
-                 $("#btnOtroPeridodo").click();
-             });
+
              $("#btnCancelar3").click(function() {
                  $("#paso3").css("display","none");
                  $("#paso4").css("display","none");
                  $("#continuarBtn").click();
              });
              $("#btnContinuar2").click(function() {
+                 // 🔹 Validar que haya valores cargados en los campos numéricos
+                 let impArt100 = $("#txtImporteArt100").val().trim();
+                 let impAfi = $("#txtImporteAfi").val().trim();
+
+                 if (impArt100 === "" && impAfi === "") {
+                     alert("Debe ingresar al menos un importe antes de continuar.");
+                     return; // Detener ejecución
+                 }
+
+                 // 🔹 Validar que los valores sean números válidos
+                 let numArt100 = parseFloat(impArt100.replace(".", "").replace(",", "."));
+                 let numAfi = parseFloat(impAfi.replace(".", "").replace(",", "."));
+
+                 if ((impArt100 !== "" && isNaN(numArt100)) || (impAfi !== "" && isNaN(numAfi))) {
+                     alert("Por favor ingrese importes válidos (solo números y comas).");
+                     return;
+                 }
                  $("#paso2").css("background", "#FFFFFF"); // Nuevo color de fondo
 
                  // Cambiar la imagen dentro de #float
@@ -251,7 +270,7 @@
                  $("#paso3").css("display","flex");
                  $("#btnCancelar").hide();
                  $("#btnOtroPeridodo").hide();
-                 $("#btnEditarEmpleados").hide();
+
                  $("#btnContinuar2").hide();
 
                  $("#paso3").css("background", "#0275D8"); // Nuevo color de fondo
@@ -309,6 +328,12 @@
                      var empresa = $("#empresa").val();
                      var mes = $("#mes").val();
                      var year = $("#year").val();
+                     var txtCantArt100 = $("#txtCantArt100").val();
+                     var txtImporteArt100 = $("#txtImporteArt100").val();
+                     var txtCantAfi = $("#txtCantAfi").val();
+                     var txtImporteAfi = $("#txtImporteAfi").val();
+
+
                      _token: '{{ csrf_token() }}'
                      // Cambiar el texto del botón al inicio de la solicitud
                      $("#continuarBtn").text('Cargando...');
@@ -320,6 +345,10 @@
                              empresa: empresa,
                              mes: mes,
                              year: year,
+                             txtCantArt100: txtCantArt100,
+                             txtImporteArt100: txtImporteArt100,
+                             txtCantAfi: txtCantAfi,
+                             txtImporteAfi: txtImporteAfi,
                              _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
                          },
                          success: function (response) {
@@ -340,7 +369,7 @@
 
                              $("#btnCancelar").show();
                              $("#btnOtroPeridodo").show();
-                             $("#btnEditarEmpleados").show();
+
                              $("#btnContinuar2").show();
 
 
@@ -350,10 +379,7 @@
                              $("#divAnterior").css("display", "flex");
                              $("#txtFOriginal").val(formatDate(response.original));
                              $("#txtFVencimiento").val(formatDate(response.vencimiento));
-                             $("#txtIntereses").val(response.intereses);
-                             $("#spanIntereses").html(response.intereses);
-                             $("#txtTotal").val(response.total);
-                             $("#spanTotal").html(response.total);
+                             CambiaImporte();
                              // Limpiar mensajes de error anteriores
                              $('#errorContainer').html('');
                              $("#paso2").css("display", "flex");
@@ -380,13 +406,7 @@
                                              jalert(message); // O el alert que uses normalmente
                                          }
                                      });
-                                     /*if (field === 'empresa') {
-                                         $('#empresa').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
-                                     } else if (field === 'mes') {
-                                         $('#mes').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
-                                     } else if (field === 'year') {
-                                         $('#year').after('<div class="error-message" style="color: red; font-size: 12px;">' + message + '</div>');
-                                     }*/
+
                                  });
                              } else {
                                  $('#errorContainer').html('Error. Intente nuevamente más tarde');
@@ -418,24 +438,7 @@
                  changeYear: true,
              });
 
-             $("#btnEditarEmpleados").click(function() {
-                 // Obtener el valor del parámetro empresa (puedes cambiar esto según tus necesidades)
-                 var empresa = $("#empresa").val();
 
-
-                 if(empresa){
-                     // Construir la URL con el parámetro empresa
-                     var nuevaURL = "{{ route('empleados.index') }}?empresa=" + encodeURIComponent(empresa);
-
-                     // Redirigir a la nueva URL
-                     window.location.href = nuevaURL;
-                 }
-                 else{
-                     alert('Debe seleccionar una empresa');
-                 }
-
-
-             });
 
              $("#continuarVencimiento").click(function() {
                  //var txtVencimiento = $("#txtVencimiento").val();
@@ -453,6 +456,8 @@
                          var mes = $("#mes").val();
                          var year = $("#year").val();
                          var txtVenc = $("#txtFVencimiento").val();
+                         var txtCantArt100 = $("#txtCantArt100").val();
+
                          var partes = txtVenc.split("/"); // Se divide en [día, mes, año]
                          var venc = partes[2].slice(-4) + "-" + partes[1] + "-" + partes[0]; // Formato yy-mm-dd
 
@@ -460,12 +465,14 @@
                          $("#continuarVencimiento").text('Cargando...');
                          $.ajax({
                              type: 'POST',
-                             url: '{{ url('/procesar') }}',
+                             url: '{{ url('/procesarBoleta') }}',
                              data: {
                                  empresa: empresa,
                                  mes: mes,
                                  year: year,
                                  venc: venc,
+                                 txtCantArt100: txtCantArt100,
+
                                  _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
                              },
                              success: function(response) {
@@ -650,17 +657,18 @@
                  alert("Mostrar lista de empleados");
              });
              $("#continuarBtn").click();
+
          });
          function CambiaImporte() {
-             const base100 = parseFloat($('#txtBaseArt100').val().replace('.', '').replace(',', '.')) || 0;
-             const baseAfi = parseFloat($('#txtBaseAfi').val().replace('.', '').replace(',', '.')) || 0;
+
+
              const imp100 = parseFloat($('#txtImporteArt100').val().replace('.', '').replace(',', '.')) || 0;
              const impAfi = parseFloat($('#txtImporteAfi').val().replace('.', '').replace(',', '.')) || 0;
 
-             const totalBase = base100 + baseAfi;
+
              const totalImporte = imp100 + impAfi;
 
-             $('#txtTotalBase').val(totalBase.toLocaleString('es-AR', { minimumFractionDigits: 2 }));
+
              $('#txtTotalImporte').val(totalImporte.toLocaleString('es-AR', { minimumFractionDigits: 2 }));
          }
 
