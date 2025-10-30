@@ -529,7 +529,7 @@
                              },
                              complete: function() {
                                  // Restaurar el texto del botón al finalizar la solicitud
-                                 $("#continuarVencimiento").text('Continuar');
+                                 $("#continuarVencimiento").text('CONTINUAR');
                              }
                          });
                      }

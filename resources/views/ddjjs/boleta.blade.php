@@ -192,7 +192,7 @@
                      <div style=" padding-top: 11px; padding-left: 10px;  margin-left: 30px;  position: relative;  float: left;    height: auto;">
                          <button class="btn btn-secondary" id="generarBtn">
                              <input type="hidden" class="form-control" id="existeDeclaracion" name="existeDeclaracion">
-                             Generar Declaración Jurada
+                             IMPRIMIR
                          </button>
                      </div>
 
@@ -457,7 +457,9 @@
                          var year = $("#year").val();
                          var txtVenc = $("#txtFVencimiento").val();
                          var txtCantArt100 = $("#txtCantArt100").val();
-
+                         var txtImporteArt100 = $("#txtImporteArt100").val();
+                         var txtCantAfi = $("#txtCantAfi").val();
+                         var txtImporteAfi = $("#txtImporteAfi").val();
                          var partes = txtVenc.split("/"); // Se divide en [día, mes, año]
                          var venc = partes[2].slice(-4) + "-" + partes[1] + "-" + partes[0]; // Formato yy-mm-dd
 
@@ -472,7 +474,9 @@
                                  year: year,
                                  venc: venc,
                                  txtCantArt100: txtCantArt100,
-
+                                 txtImporteArt100: txtImporteArt100,
+                                 txtCantAfi: txtCantAfi,
+                                 txtImporteAfi: txtImporteAfi,
                                  _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
                              },
                              success: function(response) {
@@ -498,6 +502,7 @@
 
                                  // Actualizar la tabla con la respuesta HTML
                                  $("#ListaEmpleadosActual").html(response.tabla);
+                                 CambiaImporte();
                                  $("#txtFOriginal").val(formatDate(response.original));
                                  $("#txtFVencimiento").val(formatDate(response.vencimiento));
                                  $("#txtIntereses").val(response.intereses);
@@ -527,7 +532,7 @@
                              },
                              complete: function() {
                                  // Restaurar el texto del botón al finalizar la solicitud
-                                 $("#continuarVencimiento").text('Continuar');
+                                 $("#continuarVencimiento").text('CONTINUAR');
                              }
                          });
                      }
@@ -559,6 +564,10 @@
                          var empresa = $("#empresa").val();
                          var mes = $("#mes").val();
                          var year = $("#year").val();
+                         var txtCantArt100 = $("#txtCantArt100").val();
+                         var txtImporteArt100 = $("#txtImporteArt100").val();
+                         var txtCantAfi = $("#txtCantAfi").val();
+                         var txtImporteAfi = $("#txtImporteAfi").val();
 
                          var txtVenc = $("#txtFVencimiento").val();
                          var partes = txtVenc.split("/"); // Se divide en [día, mes, año]
@@ -571,12 +580,12 @@
                          var intereses = $("#txtIntereses").val();
                          var existeDeclaracion = $("#existeDeclaracion").val();
                          var continua = 1;
-                         if (existeDeclaracion!=0){
+                         /*if (existeDeclaracion!=0){
                              if (!confirm("¿Ya existe una declaración jurada para la empresa y periodo seleccionado, es una rectificación de la misma?")){
                                  return false;
                              }
 
-                         }
+                         }*/
 
                          hoy = new Date();
                          anio = hoy.getFullYear();
@@ -610,6 +619,10 @@
                                  venc: venc,
                                  vencOri: vencOri,
                                  intereses: intereses,
+                                 txtCantArt100: txtCantArt100,
+                                 txtImporteArt100: txtImporteArt100,
+                                 txtCantAfi: txtCantAfi,
+                                 txtImporteAfi: txtImporteAfi,
                                  _token: '{{ csrf_token() }}' // Agrega el token CSRF para protección
                              },
                              success: function(response) {
@@ -640,7 +653,7 @@
                              },
                              complete: function() {
                                  // Restaurar el texto del botón al finalizar la solicitud
-                                 $("#generarBtn").text('Generar Declaración Jurada');
+                                 $("#generarBtn").text('IMPRIMIR');
                              }
                          });
                      }

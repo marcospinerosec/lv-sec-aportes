@@ -896,50 +896,112 @@ class DDJJController extends Controller
         $intereses = $this->sanitizeInput($request->input('intereses'));
         $vencimientoOriginal = $this->sanitizeInput($request->input('vencOri'));
 
+        $txtCantArt100 = $this->sanitizeInput($request->input('txtCantArt100'));
+        $txtImporteArt100 = $this->sanitizeInput($request->input('txtImporteArt100'));
+        $txtCantAfi = $this->sanitizeInput($request->input('txtCantAfi'));
+        $txtImporteAfi = $this->sanitizeInput($request->input('txtImporteAfi'));
+        $idUsuario = intval(auth()->user()->IdUsuario);
+        if (empty($txtCantArt100) && empty($txtImporteArt100) && empty($txtCantAfi) && empty($txtImporteAfi)) {
+            $results = DB::select(DB::raw("exec DDJJ_BoletaPagoImpresion :Param1, :Param2, :Param3"), [
+                ':Param1' => $empresa,
+                ':Param2' => $mes,
+                ':Param3' => $year,
+            ]);
+            if (!empty($results)) {
+                $firstResult = $results[0];
+                $carti100 = $firstResult->CantArt100;
+                //Log::info('CantArt100: ' . $carti100, []);
+                $cart100 = str_pad(strval($carti100), 4, "0", STR_PAD_LEFT);
+                $iarti100 = $firstResult->ImporteArt100;
+                //Log::info('ImporteArt100: ' . $iarti100, []);
+                $iart100 = str_pad(strval($iarti100), 8, "0", STR_PAD_LEFT);
+                $cafil = $firstResult->CantAfi;
+                //Log::info('CantAfi: ' . $cafil, []);
+                $cafi = str_pad(strval($cafil), 4, "0", STR_PAD_LEFT);
+                $iafil = $firstResult->ImporteCuotaAfi;
+
+            }
+        }
+        else{
+            /*$results = DB::select(DB::raw("exec DDJJ_BoletasPagoIngresar :Param1, :Param2, :Param3, :Param4, :Param5, :Param6, :Param7, :Param8, :Param9, :Param10, :Param11, :Param12, :Param13"), [
+                ':Param1' => $empresa,
+                ':Param2' => $mes,
+                ':Param3' => $year,
+                ':Param4' => $txtCantArt100,
+                ':Param5' => $txtImporteArt100,
+                ':Param6' => $txtCantAfi,
+                ':Param7' => $txtImporteAfi,
+                ':Param8' => 0,
+                ':Param9' => $intereses,
+                ':Param10' => $venc,
+                ':Param11' => $vencimientoOriginal,
+                ':Param12' => null,
+                ':Param13' => $idUsuario,
+            ]);*/
+            $results2 = DB::select(DB::raw("
+    exec DDJJ_BoletasPagoIngresarTraerComprobante
+    :Param1, :Param2, :Param3, :Param4, :Param5, :Param6, :Param7, :Param8, :Param9, :Param10, :Param11
+"), [
+                ':Param1'  => (int) $empresa,
+                ':Param2'  => (int) $mes,
+                ':Param3'  => (int) $year,
+                ':Param4'  => (int) ($txtCantArt100 ?: 0),
+                ':Param5'  => (float) str_replace(',', '.', ($txtImporteArt100 ?: 0)),
+                ':Param6'  => (int) ($txtCantAfi ?: 0),
+                ':Param7'  => (float) str_replace(',', '.', ($txtImporteAfi ?: 0)),
+                ':Param8'  => (float) str_replace(',', '.', ($intereses ?: 0)),      // @Intereses
+                ':Param9'  => (float) str_replace(',', '.', ($interesesPFT ?? 0)),   // @InteresesPFT
+                ':Param10' => $venc ?: now()->format('Y-m-d'),
+                ':Param11' => (int) $idUsuario,
+            ]);
+
+            if (!empty($results2)) {
+                $firstResult = $results2[0];
+                $nroComprobante = $firstResult->NroComprobante;
 
 
-        $results = DB::select(DB::raw("exec DDJJ_BoletaPagoImpresion :Param1, :Param2, :Param3"), [
-            ':Param1' => $empresa,
-            ':Param2' => $mes,
-            ':Param3' => $year,
-        ]);
-
-        //dd($result);
-
-
-        if (!empty($results)) {
-            $firstResult = $results[0];
-            $carti100 = $firstResult->CantArt100;
+                $nroComprobante = str_pad($nroComprobante, 10, "0", STR_PAD_LEFT);
+                Log::info('Comprobante: ' . $nroComprobante, []);
+            }
+            $carti100 = $txtCantArt100;
             //Log::info('CantArt100: ' . $carti100, []);
             $cart100 = str_pad(strval($carti100), 4, "0", STR_PAD_LEFT);
-            $iarti100 = $firstResult->ImporteArt100;
+            $iarti100 = $txtImporteArt100;
             //Log::info('ImporteArt100: ' . $iarti100, []);
             $iart100 = str_pad(strval($iarti100), 8, "0", STR_PAD_LEFT);
-            $cafil = $firstResult->CantAfi;
+            $cafil = $txtCantAfi;
             //Log::info('CantAfi: ' . $cafil, []);
             $cafi = str_pad(strval($cafil), 4, "0", STR_PAD_LEFT);
-            $iafil = $firstResult->ImporteCuotaAfi;
-            //Log::info('ImporteCuotaAfi: ' . $iafil, []);
-            $iafi = str_pad(strval($iafil), 8, "0", STR_PAD_LEFT);
+            $iafil = $txtImporteAfi;
 
-            $iafi = floatval($iafil);
-            /*Log::info('ImporteCuotaAfi: ' . $iafil, []);
-            Log::info('Intereses: ' . $intereses, []);*/
-
-            $intereses = str_replace('.', '', $intereses);
-            $intereses = str_replace(',', '.', $intereses);
-
-            // Convertir la cadena a un valor decimal
-            $intereses = floatval($intereses);
-
-
-
-
-            $total = number_format($iarti100 + $iafi + $intereses, 2, '.', '');
-
-            $tot = strval(number_format(floatval($total) * 100, 0, '.', ''));
-            $tot = str_pad($tot, 9, "0", STR_PAD_LEFT);
         }
+
+            //dd($result);
+
+
+
+        //Log::info('ImporteCuotaAfi: ' . $iafil, []);
+        $iafi = str_pad(strval($iafil), 8, "0", STR_PAD_LEFT);
+
+        $iafi = floatval($iafil);
+        /*Log::info('ImporteCuotaAfi: ' . $iafil, []);
+        Log::info('Intereses: ' . $intereses, []);*/
+
+        $intereses = str_replace('.', '', $intereses);
+        $intereses = str_replace(',', '.', $intereses);
+
+        // Convertir la cadena a un valor decimal
+        $intereses = floatval($intereses);
+
+
+        $total = number_format($iarti100 + $iafi + $intereses, 2, '.', '');
+
+        $tot = strval(number_format(floatval($total) * 100, 0, '.', ''));
+        $tot = str_pad($tot, 9, "0", STR_PAD_LEFT);
+
+
+
+
 
 
         if (strlen($carti100) > 4) {
@@ -949,6 +1011,7 @@ class DDJJController extends Controller
         if (strlen($cafil) > 4) {
             return response()->json(['errors' => array('Valores incorrectos, por favor verifique')], 422);
         }
+
 
 
 
@@ -1021,80 +1084,79 @@ class DDJJController extends Controller
         $year = intval($year);
         $numero = intval($numero);
 
-        $idUsuario = intval(auth()->user()->IdUsuario);
+
         $error='';
+        if (empty($txtCantArt100) && empty($txtImporteArt100) && empty($txtCantAfi) && empty($txtImporteAfi)) {
+            try {
+                DB::enableQueryLog();
 
-        try {
-            DB::enableQueryLog();
+
+                DB::statement("exec DDJJ_GuardarDDJJ ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", [
+                    $empresa,
+                    $mes,
+                    $year,
+                    0,
+                    $numero,
+                    $intereses,
+                    $vencimiento,
+                    $vencimientoOriginal,
+                    null,
+                    $idUsuario
+                ]);
+
+                // Tu lógica de actualización aquí
+
+                //return response()->json(['message' => 'Datos actualizados con éxito']);
+            } catch (QueryException $e) {
+                // Aquí manejas la excepción
+                $errorMessage = $e->getMessage();
+                $errorCode = $e->getCode();
+
+                // Obtén los parámetros utilizados en la llamada al procedimiento almacenado
+                $parametros = [
+                    'empresa' => $empresa,
+                    'mes' => $mes,
+                    'year' => $year,
+                    'intereses' => 0,
+                    'numero' => $numero,
+                    'interesesPFT' => $intereses,
+                    'vencimiento' => $vencimiento,
+                    'vencimientoOriginal' => $vencimientoOriginal,
+                    'mp' => null,
+                    'idUsuario' => $idUsuario,
+                ];
+
+                // Log de la excepción o cualquier otro manejo que necesites
 
 
-            DB::statement("exec DDJJ_GuardarDDJJ ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", [
-                $empresa,
-                $mes,
-                $year,
-                0,
-                $numero,
-                $intereses,
-                $vencimiento,
-                $vencimientoOriginal,
-                null,
-                $idUsuario
+                //Log::debug('SQL Queries: '.json_encode(DB::getQueryLog()));
+
+                // Devuelve una respuesta indicando que ha ocurrido un error
+                //return response()->json(['error' => 'Ha ocurrido un error al procesar la solicitud'], 500);
+                $error = 'Ha ocurrido un error al procesar la solicitud';
+            }
+
+
+            /*$response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj-comprobante/' . $empresa . '/' . $mes . '/' . $year . '/' . $numero);
+
+            $result = json_decode($response->getBody(), true);*/
+
+            $results = DB::select(DB::raw("exec DDJJ_GuardarDDJJTraerComprobante :Param1, :Param2, :Param3, :Param4"), [
+                ':Param1' => $empresa,
+                ':Param2' => $mes,
+                ':Param3' => $year,
+                ':Param4' => $numero
+
             ]);
 
-            // Tu lógica de actualización aquí
-
-            //return response()->json(['message' => 'Datos actualizados con éxito']);
-        } catch (QueryException $e) {
-            // Aquí manejas la excepción
-            $errorMessage = $e->getMessage();
-            $errorCode = $e->getCode();
-
-            // Obtén los parámetros utilizados en la llamada al procedimiento almacenado
-            $parametros = [
-                'empresa' => $empresa,
-                'mes' => $mes,
-                'year' => $year,
-                'intereses' => 0,
-                'numero' => $numero,
-                'interesesPFT' => $intereses,
-                'vencimiento' => $vencimiento,
-                'vencimientoOriginal' => $vencimientoOriginal,
-                'mp' => null,
-                'idUsuario' => $idUsuario,
-            ];
-
-            // Log de la excepción o cualquier otro manejo que necesites
+            if (!empty($results)) {
+                $firstResult = $results[0];
+                $nroComprobante = $firstResult->NroComprobante;
 
 
-
-            //Log::debug('SQL Queries: '.json_encode(DB::getQueryLog()));
-
-            // Devuelve una respuesta indicando que ha ocurrido un error
-            //return response()->json(['error' => 'Ha ocurrido un error al procesar la solicitud'], 500);
-            $error='Ha ocurrido un error al procesar la solicitud';
-        }
-
-
-
-        /*$response = $client->put(\Constants\Constants::API_URL . '/guardar-ddjj-comprobante/' . $empresa . '/' . $mes . '/' . $year . '/' . $numero);
-
-        $result = json_decode($response->getBody(), true);*/
-
-        $results = DB::select(DB::raw("exec DDJJ_GuardarDDJJTraerComprobante :Param1, :Param2, :Param3, :Param4"), [
-            ':Param1' => $empresa,
-            ':Param2' => $mes,
-            ':Param3' => $year,
-            ':Param4' => $numero
-
-        ]);
-
-        if (!empty($results)) {
-            $firstResult = $results[0];
-            $nroComprobante = $firstResult->NroComprobante;
-
-
-            $nroComprobante = str_pad($nroComprobante, 10, "0", STR_PAD_LEFT);
-            Log::info('Comprobante: ' . $nroComprobante, []);
+                $nroComprobante = str_pad($nroComprobante, 10, "0", STR_PAD_LEFT);
+                Log::info('Comprobante: ' . $nroComprobante, []);
+            }
         }
 
         $fechaPartes = explode("-", $venc);
