@@ -98,7 +98,7 @@
                             BOLETA DE PAGO DE ACTAS
                         </a>
                         @endif
-                        <a class="nav-link" href="tables.html">
+                        <a class="nav-link {{ $current_path === 'formularios/importar' ? 'active' : '' }}" href="{{ url('/formularios/importar') }}">
                             <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
                             CARGA DE FORMULARIO 931
                         </a>

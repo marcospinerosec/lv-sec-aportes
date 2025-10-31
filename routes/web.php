@@ -77,6 +77,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/ddjjs/boleta', [App\Http\Controllers\DDJJController::class, 'boleta'])->name('ddjjs.boleta');
     Route::post('/procesarBoleta', [App\Http\Controllers\DDJJController::class, 'procesarBoleta']);
 
+    Route::get('/formularios/importar/', [App\Http\Controllers\FormularioController::class, 'importar'])->name('formularios.importar');
+    Route::put('/formularios/procesar', [App\Http\Controllers\FormularioController::class, 'procesar']);
+
 });
 
 Route::get('/empresa', function () {
