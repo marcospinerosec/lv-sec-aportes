@@ -44,7 +44,7 @@ return [
 
         'nas' => [
             'driver' => 'local',
-            'root'   => '../nas/files',
+            'root'   => 'E:\\Documents\\Mis Webs\\lv-sec-digitalizar\\nas\\files',
         ],
 
         's3' => [

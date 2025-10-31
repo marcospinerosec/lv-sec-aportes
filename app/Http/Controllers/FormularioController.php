@@ -142,17 +142,22 @@ class FormularioController extends Controller
                 // Call the stored procedure with the line data
                 // Llamar SP
                 $detalle = "Ingreso Web - Periodo: {$mes}-{$year}";
-                DB::statement("
-        exec GEN_InsertarEmpresaDocumentoV2 :empresa, :tipo, :nombre, :detalle, :mes, :anio, :usuario
-    ", [
-                    ':empresa' => $empresa,
-                    ':tipo' => 8,
-                    ':nombre' => $newFileNameDocumento,
-                    ':detalle' => $detalle,
-                    ':mes' => $mes,
-                    ':anio' => $year,
-                    ':usuario' => $idUsuario,
+                DB::connection('odbc-connection-name')->statement("
+    exec SAI.dbo.GEN_InsertarEmpresaDocumentoV2
+        ?, ?, ?, ?, ?, ?, ?
+", [
+                    $empresa,
+                    8,
+                    $newFileNameDocumento,
+                    $detalle,
+                    $mes,
+                    $year,
+                    $idUsuario,
                 ]);
+
+
+
+
 
 
                 //return response()->json(['success' => true, 'message' => 'Archivo guardado y enviado para procesamiento.']);
@@ -174,7 +179,7 @@ class FormularioController extends Controller
                     ->withInput();
             }
         } catch (\Exception $e) {
-            Log::error('Error en la importación de empleados: ' . $e->getMessage());
+            Log::error('Error en la importación de F931: ' . $e->getMessage());
             return redirect()->route('formularios.importar')->with(['error' => 'Error en la subida.'])
                 ->withInput();
         }
