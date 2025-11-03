@@ -79,6 +79,11 @@ Route::group(['middleware' => 'auth'], function () {
 
     Route::get('/formularios/importar/', [App\Http\Controllers\FormularioController::class, 'importar'])->name('formularios.importar');
     Route::put('/formularios/procesar', [App\Http\Controllers\FormularioController::class, 'procesar']);
+    Route::get('/formularios/listar/{empresa}', [App\Http\Controllers\FormularioController::class, 'listar'])
+        ->name('formularios.listar');
+    Route::get('/formularios/archivo/{nombre}', [App\Http\Controllers\FormularioController::class, 'verArchivo'])
+        ->name('formularios.verArchivo');
+
 
 });
 

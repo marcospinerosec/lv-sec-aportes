@@ -133,32 +133,36 @@ class FormularioController extends Controller
 
             //save the iamge onto a public directory into a separately folder
             //$path = $DocumentoF->storeAs('public/files', $newFileNameDocumento);
-            $store  = Storage::disk('nas')->put($newFileNameDocumento, File::get($DocumentoF));
+
+
 
 
             $error='';
             try {
-
+                $store  = Storage::disk('nas')->put($newFileNameDocumento, File::get($DocumentoF));
                 // Call the stored procedure with the line data
                 // Llamar SP
                 $detalle = "Ingreso Web - Periodo: {$mes}-{$year}";
-                DB::connection('odbc-connection-name')->statement("
-    exec SAI.dbo.GEN_InsertarEmpresaDocumentoV2
-        ?, ?, ?, ?, ?, ?, ?
-", [
-                    $empresa,
-                    8,
-                    $newFileNameDocumento,
-                    $detalle,
-                    $mes,
-                    $year,
-                    $idUsuario,
-                ]);
+                $empresa = (int) $empresa;
+                $tipo = 8;
+                $nombre = str_replace("'", "''", $newFileNameDocumento); // Escapamos comillas simples
+                $detalle = str_replace("'", "''", $detalle);
+                $mes = (int) $mes;
+                $anio = (int) $year;
+                $usuario = (int) $idUsuario;
 
+                $sql = "
+    EXEC SAI.dbo.GEN_InsertarEmpresaDocumentoV2
+        {$empresa},
+        {$tipo},
+        '{$nombre}',
+        '{$detalle}',
+        '{$mes}',
+        '{$anio}',
+        {$usuario}
+";
 
-
-
-
+                DB::connection('odbc-connection-name')->unprepared($sql);
 
                 //return response()->json(['success' => true, 'message' => 'Archivo guardado y enviado para procesamiento.']);
 
@@ -171,8 +175,9 @@ class FormularioController extends Controller
 
             if (!$error) {
 
-                return redirect()->route('formularios.importar')->with('success', 'Importación exitosa.')
-                    ->withInput();
+                return redirect()->route('formularios.listar', ['empresa' => $empresa])
+                    ->with('success', 'Importación exitosa.');
+
             } else {
                 $errorMessage = isset($error) ? $error : 'Error desconocido.';
                 return redirect()->route('formularios.importar')->with(['error' => $errorMessage])
@@ -183,6 +188,36 @@ class FormularioController extends Controller
             return redirect()->route('formularios.importar')->with(['error' => 'Error en la subida.'])
                 ->withInput();
         }
+    }
+
+    public function listar($empresa = null)
+    {
+        $empresa = $empresa ?? auth()->user()->IdEmpresa;
+
+        // Traer los formularios desde el SP
+        $formularioSP = DB::connection('odbc-connection-name')->select(
+            DB::raw("exec SAI.dbo.SW_TraerFormulariosPorEmpresa :empresa"),
+            [':empresa' => $empresa]
+        );
+        //dd($formularioSP); // O $results si los traés de la DB
+        // Base URL para abrir los archivos en navegador
+        $baseUrl = '/nas/files/'; // si querés probar local
+        // $baseUrl = 'http://saisec.seclaplata.org.ar/saisec/scans/files/'; // producción
+        return view('formularios.listado', [
+            'archivos' => $formularioSP, 'baseUrl' =>  $baseUrl
+        ]);
+    }
+
+    public function verArchivo($nombre)
+    {
+        $filePath = Storage::disk('nas')->path($nombre);
+
+        if (!file_exists($filePath)) {
+            abort(404);
+        }
+
+        $mime = mime_content_type($filePath);
+        return response()->file($filePath, ['Content-Type' => $mime]);
     }
 
 }
