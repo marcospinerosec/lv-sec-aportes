@@ -5,11 +5,13 @@ namespace App\Http\Controllers;
 
 use Illuminate\Database\QueryException;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Log;
 
 use DB;
 use GuzzleHttp\Client;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Storage;
 use PDF;
 use App\Traits\SanitizesInput;
 
@@ -40,18 +42,12 @@ class EmpleadoController extends Controller
         $empresas=DB::select(DB::raw("exec DDJJ_EmpresasPorUsuario :Param1"),[
             ':Param1' => auth()->user()->IdUsuario,
         ]);
-        /*$client = new Client();
 
-        $response = $client->get(\Constants\Constants::API_URL.'/empresa-usuario/' . auth()->user()->IdUsuario);
-
-        $result = json_decode($response->getBody(), true);*/
 
         $empleados=array();
         if($request->query('empresa')) {
             $empresa_id = $request->query('empresa');
-            /*$response = $client->get(\Constants\Constants::API_URL.'/empleados-por-empresa-sin-novedades/' . $empresa_id);
 
-            $empleados = json_decode($response->getBody(), true);*/
             $empleados=DB::select(DB::raw("exec DDJJ_EmpleadosPorEmpresaSinNovedades :Param1"),[
                 ':Param1' => $empresa_id,
             ]);
@@ -66,12 +62,6 @@ class EmpleadoController extends Controller
         //dd($empleados);
         if(($request->query('empresa'))&&($mes)&&($year)) {
             $empresa_id = $request->query('empresa');
-
-            /*$response = $client->get(\Constants\Constants::API_URL.'/importe-minimo-por-empresa/' . $empresa_id.'/'.$mes.'/'.$year);
-
-            $minimo = json_decode($response->getBody(), true);*/
-
-
 
             $minimo = DB::select(DB::raw("exec DDJJ_ImporteMinimoPorEmpresa :Param1, :Param2, :Param3"), [
                 ':Param1' => $empresa_id,
@@ -106,40 +96,18 @@ class EmpleadoController extends Controller
         // Obtiene el valor del parámetro desde la solicitud
         $empresa = $request->input('empresa');
 
-        /*$client = new Client();
-
-
-
-        $response = $client->get(\Constants\Constants::API_URL.'/categorias/');
-
-        $categorias = json_decode($response->getBody(), true);*/
 
         $categorias = DB::select(DB::raw("exec DDJJ_CategoriasTraer"), [
 
         ]);
 
-        /*$response = $client->get(\Constants\Constants::API_URL.'/tipos-novedades/');
 
-        $tiposNovedades = json_decode($response->getBody(), true);*/
 
         $tiposNovedades = DB::select(DB::raw("exec DDJJ_TiposNovedadesTraer"), [
 
         ]);
 
-        /*$exceptuadas['result']=array();
-        if (!empty($result['result'])) {
-            $firstResult = $result['result'][0];
-            $empresa=$firstResult['IdEmpresa'];
-            $response = $client->get(\Constants\Constants::API_URL . '/empresas-exceptuadas-validacion-minimo-traer-por-empresa/' .$empresa );
 
-            $exceptuadas = json_decode($response->getBody(), true);
-        }
-
-        $response = $client->get(\Constants\Constants::API_URL.'/empresas-importe-minimo/');
-
-        $importeMinimo = json_decode($response->getBody(), true);*/
-
-        //dd($result['result']);
 
 
         return view('empleados.create', ['categorias' => $categorias,'tiposNovedades' => $tiposNovedades,'empresa'=>$empresa]);
@@ -167,27 +135,17 @@ class EmpleadoController extends Controller
      */
     public function edit($id)
     {
-        /*$client = new Client();
-
-        $response = $client->get(\Constants\Constants::API_URL.'/empleado/' . $id);
-
-        $result = json_decode($response->getBody(), true);*/
 
         $empleado=DB::select(DB::raw("exec DDJJ_EmpleadosTraerPorId :Param1"),[
             ':Param1' => $id,
         ]);
 
-        /*$response = $client->get(\Constants\Constants::API_URL.'/categorias/');
 
-        $categorias = json_decode($response->getBody(), true);*/
 
          $categorias = DB::select(DB::raw("exec DDJJ_CategoriasTraer"), [
 
         ]);
 
-        /*$response = $client->get(\Constants\Constants::API_URL.'/tipos-novedades/');
-
-        $tiposNovedades = json_decode($response->getBody(), true);*/
 
         $tiposNovedades = DB::select(DB::raw("exec DDJJ_TiposNovedadesTraer"), [
 
@@ -196,16 +154,10 @@ class EmpleadoController extends Controller
         if (!empty($empleado)) {
             $firstResult = $empleado[0];
             $empresa=$firstResult->IdEmpresa;
-            /*$response = $client->get(\Constants\Constants::API_URL . '/empresas-exceptuadas-validacion-minimo-traer-por-empresa/' .$empresa );
 
-            $exceptuadas = json_decode($response->getBody(), true);*/
         }
 
-        /*$response = $client->get(\Constants\Constants::API_URL.'/empresas-importe-minimo/');
 
-        $importeMinimo = json_decode($response->getBody(), true);*/
-
-        //dd($result['result']);
 
 
         return view('empleados.edit', ['empleado' => $empleado,'categorias' => $categorias,'tiposNovedades' => $tiposNovedades,'empresa'=>$empresa]);
@@ -314,14 +266,7 @@ class EmpleadoController extends Controller
             return redirect()->back()->withInput()->withErrors(['cuil' => 'El CUIL no es válido.']); // Adjust the error message as needed
         }
 
-        /*$client = new Client();
 
-            //Log::debug('CUILs distintos');
-            $response = $client->get(\Constants\Constants::API_URL . '/empleados-traer-por-cuil/'.$cuil.'/' .$empresa );
-
-            $result = json_decode($response->getBody(), true);
-            //Log::debug(print_r($result));
-            if (!empty($result['result'])) {*/
 
         $results=DB::select(DB::raw("exec DDJJ_EmpleadosTraerPorCuil :Param1,:Param2"),[
             ':Param1' => $cuil,
@@ -337,43 +282,6 @@ class EmpleadoController extends Controller
 
 
 
-        // Construye la URL directamente
-        /*$url = \Constants\Constants::API_URL . '/empleados-agregar/' . rawurlencode($empresa) . '/' . rawurlencode($cuil) . '/' . rawurlencode($nombre) . '/' . rawurlencode($idCategoria) . '/' . ($afiliado ? rawurlencode($afiliado) : '0') . '/' . rawurlencode($ingreso) . '/' . ($idNovedad !== null ? rawurlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? rawurlencode($egreso) : 'null') . '/' . rawurlencode($ia100) . '/' . ($ica !== null ? rawurlencode($ica) : 'null') . '/' . rawurlencode(auth()->user()->IdUsuario);
-
-
-        Log::debug('URL: '.$url);*/
-
-
-        // Datos a enviar en el cuerpo de la solicitud PUT
-        /*$data = [
-            'idEmpresa' => $empresa,
-            'cuil' => $cuil,
-            'nombre' => $nombre,
-            'idCategoria' => $idCategoria,
-            'afiliado' => $afiliado,
-            'ingreso' => $ingreso,
-            'idNovedad' => $idNovedad !== null ? $idNovedad : 'null',
-            'egreso' => $egreso !== null ? $egreso : 'null',
-            'ia100' => $ia100,
-            'ica' => $ica,
-            'idUsuario' => auth()->user()->IdUsuario
-        ];
-
-// Construye la URL directamente sin los parámetros
-        $url = \Constants\Constants::API_URL . '/empleados-agregar';
-
-        //Log::debug('URL: ' . $url);
-
-// Realiza la solicitud PUT enviando el cuerpo de la solicitud como JSON
-        $response = $client->put($url, [
-            'json' => $data // Usamos 'json' para enviar los datos en el cuerpo de la solicitud
-        ]);
-
-
-// Realiza la solicitud PUT
-        //$response = $client->put($url);
-
-        $result = json_decode($response->getBody(), true);*/
 
         $error='';
 
@@ -415,29 +323,7 @@ class EmpleadoController extends Controller
             $errorMessage = $e->getMessage();
             $errorCode = $e->getCode();
 
-            // Obtén los parámetros utilizados en la llamada al procedimiento almacenado
-            /*$parametros = [
-                'empleado' => $idEmpleado,
-                'cuil' => $cuil,
-                'nombre' => $nombre,
-                'categoria' => $idCategoria,
-                'afiliado' => $afiliado,
-                'ingreso' => $ingreso,
-                'novedad' => $idNovedad,
-                'egreso' => $egreso,
-                'ia100' => $ia100,
-                'ica' => $ica,
-                'idUsuario' => $idUsuario,
-            ];
 
-            // Log de la excepción o cualquier otro manejo que necesites
-
-            \Log::error("Error al ejecutar el procedimiento almacenado en " . now() . ": $errorMessage (Code: $errorCode). Parámetros: " . print_r($parametros, true));
-
-            Log::debug('SQL Queries: '.json_encode(DB::getQueryLog()));*/
-
-            // Devuelve una respuesta indicando que ha ocurrido un error
-            //return response()->json(['error' => 'Ha ocurrido un error al procesar la solicitud'], 500);
             $error= 'Ha ocurrido un error al procesar la solicitud '.$errorMessage;
         }
 
@@ -535,13 +421,10 @@ class EmpleadoController extends Controller
             return redirect()->back()->withInput()->withErrors(['cuil' => 'El CUIL no es válido.']); // Adjust the error message as needed
         }
 
-        //$client = new Client();
+
         if($cuil!=$hCuil){
             //Log::debug('CUILs distintos');
-            /*$response = $client->get(\Constants\Constants::API_URL . '/empleados-traer-por-cuil/'.$cuil.'/' .$empresa );
 
-            $result = json_decode($response->getBody(), true);*/
-            //Log::debug(print_r($result));
 
             $results=DB::select(DB::raw("exec DDJJ_EmpleadosTraerPorCuil :Param1,:Param2"),[
                 ':Param1' => $cuil,
@@ -555,17 +438,6 @@ class EmpleadoController extends Controller
         }
 
 
-
-
-        // Construye la URL directamente
-
-        /*$url = \Constants\Constants::API_URL . '/empleados-actualizar/' . rawurlencode($idEmpleado) . '/' . rawurlencode($cuil) . '/' . rawurlencode($this->convertirMayusculasEspeciales($nombre)) . '/' . rawurlencode($idCategoria) . '/' . ($afiliado ? rawurlencode($afiliado) : '0') . '/' . rawurlencode($ingreso) . '/' . ($idNovedad !== null ? rawurlencode($idNovedad) : 'null') . '/' . ($egreso !== null ? rawurlencode($egreso) : 'null') . '/' . rawurlencode($ia100) . '/' . ($ica !== null ? rawurlencode($ica) : 'null') . '/' . rawurlencode(auth()->user()->IdUsuario);
-
-        $headers = [
-            'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8',
-        ];
-        $response = $client->put($url, ['headers' => $headers]);*/
-
         Log::debug('Codificación antes de convertir: ' . mb_detect_encoding($nombre));
 
         if ($nombre && !mb_check_encoding($nombre, 'UTF-8')) {
@@ -574,27 +446,7 @@ class EmpleadoController extends Controller
 
         Log::debug('Nombre después de la conversión: ' . $nombre);
 
-        /*$response = $client->put(\Constants\Constants::API_URL . '/empleados-actualizar/' . $idEmpleado, [
-            'form_params' => [
-                'cuil' => $cuil,
-                'nombre' => $this->convertirMayusculasEspeciales($nombre),
-                'idCategoria' => $idCategoria,
-                'afiliado' => $afiliado ?? 0,
-                'ingreso' => $ingreso,
-                'idNovedad' => $idNovedad ?? 'null',
-                'egreso' => $egreso ?? 'null',
-                'ia100' => $ia100,
-                'ica' => $ica ?? 'null',
-                'idUsuario' => auth()->user()->IdUsuario
-            ],
-            'headers' => [
-                'Content-Type' => 'application/x-www-form-urlencoded; charset=utf-8',
-            ]
-        ]);
 
-
-
-        $result = json_decode($response->getBody(), true);*/
 
         $ingreso = (!$ingreso)?null:date('Y-m-d', strtotime($ingreso));
         $egreso = (!$egreso)?null:date('Y-m-d', strtotime($egreso));
@@ -638,29 +490,7 @@ class EmpleadoController extends Controller
             $errorMessage = $e->getMessage();
             $errorCode = $e->getCode();
 
-            // Obtén los parámetros utilizados en la llamada al procedimiento almacenado
-            /*$parametros = [
-                'empleado' => $idEmpleado,
-                'cuil' => $cuil,
-                'nombre' => $nombre,
-                'categoria' => $idCategoria,
-                'afiliado' => $afiliado,
-                'ingreso' => $ingreso,
-                'novedad' => $idNovedad,
-                'egreso' => $egreso,
-                'ia100' => $ia100,
-                'ica' => $ica,
-                'idUsuario' => $idUsuario,
-            ];
 
-            // Log de la excepción o cualquier otro manejo que necesites
-
-            \Log::error("Error al ejecutar el procedimiento almacenado en " . now() . ": $errorMessage (Code: $errorCode). Parámetros: " . print_r($parametros, true));
-
-            Log::debug('SQL Queries: '.json_encode(DB::getQueryLog()));*/
-
-            // Devuelve una respuesta indicando que ha ocurrido un error
-            //return response()->json(['error' => 'Ha ocurrido un error al procesar la solicitud'], 500);
             $error= 'Ha ocurrido un error al procesar la solicitud';
         }
 
@@ -716,13 +546,6 @@ class EmpleadoController extends Controller
 
     public function formatoArchivo()
     {
-        /*$client = new Client();
-
-
-
-        $response = $client->get(\Constants\Constants::API_URL.'/categorias/');
-
-        $categorias = json_decode($response->getBody(), true);*/
 
         $categorias = DB::select(DB::raw("exec DDJJ_CategoriasTraer"), [
 
@@ -854,24 +677,7 @@ class EmpleadoController extends Controller
 
         $file = $request->file('archivo');
 
-        // Validar archivo
-        /*$valid_extension = ["csv", "txt"];
-        $maxFileSize = 2097152; // 2MB en Bytes
 
-        if (!$file) {
-            return redirect()->back()->withErrors(['error' => 'Archivo no proporcionado.']);
-        }
-
-        $extension = $file->getClientOriginalExtension();
-        $fileSize = $file->getSize();
-
-        if (!in_array(strtolower($extension), $valid_extension)) {
-            return redirect()->back()->withErrors(['error' => 'Extensión de archivo no válida.']);
-        }
-
-        if ($fileSize > $maxFileSize) {
-            return redirect()->back()->withErrors(['error' => 'Archivo demasiado grande. El archivo debe ser menor que 2MB.']);
-        }*/
 
         $this->validate($request, [
             'archivo' => 'required|file|mimes:csv,txt|max:2048', // 2048KB = 2MB
@@ -880,65 +686,18 @@ class EmpleadoController extends Controller
 
 
         try {
-            // Preparar el cliente HTTP
-            /*$client = new Client();
-            $url = \Constants\Constants::API_URL . '/importar-empleados';
+            $extension = $file->getClientOriginalExtension();
 
-            // Configurar los headers
-            $headers = [
-                'Content-Type' => 'multipart/form-data',
-            ];
 
-            // Preparar los datos del formulario para la solicitud
-            $multipart = [
-                [
-                    'name'     => 'file',
-                    'contents' => fopen($file->getRealPath(), 'r'),
-                    'filename' => $file->getClientOriginalName(),
-                ],
-                [
-                    'name'     => 'idEmpresa',
-                    'contents' => $empresa,
-                ],
-                [
-                    'name'     => 'idUsuario',
-                    'contents' => $idUsuario,
-                ],
-            ];
-            //Log::debug('Multipart Data: ', $multipart);
-            // Realizar la solicitud POST
-            $response = $client->post($url, [
-                //'headers' => $headers,
-                'multipart' => $multipart,
-            ]);
-
-            // Manejar la respuesta
-            $result = json_decode($response->getBody(), true);*/
-
-            /*$request->validate([
-                'file' => 'required|file|mimes:csv,txt',
-                'idEmpresa' => 'required|integer',
-                'idUsuario' => 'required|integer',
-            ]);*/
-
-            // Retrieve the file and parameters
-
-            // Definir la ruta de destino donde se guardará el archivo
-            $destinationPath = public_path('files');
-
-            // Asegurarse de que el directorio 'files' exista
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0777, true);
-            }
 
             // Mover el archivo al directorio 'files' con un nombre único
             $fileName = time() . '_' . $file->getClientOriginalName();
             $filePath = $destinationPath . '/' . $fileName;
-            $file->move($destinationPath, $fileName);
+
 
             $error='';
             try {
-
+                $store  = Storage::disk('nas')->put($fileName, File::get($file));
                 // Call the stored procedure with the line data
                 $result = DB::statement('exec DDJJ_EmpleadosImportarArchivo ?, ?, ?', [$filePath,$empresa, $idUsuario]);
 

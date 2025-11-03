@@ -46,6 +46,10 @@ return [
             'driver' => 'local',
             'root'   => 'E:\\Documents\\Mis Webs\\lv-sec-digitalizar\\nas\\files',
         ],
+        'empleados' => [
+            'driver' => 'local',
+            'root'   => 'E:\\Documents\\Mis Webs\\lv-sec-digitalizar\\nas\\empleados',
+        ],
 
         's3' => [
             'driver' => 's3',
