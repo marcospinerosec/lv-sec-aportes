@@ -200,11 +200,9 @@ class FormularioController extends Controller
             [':empresa' => $empresa]
         );
         //dd($formularioSP); // O $results si los traés de la DB
-        // Base URL para abrir los archivos en navegador
-        $baseUrl = '/nas/files/'; // si querés probar local
-        // $baseUrl = 'http://saisec.seclaplata.org.ar/saisec/scans/files/'; // producción
+
         return view('formularios.listado', [
-            'archivos' => $formularioSP, 'baseUrl' =>  $baseUrl
+            'archivos' => $formularioSP
         ]);
     }
 
