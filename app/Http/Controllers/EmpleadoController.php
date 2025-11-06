@@ -15,8 +15,11 @@ use Illuminate\Support\Facades\Storage;
 use PDF;
 use App\Traits\SanitizesInput;
 
+use App\Traits\EncodingNormalizer;
+
 class EmpleadoController extends Controller
 {
+    use EncodingNormalizer;
     use SanitizesInput;
     /**
      * Create a new controller instance.
@@ -52,11 +55,13 @@ class EmpleadoController extends Controller
                 ':Param1' => $empresa_id,
             ]);
 
+
             $empleados = array_map(function($empleado) {
-                $empleado->Nombre = utf8_encode($empleado->Nombre);
-                $empleado->Categoria = utf8_encode($empleado->Categoria);
+                $empleado->Nombre = $this->normalizeEncoding($empleado->Nombre);
+                $empleado->Categoria = $this->normalizeEncoding($empleado->Categoria);
                 return $empleado;
             }, $empleados);
+
 
         }
         //dd($empleados);
@@ -140,7 +145,12 @@ class EmpleadoController extends Controller
             ':Param1' => $id,
         ]);
 
+        // Normalizamos los campos de texto para que UTF-8 funcione bien
+        $empleado = array_map(function($e) {
+            $e->Nombre = $this->normalizeEncoding($e->Nombre);
 
+            return $e;
+        }, $empleado);
 
          $categorias = DB::select(DB::raw("exec DDJJ_CategoriasTraer"), [
 
@@ -295,12 +305,13 @@ class EmpleadoController extends Controller
 
 
             $idUsuario = intval(auth()->user()->IdUsuario);
-
+            // Normalizar encoding del nombre antes de guardarlo
+            $nombre = $this->normalizeEncoding($nombre);
 
             DB::statement("exec DDJJ_EmpleadosAgregar ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", [
                 $empresa,
                 $cuil,
-                strtoupper(urldecode(utf8_decode($nombre))),
+                strtoupper($nombre),
                 $idCategoria,
                 $afiliado,
                 $ingreso,
@@ -438,13 +449,9 @@ class EmpleadoController extends Controller
         }
 
 
-        Log::debug('Codificación antes de convertir: ' . mb_detect_encoding($nombre));
+        // Normalizar encoding del nombre antes de guardarlo
+        $nombre = $this->normalizeEncoding($nombre);
 
-        if ($nombre && !mb_check_encoding($nombre, 'UTF-8')) {
-            $nombre = utf8_encode($nombre);  // Codificar a UTF-8
-        }
-
-        Log::debug('Nombre después de la conversión: ' . $nombre);
 
 
 
@@ -470,7 +477,7 @@ class EmpleadoController extends Controller
             DB::statement("exec DDJJ_EmpleadosActualizar ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?", [
                 $idEmpleado,
                 $cuil,
-                strtoupper(urldecode(utf8_decode($nombre))),
+                strtoupper($nombre),
                 $idCategoria,
                 $afiliado,
                 $ingreso,
@@ -672,56 +679,56 @@ class EmpleadoController extends Controller
     {
         set_time_limit(0);
 
-        $empresa = empty(request('empresa')) ? null : $this->sanitizeInput(request('empresa'));
-        $idUsuario = auth()->user()->IdUsuario; // Suponiendo que el usuario está autenticado y se obtiene el ID del usuario
+        $empresa = empty($request->input('empresa')) ? null : $this->sanitizeInput($request->input('empresa'));
+        $idUsuario = auth()->user()->IdUsuario;
 
         $file = $request->file('archivo');
 
-
-
         $this->validate($request, [
-            'archivo' => 'required|file|mimes:csv,txt|max:2048', // 2048KB = 2MB
-            'empresa'   => 'required|integer',
+            'archivo' => 'required|file|mimes:csv,txt|max:2048',
+            'empresa' => 'required|integer',
         ]);
 
-
         try {
-            $extension = $file->getClientOriginalExtension();
-
-
-
-            // Mover el archivo al directorio 'files' con un nombre único
             $fileName = time() . '_' . $file->getClientOriginalName();
-            $filePath = $destinationPath . '/' . $fileName;
 
+            // Guardar el archivo en el disco "empleados"
+            Storage::disk('empleados')->put($fileName, File::get($file));
 
-            $error='';
+            // Construir la ruta UNC para el SP
+            $uncPath = '\\\\192.168.1.120\\scans\\temp_desarrollo\\' . $fileName;
+
             try {
-                $store  = Storage::disk('nas')->put($fileName, File::get($file));
-                // Call the stored procedure with the line data
-                $result = DB::statement('exec DDJJ_EmpleadosImportarArchivo ?, ?, ?', [$filePath,$empresa, $idUsuario]);
+                // Llamar al SP con la ruta UNC
+                DB::statement('exec DDJJ_EmpleadosImportarArchivo ?, ?, ?', [
+                    $uncPath,
+                    $empresa,
+                    $idUsuario
+                ]);
 
+                // Borrar el archivo del NAS después de procesarlo
+                Storage::disk('empleados')->delete($fileName);
 
-                //return response()->json(['success' => true, 'message' => 'Archivo guardado y enviado para procesamiento.']);
+                return redirect()->route('empleados.index', ['empresa' => $empresa])
+                    ->with('success', 'Importación exitosa.');
 
             } catch (\Exception $e) {
-                Log::error('Error al procesar el archivo: ' . $e->getMessage());
-                //return response()->json(['error' => 'Error al procesar el archivo en el SP.'], 500);
-                $error = 'Error al procesar el archivo en el SP.';
+                Log::error('Error al procesar el archivo en el SP: ' . $e->getMessage());
+
+                // Opcional: borrar archivo aunque falle el SP
+                Storage::disk('empleados')->delete($fileName);
+
+                return redirect()->route('empleados.index', ['empresa' => $empresa])
+                    ->with('error', 'Error al procesar el archivo en el SP.');
             }
 
-
-            if (!$error) {
-
-                return redirect()->route('empleados.index', ['empresa' => $empresa])->with('success', 'Importación exitosa.');
-            } else {
-                $errorMessage = isset($error) ? $error : 'Error desconocido.';
-                return redirect()->route('empleados.index', ['empresa' => $empresa])->with(['error' => $errorMessage]);
-            }
         } catch (\Exception $e) {
             Log::error('Error en la importación de empleados: ' . $e->getMessage());
-            return redirect()->route('empleados.index', ['empresa' => $empresa])->with(['error' => 'Error en la importación de empleados.']);
+            return redirect()->route('empleados.index', ['empresa' => $empresa])
+                ->with('error', 'Error al subir el archivo.');
         }
     }
+
+
 
 }

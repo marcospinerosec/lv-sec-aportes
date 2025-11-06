@@ -44,11 +44,11 @@ return [
 
         'nas' => [
             'driver' => 'local',
-            'root'   => 'E:\\Documents\\Mis Webs\\lv-sec-digitalizar\\nas\\files',
+            'root'   => 'E:\\Documents\\Mis Webs\\lv-sec-digitalizar\\nas\\f931',
         ],
         'empleados' => [
             'driver' => 'local',
-            'root'   => 'E:\\Documents\\Mis Webs\\lv-sec-digitalizar\\nas\\empleados',
+            'root'   => 'E:\\Documents\\Mis Webs\\lv-sec-digitalizar\\nas\\temp_desarrollo',
         ],
 
         's3' => [
